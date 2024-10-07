@@ -1,0 +1,13 @@
+﻿{
+  "profiles": {
+    "CS_SIEM_PROTOTYP": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:5001;http://localhost:5000;http://192.168.8.101:5000;https://192.168.8.101:5001",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
