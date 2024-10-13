@@ -10,7 +10,6 @@ namespace CS_SIEM_PROTOTYP
     {
         private static ConcurrentQueue<string> _syslogMessagesQueue = new ConcurrentQueue<string>();
         // damit man von mehreren Threads strings hinzufuegen kann
-        private static bool isReceiving = true;
         private static int delay = 10;
         private static CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private static CancellationToken cancellationToken = cancellationTokenSource.Token;
@@ -72,7 +71,9 @@ namespace CS_SIEM_PROTOTYP
             // stoppt wenn cancellation requested wird
             while (!token.IsCancellationRequested)
             {
-                await Task.Delay(1000 * delay); // Wait for 10 seconds
+                
+                await Task.Delay(1000 * delay, token); // "Delay" sekunden warten und den token ueberpruefen
+
 
                 InsertMessagesIntoDatabase();
             }
@@ -115,3 +116,5 @@ namespace CS_SIEM_PROTOTYP
         }
     }
 }
+
+// SYSLOG THREADING https://chatgpt.com/share/670bf4b4-0d3c-8000-be1d-0902162c70e6
