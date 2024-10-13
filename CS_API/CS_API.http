@@ -15,7 +15,7 @@ Content-Type: application/json
   "snmpPolls": [
     {
       "ip": "192.168.10.254",
-      "hostname": "FW-1",
+      "hostname": "FW-1123123123123123123123123",
       "oids": [
         {
           "oid": "1.3.6.1.4.1.9.2.1.56.0",

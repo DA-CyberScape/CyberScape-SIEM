@@ -238,3 +238,17 @@ public class Sensor
     public string MessageRaw { get; set; }
     public DateTime fetchDateTime { get; set; }
 }
+
+public class PrtgConfig
+{
+    public string PRTGUrl { get; set; }
+    public string ApiToken { get; set; }
+    public string Name { get; set; }
+    public int Id { get; set; }
+    
+    public override string ToString()
+    {
+        return $"PRTG URL: {PRTGUrl}, " +
+               $"API Token: {ApiToken} id: {Id} name: {Name}";
+    }
+}

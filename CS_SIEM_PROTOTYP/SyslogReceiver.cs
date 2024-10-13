@@ -45,3 +45,15 @@ public class SyslogReceiver : IDataReceiver
     }
 
 }
+
+public class SyslogConfig
+{
+    public int Port { get; set; }
+    public string Name { get; set; }
+    public int Id { get; set; }
+    public override string ToString()
+    {
+        return $"Port: {Port} id: {Id} name: {Name}"
+        ;
+    }
+}

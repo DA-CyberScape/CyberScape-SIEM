@@ -276,3 +276,21 @@ public class NetflowReceiver : IDataReceiver
         }
     }
 
+    public class NfConfig
+    {
+        public string FolderLocation { get; set; }
+        public string NfdumpBinaryLocation { get; set; }
+        public string NfcapdBinaryLocation { get; set; }
+        public long Port { get; set; } 
+        public string Name { get; set; }
+        public int Id { get; set; }
+        
+        public override string ToString()
+        {
+            return $"Folder Location: {FolderLocation}, " +
+                   $"Nfdump Binary Location: {NfdumpBinaryLocation}, " +
+                   $"Nfcapd Binary Location: {NfcapdBinaryLocation}, " +
+                   $"Port: {Port}  id: {Id} name: {Name}";
+        }
+    }
+

@@ -81,7 +81,7 @@ public class SnmpCustomReceiver : IDataReceiver
             snmpRequest.PrivPass, snmpRequest.AuthDigest, snmpRequest.PrivProtocol, snmpRequest.Port, snmpRequest.Hostname);
     }
 
-    public static List<SnmpPoll> PollSnmpV3(List <string> oids, string ipAddress,string user,  string authPass, string privPass, AuthenticationDigests authenticationDigests, PrivacyProtocols privacyProtocols, int port, string hostname)
+    public static List<SnmpPoll> PollSnmpV3(Dictionary <string, string> oidDict, string ipAddress,string user,  string authPass, string privPass, AuthenticationDigests authenticationDigests, PrivacyProtocols privacyProtocols, int port, string hostname)
     {
         try
         {
@@ -95,6 +95,9 @@ public class SnmpCustomReceiver : IDataReceiver
                 return null;
               
             }
+            
+            List <string> oids = oidDict.Keys.ToList();
+            // List <string> oids_value = oidDict.Values.ToList();
 
             // get request pdu
             Pdu pdu = new Pdu(PduType.Get);
@@ -138,8 +141,9 @@ public class SnmpCustomReceiver : IDataReceiver
                 foreach (var value in values)
                 {
                     string name = "temp";
-                    SnmpPoll snmpPoll = new SnmpPoll(ipAddress, value.Oid.ToString(), value.Value.ToString(),
-                        hostname, DateTime.Now, name);
+                    string oid = value.Oid.ToString();
+                    SnmpPoll snmpPoll = new SnmpPoll(ipAddress,oid , value.Value.ToString(),
+                        hostname, DateTime.Now, oidDict[oid]);
                     answerSnmpPolls.Add(snmpPoll);
                     
                 }
@@ -213,7 +217,7 @@ public class SnmpCustomReceiver : IDataReceiver
 
 public class SnmpPollRequest
 {
-    public List<string> Oids { get; set; }
+    public Dictionary<string, string> Oids { get; set; }
     public string IpAddress { get; set; }
     public string Hostname { get; set; }
 
@@ -224,9 +228,11 @@ public class SnmpPollRequest
     public AuthenticationDigests AuthDigest { get; set; }
     public PrivacyProtocols PrivProtocol { get; set; }
     public string Name { get; set; }
+    public int Id { get; set; }
 
 
-    public SnmpPollRequest(List<string> oids, string ipAddress, string user, string authPass, string privPass, 
+
+    public SnmpPollRequest(Dictionary<string, string> oids, string ipAddress, string user, string authPass, string privPass, 
                            AuthenticationDigests authDigest, PrivacyProtocols privProtocol, int port, string hostname)
     {
         Oids = oids;
@@ -238,6 +244,25 @@ public class SnmpPollRequest
         PrivPass = privPass;
         AuthDigest = authDigest;
         PrivProtocol = privProtocol;
+    }
+    
+    public SnmpPollRequest()
+    {
+        Oids = new Dictionary<string, string>(); // damit man kein null reference fehler bekommt
+    }
+    public override string ToString()
+    {
+        // Start building the output string
+        string oidsString = "";
+        foreach (var oid in Oids)
+        {
+            oidsString += $"OID: {oid.Key}, Name: {oid.Value}\n";
+        }
+
+        return $"Hostname: {Hostname}, IP Address: {IpAddress}, Port: {Port}\n" +
+               $"User: {User}, AuthPass: {AuthPass}, PrivPass: {PrivPass}\n" +
+               $"Authentication: {AuthDigest}, Encryption: {PrivProtocol}\n" +
+               $"OIDs:\n{oidsString} id: {Id} name: {Name} ";
     }
 }
 
@@ -270,3 +295,69 @@ public class SnmpPoll
                $"Hostname: {Hostname}, Timestamp: {Timestamp}, Name: {Name}]";
     }
 }
+
+public enum AuthDig
+{
+    SHA1,
+    MD5
+}
+
+public enum PrivProt
+{
+    AES128,
+    DES
+}
+
+public class SnmpOid
+{
+    public string oid { get; set; }
+    public string name { get; set; }
+}
+
+public class SnmpDevice
+{
+    public string ip { get; set; }
+    public string hostname { get; set; }
+    public List<SnmpOid> oids { get; set; }
+    public string user { get; set; }
+    public string authentication { get; set; }
+    public string encryption { get; set; }
+    public string authpass { get; set; }
+    public string privpass { get; set; }
+    public int port { get; set; }
+    public string Name { get; set; }
+    public int Id { get; set; }
+}
+
+public class AuthParameters
+{
+    public string Username { get; set; }
+    public string AuthProtocol { get; set; }
+    public string AuthPassword { get; set; }
+    public string PrivacyProtocol { get; set; }
+    public string PrivacyPassword { get; set; }
+
+    public override string ToString()
+    {
+        return $"Username: {Username}, Auth Protocol: {AuthProtocol}, Auth Password: {AuthPassword}, " +
+               $"Privacy Protocol: {PrivacyProtocol}, Privacy Password: {PrivacyPassword}";
+    }
+}
+
+public class SnmpTrapConfig
+{
+    public int Port { get; set; }
+    public string Version { get; set; }
+    public AuthParameters AuthParameters { get; set; }
+    public string Name { get; set; }
+    public int Id { get; set; }
+    
+    
+    
+    public override string ToString()
+    {
+        return $"Port: {Port}, Version: {Version}, Auth Parameters: [{AuthParameters.ToString()}]   id: {Id} name: {Name}";
+    }
+}
+
+

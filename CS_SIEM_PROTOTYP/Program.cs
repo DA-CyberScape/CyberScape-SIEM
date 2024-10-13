@@ -7,11 +7,14 @@ using System.Diagnostics;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Principal;
+using System.Text.Json.Nodes;
 using CS_DatabaseManager;
 using DotNetEnv;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PacketDotNet.Utils;
 using SnmpSharpNet;
 
@@ -137,10 +140,191 @@ public static class Program
         SyslogReceiver.ReceiveSyslogData(port);
     }
 
+    public static JArray ParseJson(string jsonPath)
+    {
+        string jsonText = File.ReadAllText(jsonPath);
+        
+        JArray jsonResult = JArray.Parse(jsonText);
+    
+        return jsonResult; 
+    }
+    
+    static void PrintDictionary<T>(T dict)
+    {
+        Console.WriteLine(JsonConvert.SerializeObject(dict, Formatting.Indented));
+        Console.WriteLine("------------------------------------");
+    }
+
+    public static List<SnmpPollRequest> convertJsontoSNMPPollRequest(List<Dictionary<string, object>> dictSNMP)
+    {
+        var jsonSNMP = JsonConvert.SerializeObject(dictSNMP);
+        List<SnmpDevice> devices = JsonConvert.DeserializeObject<List<SnmpDevice>>(jsonSNMP);
+        List<SnmpPollRequest> pollRequests = new List<SnmpPollRequest>();
+        
+        foreach (var device in devices)
+        {
+            var pollRequest = new SnmpPollRequest
+            {
+                IpAddress = device.ip,
+                Hostname = device.hostname,
+                Oids = new Dictionary<string, string>(),
+                User = device.user,
+                AuthPass = device.authpass,
+                PrivPass = device.privpass,
+                Port = device.port,
+                AuthDigest = (device.authentication == "SHA1") ? AuthenticationDigests.SHA1 : AuthenticationDigests.MD5,
+                PrivProtocol = (device.encryption == "aes 128") ? PrivacyProtocols.AES128 : PrivacyProtocols.DES,
+                Name = device.Name,
+                Id = device.Id
+            };
+
+            // convert oids
+            foreach (var oid in device.oids)
+            {
+                pollRequest.Oids.Add(oid.oid, oid.name);
+            }
+
+            pollRequests.Add(pollRequest);
+        }
+        
+        
+
+
+
+        return pollRequests;
+
+
+    }
+
+    public static List<NfConfig> convertJsontoNetflowDict(List<Dictionary<string, object>> dictNetflow)
+    {
+        var jsonNetflow = JsonConvert.SerializeObject(dictNetflow);
+        List<NfConfig> configList = JsonConvert.DeserializeObject<List<NfConfig>>(jsonNetflow);
+
+        return configList;
+    }
+    public static List<PrtgConfig> convertJsontoPRTG(List<Dictionary<string, object>> dictPRTG)
+    {
+        var jsonPrtg = JsonConvert.SerializeObject(dictPRTG);
+        List<PrtgConfig> configList = JsonConvert.DeserializeObject<List<PrtgConfig>>(jsonPrtg);
+
+        return configList;
+    }
+    
+    public static List<SnmpTrapConfig> convertJsontoSNMPTrap(List<Dictionary<string, object>> dictSNMPTrap)
+    {
+        var jsonTrap = JsonConvert.SerializeObject(dictSNMPTrap);
+        List<SnmpTrapConfig> configList = JsonConvert.DeserializeObject<List<SnmpTrapConfig>>(jsonTrap);
+        
+        return configList;
+    }
+    public static List<SyslogConfig> ConvertJsontoSyslogConfigs(List<Dictionary<string, object>> dictSyslog)
+    {
+        var jsonSyslog = JsonConvert.SerializeObject(dictSyslog);
+        List<SyslogConfig> configList = JsonConvert.DeserializeObject<List<SyslogConfig>>(jsonSyslog);
+        return configList;
+    }
+
+
+
     public static async Task Main(string[] args)
     {
+        string absolutePath = @"C:\Users\apexl\Desktop\CS_SIEM_PROTOTYP\CS_SIEM_PROTOTYP\example_API.json";
+        var jsonArray = ParseJson(absolutePath);
+        // Console.WriteLine(test[0]);
+        // Console.WriteLine(test.Count);
+        var snmpPollsDict = new List<Dictionary<string, object>>();
+        var netflowReceiverDict = new List<Dictionary<string, object>>();
+        var prtgReceiverDict = new List<Dictionary<string, object>>();
+        var snmpTrapReceiverDict = new List<Dictionary<string, object>>();
+        var syslogDict = new List<Dictionary<string, object>>();
+        foreach (JObject item in jsonArray)
+        {
+            if (item["snmpPolls"] != null)
+            {
+                snmpPollsDict = item["snmpPolls"].ToObject<List<Dictionary<string, object>>>();
+                PrintDictionary(snmpPollsDict);
+            }
+
+            if (item["netflowReceiver"] != null)
+            {
+                netflowReceiverDict = item["netflowReceiver"].ToObject<List<Dictionary<string, object>>>();
+                PrintDictionary(netflowReceiverDict);
+            }
+
+            if (item["PRTGReceiver"] != null)
+            {
+                prtgReceiverDict = item["PRTGReceiver"].ToObject<List<Dictionary<string, object>>>();
+                PrintDictionary(prtgReceiverDict);
+            }
+
+            if (item["snmpTrapReceiver"] != null)
+            {
+                snmpTrapReceiverDict = item["snmpTrapReceiver"].ToObject<List<Dictionary<string, object>>>();
+                PrintDictionary(snmpTrapReceiverDict);
+            }
+
+            if (item["Syslog"] != null)
+            {
+                syslogDict = item["Syslog"].ToObject<List<Dictionary<string, object>>>();
+                PrintDictionary(syslogDict);
+            }
+
+            if (item["ScyllaDB"] != null)
+            {
+                var scyllaDbDict = item["ScyllaDB"].ToObject<Dictionary<string, object>>();
+                PrintDictionary(scyllaDbDict);
+            }
+        }
+        var tempSNMP = convertJsontoSNMPPollRequest(snmpPollsDict);
+
+        foreach (var element in tempSNMP)
+        {
+            Console.WriteLine(element);
+        }
+
+        var tempNetflow = convertJsontoNetflowDict(netflowReceiverDict);
+        foreach (var element in tempNetflow)
+        {
+            Console.WriteLine(element);
+            
+        }
+        var tempPRTG = convertJsontoPRTG(prtgReceiverDict);
+        foreach (var element in tempPRTG)
+        {
+            Console.WriteLine(element);
+            
+        }
+        var tempSNMPTrap = convertJsontoSNMPTrap(snmpTrapReceiverDict);
+        foreach (var element in tempSNMPTrap)
+        {
+            Console.WriteLine(element);
+            
+        }
+        var tempSyslogp = ConvertJsontoSyslogConfigs(syslogDict);
+        foreach (var element in tempSyslogp)
+        {
+            Console.WriteLine(element);
+            
+        }
         
+        /*
         
+        var oidDictionary = new Dictionary<string, string>
+        {
+            { "1.3.6.1.4.1.9.2.1.56.0", "CPU Load" },
+            { "1.3.6.1.4.1.9.2.1.8.0", "Memory Usage" },
+            { "1.3.6.1.2.1.1.3.0", "Uptime" },
+            { "1.3.6.1.2.1.6.9.0", "TCP Connections" }
+        };
+        
+        List<string> oidList = oidDictionary.Keys.ToList();
+        List<string> valueList = oidDictionary.Values.ToList();
+        Console.WriteLine(string.Join(", ", oidList));
+        Console.WriteLine(string.Join(", ", valueList));
+        Console.WriteLine(oidDictionary["1.3.6.1.4.1.9.2.1.56.0"]);
+        */
+        /*
         
 
         List<string> oids = new List<string>
@@ -175,6 +359,7 @@ public static class Program
             Console.WriteLine(response);
             Console.WriteLine("-----------------------------");
         }
+        */
         
         
         
@@ -285,6 +470,7 @@ public static class Program
 //        nfThread.Start();
 
         // Netflow THREAD
+        
         
         
  
