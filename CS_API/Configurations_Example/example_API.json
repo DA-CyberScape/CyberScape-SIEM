@@ -141,7 +141,8 @@
   },
   {
     "ScyllaDB": {
-      "port": 123
+      "port": 123,
+      "ipaddresses": 12312
     }
   }
 ]
