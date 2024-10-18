@@ -128,6 +128,8 @@ public static class Program
             
         }
         
+        SyslogReceiver.TestProcessSyslogMessage();
+        
         /*
         
         var oidDictionary = new Dictionary<string, string>
