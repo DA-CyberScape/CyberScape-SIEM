@@ -96,30 +96,31 @@
     ]
   },
   {
-     "snmpTrapReceiver": [
-    {
-      "name": "Trap1",
-      "id": 12312312,
-      "port": 162,
-      "version": "SNMPv3",
-      "username": "snmpv3user",
-      "authProtocol": "SHA",
-      "authPassword": "authPassword123",
-      "privacyProtocol": "AES",
-      "privacyPassword": "privPassword123"
-    },
-    {
-      "name": "Trap2",
-      "id": 5675,
-      "port": 162,
-      "version": "SNMPv3",
-      "username": "snmpv3user",
-      "authProtocol": "SHA",
-      "authPassword": "authPassword123",
-      "privacyProtocol": "AES",
-      "privacyPassword": "privPassword123"
-    }
-  ],
+    "snmpTrapReceiver": [
+      {
+        "name": "Trap1",
+        "id": 12312312,
+        "port": 162,
+        "version": "SNMPv3",
+        "username": "snmpv3user",
+        "authProtocol": "SHA",
+        "authPassword": "authPassword123",
+        "privacyProtocol": "AES",
+        "privacyPassword": "privPassword123"
+      },
+      {
+        "name": "Trap2",
+        "id": 5675,
+        "port": 162,
+        "version": "SNMPv3",
+        "username": "snmpv3user",
+        "authProtocol": "SHA",
+        "authPassword": "authPassword123",
+        "privacyProtocol": "AES",
+        "privacyPassword": "privPassword123"
+      }
+    ]
+  },
   {
     "Syslog": [
       {
