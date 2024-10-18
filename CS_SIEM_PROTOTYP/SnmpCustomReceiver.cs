@@ -329,26 +329,18 @@ public class SnmpDevice
     public int Id { get; set; }
 }
 
-public class AuthParameters
-{
-    public string Username { get; set; }
-    public string AuthProtocol { get; set; }
-    public string AuthPassword { get; set; }
-    public string PrivacyProtocol { get; set; }
-    public string PrivacyPassword { get; set; }
 
-    public override string ToString()
-    {
-        return $"Username: {Username}, Auth Protocol: {AuthProtocol}, Auth Password: {AuthPassword}, " +
-               $"Privacy Protocol: {PrivacyProtocol}, Privacy Password: {PrivacyPassword}";
-    }
-}
 
 public class SnmpTrapConfig
 {
     public int Port { get; set; }
     public string Version { get; set; }
-    public AuthParameters AuthParameters { get; set; }
+    // public AuthParameters AuthParameters { get; set; }
+    public string Username { get; set; }
+    public string AuthProtocol { get; set; }
+    public string AuthPassword { get; set; }
+    public string PrivacyProtocol { get; set; }
+    public string PrivacyPassword { get; set; }
     public string Name { get; set; }
     public int Id { get; set; }
     
@@ -356,7 +348,7 @@ public class SnmpTrapConfig
     
     public override string ToString()
     {
-        return $"Port: {Port}, Version: {Version}, Auth Parameters: [{AuthParameters.ToString()}]   id: {Id} name: {Name}";
+        return $"Port: {Port}, Version: {Version} id: {Id} name: {Name} Username: {Username}, Auth Protocol: {AuthProtocol}, Auth Password: {AuthPassword}, Privacy Protocol: {PrivacyProtocol}, Privacy Password: {PrivacyPassword}";
     }
 }
 

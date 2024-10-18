@@ -102,26 +102,22 @@
         "id": 12312312,
         "port": 162,
         "version": "SNMPv3",
-        "authParameters": {
-          "username": "snmpv3user",
-          "authProtocol": "SHA",
-          "authPassword": "authPassword123",
-          "privacyProtocol": "AES",
-          "privacyPassword": "privPassword123"
-        }
+        "username": "snmpv3user",
+        "authProtocol": "SHA",
+        "authPassword": "authPassword123",
+        "privacyProtocol": "AES",
+        "privacyPassword": "privPassword123"
       },
       {
         "name": "Trap2",
         "id": 5675,
         "port": 162,
-        "version": "SNMPv3",
-        "authParameters": {
-          "username": "snmpv3user",
-          "authProtocol": "SHA",
-          "authPassword": "authPassword123",
-          "privacyProtocol": "AES",
-          "privacyPassword": "privPassword123"
-        }
+        "version": "SNMPv2",
+        "username": "snmpv3user",
+        "authProtocol": "SHA",
+        "authPassword": "authPassword123",
+        "privacyProtocol": "AES",
+        "privacyPassword": "privPassword123"
       }
     ]
   },
@@ -141,7 +137,8 @@
   },
   {
     "ScyllaDB": {
-      "port": 123
+      "port": 123,
+      "ipaddresses": 12312
     }
   }
 ]

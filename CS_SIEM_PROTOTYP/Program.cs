@@ -47,7 +47,7 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
-        string absolutePath = @"C:\Users\apexl\Desktop\CS_SIEM_PROTOTYP\CS_SIEM_PROTOTYP\example_API.json";
+        string absolutePath = @"C:\Users\apexl\Desktop\CyberScape-SIEM\CS_SIEM_PROTOTYP\example_API.json";
         var jsonArray = ParseJson(absolutePath);
         // Console.WriteLine(test[0]);
         // Console.WriteLine(test.Count);
