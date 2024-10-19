@@ -128,7 +128,7 @@ public static class Program
             
         }
         
-        SyslogReceiver.TestProcessSyslogMessage();
+        // SyslogReceiver.TestProcessSyslogMessage();
         
         /*
         
