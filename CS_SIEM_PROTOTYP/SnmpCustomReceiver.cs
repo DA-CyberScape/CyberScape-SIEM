@@ -137,7 +137,7 @@ public class SnmpCustomReceiver : IDataReceiver
                 List<SnmpPoll> answerSnmpPolls = new List<SnmpPoll>();
                 foreach (var value in values)
                 {
-                    string name = "temp";
+                    // string name = "temp";
                     string oid = value.Oid.ToString();
                     SnmpPoll snmpPoll = new SnmpPoll(ipAddress,oid , value.Value.ToString(),
                         hostname, DateTime.Now, oidDict[oid]);
