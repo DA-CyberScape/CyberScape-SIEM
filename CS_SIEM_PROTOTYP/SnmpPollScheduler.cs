@@ -115,3 +115,4 @@ namespace CS_SIEM_PROTOTYP
     
 }
 
+// https://chatgpt.com/share/6713a9bf-d594-8000-9eaf-47dbabf9333a
