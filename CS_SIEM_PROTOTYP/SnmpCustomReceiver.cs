@@ -9,12 +9,9 @@ public class SnmpCustomReceiver : IDataReceiver
     {
         throw new NotImplementedException();
     }
-    private readonly IDatabaseManager _databaseManager;
     
-    public SnmpCustomReceiver (IDatabaseManager databaseManager)
-    {
-        _databaseManager = databaseManager;
-    }
+    
+    
     
     // snmp-server group MY-GROUP v3 priv
     // snmp-server user MY-USER MY-GROUP v3 auth sha MyAuthPass priv aes 128 MyPrivPass
@@ -160,57 +157,17 @@ public class SnmpCustomReceiver : IDataReceiver
         
     }
     
-    public Dictionary<string, Type> GetSnmpPollColumn()
-    {
-        return new Dictionary<string, Type>
-        {
-            { "deviceIP", typeof(string) },
-            { "hostname", typeof(string) },
-            { "devicePort", typeof(int) },
-            { "oid", typeof(string) },
-            { "oidValue", typeof(string) },
-            { "timestamp", typeof(DateTime) },
-            { "UUID", typeof(Guid)} 
-        };
-    }
     
-    public Dictionary<string, object> MapSnmpPollDataToData(SnmpPoll snmp)
-    {
-        return new Dictionary<string, object>
-        {
-            { "deviceIP", snmp.IpAddress },
-            { "hostname", snmp.Hostname },
-            { "oid", snmp.Oid },
-            { "oidValue", snmp.OidValue },
-            { "timestamp", snmp.Timestamp },
-            { "UUID", Guid.NewGuid()}  
-        };
-    }
     
-    public async Task InsertSnmpPollDataAsync(List<SnmpPoll> snmpDatas, string table, Dictionary<string, Type> columns)
-    {
-
-        foreach (var snmpData in snmpDatas)
-        {
-            var data = MapSnmpPollDataToData(snmpData);
-
-            foreach (var value in data)
-            {
-                Console.WriteLine(value);
-            }
-            
-            try
-            {
-                await _databaseManager.InsertData(table, columns, data);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to insert data");
-            }
-        }
-    }
-
-   
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
 
 }
