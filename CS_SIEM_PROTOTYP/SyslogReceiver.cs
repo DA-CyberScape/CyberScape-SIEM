@@ -21,13 +21,8 @@ namespace CS_SIEM_PROTOTYP
             throw new NotImplementedException();
         }
 
-        public static void ReceiveSyslogData(int port)
+        public static void ReceiveSyslogData(int port = 514)
         {
-            if (port == 0)
-            {
-                port = 514;
-            }
-
             udpClient = new UdpClient(port);
             Console.WriteLine($"Listening for Syslog messages on port {port}...");
 
