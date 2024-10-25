@@ -25,6 +25,15 @@ public class NetflowScheduler
         while (!cancellationToken.IsCancellationRequested)
         {
         }
-        Console.WriteLine("Netflow Scheduler stopped");
+        Console.WriteLine("Netflow Receiver stopped");
+    }
+    
+    public void StopPolling()
+    {
+        if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
+        {
+            _cancellationTokenSource.Cancel();
+            Console.WriteLine("Netflow Receiver is Stopping");
+        }
     }
 }
