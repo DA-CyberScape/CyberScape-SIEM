@@ -35,6 +35,7 @@ namespace CS_SIEM_PROTOTYP
                     Console.WriteLine($"[INFO] Polling SNMP data for device IP: {snmpRequest.IpAddress} on Port: {snmpRequest.Port}");
 
                     List<SnmpPoll> snmpPolls = SnmpCustomReceiver.PollSnmpV3(snmpRequest);
+                    Console.WriteLine(snmpRequest);
 
                     if (snmpPolls != null && snmpPolls.Count > 0)
                     {
@@ -43,6 +44,11 @@ namespace CS_SIEM_PROTOTYP
                         
                         //TODO DATABASE
                         // InsertSnmpPollDataAsync(snmpPolls, "SNMP", GetSnmpPollColumn());
+                        foreach (var snmpPoll in snmpPolls)
+                        {
+                            Console.WriteLine(snmpPoll);
+                            
+                        }
                     }else
                     {
                         Console.WriteLine($"[WARN] No data returned for device IP: {snmpRequest.IpAddress}. Check device connectivity or OID configuration.");
@@ -54,7 +60,9 @@ namespace CS_SIEM_PROTOTYP
                
                 try
                 {
+                    Console.WriteLine($"[INFO] Waiting for {_delay} seconds");
                     await Task.Delay(_delay * 1000, cancellationToken);
+                    
                 }
                 catch (TaskCanceledException)
                 {

@@ -94,6 +94,10 @@ public class SnmpCustomReceiver : IDataReceiver
             }
             
             List <string> oids = oidDict.Keys.ToList();
+            foreach (var oid in oids)
+            {
+                Console.WriteLine(oid);
+            }
             // List <string> oids_value = oidDict.Values.ToList();
 
             // get request pdu

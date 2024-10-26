@@ -47,7 +47,7 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
-        string absolutePath = @"C:\Users\apexl\Desktop\CyberScape-SIEM\CS_SIEM_PROTOTYP\example_API.json";
+        string absolutePath = @"/home/sai/CyberScape-SIEM/CS_SIEM_PROTOTYP/example_API.json";
         var jsonArray = ParseJson(absolutePath);
         // Console.WriteLine(test[0]);
         // Console.WriteLine(test.Count);
@@ -112,13 +112,13 @@ public static class Program
         var tempPRTG = Converter.convertJsontoPRTG(prtgReceiverDict);
         foreach (var element in tempPRTG)
         {
-            Console.WriteLine(element);
+            // Console.WriteLine(element);
             
         }
         var tempSNMPTrap = Converter.convertJsontoSNMPTrap(snmpTrapReceiverDict);
         foreach (var element in tempSNMPTrap)
         {
-            Console.WriteLine(element);
+            // Console.WriteLine(element);
             
         }
         var tempSyslogp = Converter.ConvertJsontoSyslogConfigs(syslogDict);
@@ -127,27 +127,49 @@ public static class Program
             Console.WriteLine(element);
             
         }
-        
-        // SyslogReceiver.TestProcessSyslogMessage();
-        
+        Console.WriteLine("-----------------------------------------------------------------");
+
         /*
+         // TESTED OUT SNMPSCHEDULER AND INDEED IT WORKED 
+        SnmpPollScheduler snmpPollScheduler = new SnmpPollScheduler(tempSNMP, null, 10 );
+        snmpPollScheduler.StartPollingAsync();
+
+        Console.WriteLine("WAITING FOR 60 SECONDS THEN STOPPING SNMP SCHEDULER");
+        await Task.Delay(20 * 1000);
         
-        var oidDictionary = new Dictionary<string, string>
+        snmpPollScheduler.StopPolling();
+        */
+
+
+        // SyslogReceiver.TestProcessSyslogMessage();
+
+
+        // public static List<SnmpPoll> PollSnmpV3(Dictionary <string, string> oidDict, string ipAddress,string user,  string authPass, string privPass,
+        // AuthenticationDigests authenticationDigests, PrivacyProtocols privacyProtocols, int port, string hostname)
+
+        /*
+        Console.WriteLine(tempSNMP[1].Oids);
+        Console.WriteLine(tempSNMP[1].IpAddress);
+        Console.WriteLine(tempSNMP[1].User);
+        Console.WriteLine(tempSNMP[1].AuthPass);
+        Console.WriteLine(tempSNMP[1].PrivPass);
+        Console.WriteLine(tempSNMP[1].AuthDigest);
+        Console.WriteLine(tempSNMP[1].PrivProtocol);
+        Console.WriteLine(tempSNMP[1].Port);
+        Console.WriteLine(tempSNMP[1].Hostname);
+
+        var temp = SnmpCustomReceiver.PollSnmpV3(tempSNMP[1].Oids, tempSNMP[1].IpAddress, tempSNMP[1].User, tempSNMP[1].AuthPass, tempSNMP[1].PrivPass, tempSNMP[1].AuthDigest, tempSNMP[1].PrivProtocol, tempSNMP[1].Port, tempSNMP[1].Hostname);
+
+        foreach (var t in temp)
         {
-            { "1.3.6.1.4.1.9.2.1.56.0", "CPU Load" },
-            { "1.3.6.1.4.1.9.2.1.8.0", "Memory Usage" },
-            { "1.3.6.1.2.1.1.3.0", "Uptime" },
-            { "1.3.6.1.2.1.6.9.0", "TCP Connections" }
-        };
-        
-        List<string> oidList = oidDictionary.Keys.ToList();
-        List<string> valueList = oidDictionary.Values.ToList();
-        Console.WriteLine(string.Join(", ", oidList));
-        Console.WriteLine(string.Join(", ", valueList));
-        Console.WriteLine(oidDictionary["1.3.6.1.4.1.9.2.1.56.0"]);
+            Console.WriteLine(t);
+
+        }
         */
         /*
-        
+         snmpwalk -v3 -l authPriv -u MY-USER -a SHA -A MyAuthPass -x AES -X MyPrivPass -p 161 192.168.10.20 1.3.6.1.4.1.9.2.1.56.0
+
+
 
         List<string> oids = new List<string>
                 {
@@ -156,7 +178,7 @@ public static class Program
                     "1.3.6.1.2.1.1.5.0", //name
                     "1.3.6.1.2.1.1.3.0", // uptime
                     "1.3.6.1.2.1.2.2.1.2",
-                    
+
 
                 };
         AuthenticationDigests authenticationDigests = AuthenticationDigests.SHA1;
@@ -167,37 +189,37 @@ public static class Program
         string privpass = "MyPrivPass";
         int port = 161;
         string hostname = "Switch";
-       
-        
+
+
 
 
         SnmpPollRequest snmpPollRequest = new SnmpPollRequest(oids, ip, user, authpass, privpass, authenticationDigests, privacyProtocols, port, hostname);
 
 
         var responses = SnmpCustomReceiver.PollSnmpV3(snmpPollRequest);
-        
+
         foreach (var response in responses)
         {
             Console.WriteLine(response);
             Console.WriteLine("-----------------------------");
         }
         */
-        
-        
-        
+
+
+
         /*
-        
+
 
         // Syslog THREAD
         Thread syslogThread = new Thread(() => startSyslogReceiver(514));
         syslogThread.Start();*/
-        
-        
-        
+
+
+
         /*
         Console.WriteLine("Hello World");
         Console.WriteLine("-----------------------------");
-        
+
         string nfdump_files = "/var/cache/nfdump";
         string nfdump_bin = "/bin/nfdump";
         string[] netflowPaths = NetflowReceiver.GetFilePaths(nfdump_files);
@@ -217,8 +239,8 @@ public static class Program
             }
 
         }
-        
-        
+
+
         List<string> oids = new List<string>
         {
             "1.3.6.1.4.1.9.2.1.56.0", // cpu load
@@ -227,20 +249,20 @@ public static class Program
             "1.3.6.1.2.1.1.3.0", // uptime
             "1.3.6.1.4.1.9.2.1.57.0", // cpu load 60sec
             "1.3.6.1.2.1.2.2.1.2"
-            
+
         };
 
-        
+
         string community = "cssiemtest"; // Replace with your SNMP community string
         string ipAddress = "192.168.10.20"; // Replace with the IP address of your Cisco router
 
 
-       
+
 
         Dictionary<string, string> responses = SnmpCustomReceiver.PollMultipleOids(oids, ipAddress, community);
         Console.WriteLine("Cisco Router Metrics:");
-        
-        
+
+
         foreach (var response in responses)
         {
             Console.WriteLine($"{ipAddress}: {response.Value}");
@@ -264,13 +286,13 @@ public static class Program
         var db = serviceProvider.GetService<IDatabaseManager>()!;
         Console.WriteLine(db.GetType());
         db.SetKeySpace("Test_Keyspace");
-        
+
         Console.WriteLine("IT WORKS");
         // API THREAD
         Thread apiThread = new Thread(() => StartApi(db));
         apiThread.Start();
         */
-        
+
 
 
 
@@ -283,7 +305,7 @@ public static class Program
         */
         // PRTG/SNMP THREAD
 
-        
+
         // Netflow THREAD
 
         // StartNetflow(db, serviceProvider);
@@ -292,10 +314,10 @@ public static class Program
 //        nfThread.Start();
 
         // Netflow THREAD
-        
-        
-        
- 
+
+
+
+
 
         #region SNMP
 
