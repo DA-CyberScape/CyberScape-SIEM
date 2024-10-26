@@ -93,16 +93,23 @@ public class NetflowReceiver : IDataReceiver
 
         foreach (var line in lines)
         {
-            if (!line.Contains("ICMP"))
+            try
             {
-                result.Add(ParseLineToNetFlowData(line));
+                if (!line.Contains("ICMP"))
+                {
+                    result.Add(ParseLineToNetFlowData(line));
+                }
+                else
+                {
+                    result.Add(ParseICMPLineToNetFlowData(line));
+                }
             }
-            else
+            catch(Exception e)
             {
-                result.Add(ParseICMPLineToNetFlowData(line));
-                
+                Console.WriteLine(e);
+            }
 
-            }
+
 
 
         }
@@ -124,7 +131,7 @@ public class NetflowReceiver : IDataReceiver
                 return new NetFlowData
                 {
                     timestamp = DateTime.Parse(match.Groups["timestamp"].Value),
-                    duration = DateTime.Parse(match.Groups["duration"].Value),
+                    duration = match.Groups["duration"].Value,
                     protocol = match.Groups["protocol"].Value,
                     srcIP = match.Groups["srcIP"].Value,
                     srcPort = int.Parse(match.Groups["srcPort"].Value),
@@ -138,6 +145,31 @@ public class NetflowReceiver : IDataReceiver
                     flag = match.Groups["flag"].Value
                 };
             }
+            else
+            {
+                Regex r = new Regex(@"(?<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) +(?<duration>\d+\.\d+) +(?<protocol>\w+) +(?<srcIP>\d+\.\d+\.\d+\.\d+):(?<srcPort>\d+) +-> +(?<dstIP>\d+\.\d+\.\d+\.\d+):(?<icmpType>\S+) +(?<flag>\S+) +(?<typeOfService>\d+) +(?<packets>\d+) +(?<bytes>\d+) +(?<flows>\d+)");
+                Match m = r.Match(line);
+                if (m.Success)
+                {
+                    return new NetFlowData
+                    {
+                        timestamp = DateTime.Parse(m.Groups["timestamp"].Value),
+                        duration = m.Groups["duration"].Value,
+                        protocol = m.Groups["protocol"].Value,
+                        srcIP = m.Groups["srcIP"].Value,
+                        srcPort = int.Parse(m.Groups["srcPort"].Value),
+                        dstIP = m.Groups["dstIP"].Value,
+                        dstPort = 0,
+                        bytes = long.Parse(m.Groups["bytes"].Value),
+                        packets = int.Parse(m.Groups["packets"].Value),
+                        flows = int.Parse(m.Groups["flows"].Value),
+                        typeOfService = int.Parse(m.Groups["typeOfService"].Value.Trim()),
+                        icmpType = Double.Parse(m.Groups["icmpType"].Value),
+                        flag = m.Groups["flag"].Value
+                    };
+                }
+            }
+            
 
             return null;
         }
@@ -154,7 +186,7 @@ public class NetflowReceiver : IDataReceiver
             return new NetFlowData
             {
                 timestamp = DateTime.Parse(match.Groups["timestamp"].Value),
-                duration = DateTime.Parse(match.Groups["duration"].Value),
+                duration = match.Groups["duration"].Value,
                 protocol = match.Groups["protocol"].Value,
                 srcIP = match.Groups["srcIP"].Value,
                 srcPort = int.Parse(match.Groups["srcPort"].Value),
@@ -167,83 +199,39 @@ public class NetflowReceiver : IDataReceiver
                 flag = match.Groups["flag"].Value
             };
         }
+        else
+        {
+            Regex r = new Regex(@"(?<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) +(?<duration>\d+\.\d+) +(?<protocol>\w+) +(?<srcIP>\d+\.\d+\.\d+\.\d+):(?<srcPort>\d+) +-> +(?<dstIP>\d+\.\d+\.\d+\.\d+):(?<dstPort>\d+) +(?<flag>\S+) +(?<typeOfService>\d+) +(?<packets>\d+) +(?<bytes>\d+) +(?<flows>\d+)");
+            Match m = r.Match(line);
+            if (m.Success)
+            {
+ 
+                return new NetFlowData
+                {
+                    timestamp = DateTime.Parse(m.Groups["timestamp"].Value),
+                    duration = m.Groups["duration"].Value,
+                    protocol = m.Groups["protocol"].Value,
+                    srcIP = m.Groups["srcIP"].Value,
+                    srcPort = int.Parse(m.Groups["srcPort"].Value),
+                    dstIP = m.Groups["dstIP"].Value,
+                    dstPort = int.Parse(m.Groups["dstPort"].Value),
+                    bytes = long.Parse(m.Groups["bytes"].Value),
+                    packets = int.Parse(m.Groups["packets"].Value),
+                    flows = int.Parse(m.Groups["flows"].Value),
+                    typeOfService = int.Parse(m.Groups["typeOfService"].Value.Trim()),
+                    flag = m.Groups["flag"].Value
+                };
+                
+            }
+        }
 
         return null;
     }
 
         // Method to stop capturing NetFlow data
-    public static void StopCapturingNetFlowData()
-    {
-        // Assuming we stored the process when starting, we could kill it here.
-        // This is just a placeholder as we're not storing the process in this example.
-        // nfcapdProcess.Kill();
-        Console.WriteLine("Stopped capturing NetFlow data.");
-    }
     
-    public Dictionary<string, object> MapnfDataToData(NetFlowData nfData)
-    {
-        return new Dictionary<string, object>
-        {
-            { "srcIP", nfData.srcIP },
-            { "dstIP", nfData.dstIP },
-            { "srcPort", nfData.srcPort },
-            { "dstPort", nfData.dstPort },
-            { "bytes", nfData.bytes },
-            { "timestamp", nfData.timestamp },
-            { "duration", nfData.duration },
-            { "protocol", nfData.protocol },
-            { "flag", nfData.flag },
-            { "typeOfService", nfData.typeOfService },
-            { "packets", nfData.packets },
-            { "flows", nfData.flows },
-            { "icmpType", nfData.icmpType },
-            { "UUID", Guid.NewGuid() } 
-        };
-    }
-        
-    public Dictionary<string, Type> GetNetflowColumnTypes()
-    {
-        return new Dictionary<string, Type>
-        {
-            { "srcIP", typeof(string) },
-            { "dstIP", typeof(string) },
-            { "srcPort", typeof(int) },
-            { "dstPort", typeof(int) },
-            { "bytes", typeof(long) },
-            { "timestamp", typeof(DateTime) },
-            { "duration", typeof(DateTime) },
-            { "protocol", typeof(string) },
-            { "flag", typeof(string) },
-            { "typeOfService", typeof(int) },
-            { "packets", typeof(int) },
-            { "flows", typeof(int) },
-            { "icmpType", typeof(double) },
-            { "UUID", typeof(Guid)} 
-        };
-    }
     
-    public async Task InsertNfDataAsync(List<NetFlowData> nfDatas, string table, Dictionary<string, Type> columns)
-    {
-
-        foreach (var nfData in nfDatas)
-        {
-            var data = MapnfDataToData(nfData);
-
-            foreach (var value in data)
-            {
-                Console.WriteLine(value);
-            }
-            
-            try
-            {
-                await _databaseManager.InsertData(table, columns, data);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to insert data");
-            }
-        }
-    }
+    
     
 }
 
@@ -259,7 +247,7 @@ public class NetflowReceiver : IDataReceiver
         public int dstPort { get; set; }
         public long bytes { get; set; }
         public DateTime timestamp { get; set; }
-        public DateTime duration { get; set; }
+        public string duration { get; set; }
         public string protocol { get; set; }
         public string flag { get; set; }
         public int typeOfService { get; set; }

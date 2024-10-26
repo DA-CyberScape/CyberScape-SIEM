@@ -26,7 +26,7 @@ namespace CS_SIEM_PROTOTYP
         }
 
         /*
-        public async Task StartPollingAsync()
+        public async Task StartAnalyzingAsync()
         {
             var cancellationToken = _cancellationTokenSource.Token;
 

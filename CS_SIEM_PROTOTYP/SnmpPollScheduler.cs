@@ -43,12 +43,13 @@ namespace CS_SIEM_PROTOTYP
                         Console.WriteLine($"[INFO] Received {snmpPolls.Count} SNMP poll results for device IP: {snmpRequest.IpAddress}");
                         
                         //TODO DATABASE
-                        // InsertSnmpPollDataAsync(snmpPolls, "SNMP", GetSnmpPollColumn());
+                        // await InsertSnmpPollDataAsync(snmpPolls, "SNMP", GetSnmpPollColumn());
+                        /*
                         foreach (var snmpPoll in snmpPolls)
                         {
                             Console.WriteLine(snmpPoll);
                             
-                        }
+                        }*/
                     }else
                     {
                         Console.WriteLine($"[WARN] No data returned for device IP: {snmpRequest.IpAddress}. Check device connectivity or OID configuration.");

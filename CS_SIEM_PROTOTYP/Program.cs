@@ -61,37 +61,37 @@ public static class Program
             if (item["snmpPolls"] != null)
             {
                 snmpPollsDict = item["snmpPolls"].ToObject<List<Dictionary<string, object>>>();
-                PrintDictionary(snmpPollsDict);
+                // PrintDictionary(snmpPollsDict);
             }
 
             if (item["netflowReceiver"] != null)
             {
                 netflowReceiverDict = item["netflowReceiver"].ToObject<List<Dictionary<string, object>>>();
-                PrintDictionary(netflowReceiverDict);
+                // PrintDictionary(netflowReceiverDict);
             }
 
             if (item["PRTGReceiver"] != null)
             {
                 prtgReceiverDict = item["PRTGReceiver"].ToObject<List<Dictionary<string, object>>>();
-                PrintDictionary(prtgReceiverDict);
+                // PrintDictionary(prtgReceiverDict);
             }
 
             if (item["snmpTrapReceiver"] != null)
             {
                 snmpTrapReceiverDict = item["snmpTrapReceiver"].ToObject<List<Dictionary<string, object>>>();
-                PrintDictionary(snmpTrapReceiverDict);
+                // PrintDictionary(snmpTrapReceiverDict);
             }
 
             if (item["Syslog"] != null)
             {
                 syslogDict = item["Syslog"].ToObject<List<Dictionary<string, object>>>();
-                PrintDictionary(syslogDict);
+                // PrintDictionary(syslogDict);
             }
 
             if (item["ScyllaDB"] != null)
             {
                 var scyllaDbDict = item["ScyllaDB"].ToObject<Dictionary<string, object>>();
-                PrintDictionary(scyllaDbDict);
+                // PrintDictionary(scyllaDbDict);
             }
         }
 
@@ -100,7 +100,7 @@ public static class Program
         foreach (var element in tempSNMP)
         {
             
-            Console.WriteLine(element);
+            // Console.WriteLine(element);
         }
 
         var tempNetflow = Converter.convertJsontoNetflowDict(netflowReceiverDict);
@@ -124,21 +124,31 @@ public static class Program
         var tempSyslogp = Converter.ConvertJsontoSyslogConfigs(syslogDict);
         foreach (var element in tempSyslogp)
         {
-            Console.WriteLine(element);
+            // Console.WriteLine(element);
             
         }
         Console.WriteLine("-----------------------------------------------------------------");
 
         /*
-         // TESTED OUT SNMPSCHEDULER AND INDEED IT WORKED 
+        NetflowScheduler netflowScheduler = new NetflowScheduler(tempNetflow, null, 10);
+        netflowScheduler.StartAnalyzingAsync();
+        
+        Console.WriteLine("WAITING FOR 20 SECONDS THEN STOPPING SNMP SCHEDULER");
+        await Task.Delay(20 * 1000);
+
+        netflowScheduler.StopPolling();*/
+
+
+        /*
+         // TESTED OUT SNMPSCHEDULER AND INDEED IT WORKED
         SnmpPollScheduler snmpPollScheduler = new SnmpPollScheduler(tempSNMP, null, 10 );
         snmpPollScheduler.StartPollingAsync();
-
+        
         Console.WriteLine("WAITING FOR 60 SECONDS THEN STOPPING SNMP SCHEDULER");
         await Task.Delay(20 * 1000);
+
+        snmpPollScheduler.StopPolling();*/
         
-        snmpPollScheduler.StopPolling();
-        */
 
 
         // SyslogReceiver.TestProcessSyslogMessage();

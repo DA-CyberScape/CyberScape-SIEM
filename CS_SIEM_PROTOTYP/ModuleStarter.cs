@@ -60,10 +60,10 @@ public class ModuleStarter
         // nfdump muss im Hintergrund laufen (vielleicht immer den Prozess killen und neu starten)
         // StartCapturingNetFlowData
         var nf = serviceProvider.GetService<NetflowReceiver>()!;
-        var nfColumns = nf.GetNetflowColumnTypes();
+        // var nfColumns = NetflowScheduler.GetNetflowColumnTypes();
         string primaryKey = "UUID";
         Console.WriteLine("I AM HERE :SLLJSD");
-        await db.CreateTable("Netflow", nfColumns, primaryKey);
+        // await db.CreateTable("Netflow", nfColumns, primaryKey);
         Console.WriteLine("I AM HERE :SLLJSD");
         string nfdump_files = "/home/mehmet/Desktop/nfdump";
         string nfdump_bin = "/bin/nfdump";
@@ -83,7 +83,7 @@ public class ModuleStarter
             {
                 Console.WriteLine(nfdata);
             }
-            await nf.InsertNfDataAsync(nfDatas, "Netflow", nfColumns);
+            // await nf.InsertNfDataAsync(nfDatas, "Netflow", nfColumns);
             //MIT DATENBANK TESTEN
 
         }

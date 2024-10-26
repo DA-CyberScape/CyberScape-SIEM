@@ -34,18 +34,10 @@
       {
         "name": "Netflow1",
         "id": 12312,
-        "folderLocation": "/path/to/folder",
-        "nfdumpBinaryLocation": "/usr/local/bin/nfdump",
-        "nfcapdBinaryLocation": "/usr/local/bin/nfcapd",
+        "folderLocation": "/var/cache/nfdump/test",
+        "nfdumpBinaryLocation": "/usr/bin/nfdump",
+        "nfcapdBinaryLocation": "/usr/bin/nfcapd",
         "port": 2055
-      },
-      {
-        "name": "Netflow2",
-        "id": 12312123,
-        "folderLocation": "/path/to/123123",
-        "nfdumpBinaryLocation": "/usr/local/bin/nfdump123123",
-        "nfcapdBinaryLocation": "/usr/local/bin/nfcapd1231231",
-        "port": 21231231231
       }
     ]
   },
