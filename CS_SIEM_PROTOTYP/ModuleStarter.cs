@@ -122,7 +122,7 @@ public class ModuleStarter
     {
         foreach (var element in syslogConfigs)
         {
-            SyslogReceiver.ReceiveSyslogData(element.Port);
+            
             
         }
         
