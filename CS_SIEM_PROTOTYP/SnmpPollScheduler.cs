@@ -8,7 +8,7 @@ namespace CS_SIEM_PROTOTYP
 {
     public class SnmpPollScheduler
     {
-        private readonly TimeSpan _pollInterval;
+        private readonly int _delay;
         private readonly List<SnmpPollRequest> _snmpRequests;
         private readonly IDatabaseManager _databaseManager;
         private CancellationTokenSource _cancellationTokenSource;
@@ -16,7 +16,7 @@ namespace CS_SIEM_PROTOTYP
         public SnmpPollScheduler(List<SnmpPollRequest> snmpRequests, IDatabaseManager databaseManager, int delayInSeconds = 10)
         {
             _snmpRequests = snmpRequests;
-            _pollInterval = TimeSpan.FromSeconds(delayInSeconds);
+            _delay = delayInSeconds;
             _databaseManager = databaseManager;
             _cancellationTokenSource = new CancellationTokenSource();
         }
@@ -24,34 +24,46 @@ namespace CS_SIEM_PROTOTYP
         public async Task StartPollingAsync()
         {
             var cancellationToken = _cancellationTokenSource.Token;
+            Console.WriteLine("[INFO] Starting SNMP polling...");
 
             while (!cancellationToken.IsCancellationRequested)
             {
+                Console.WriteLine("[INFO] Beginning new polling cycle.");
                 foreach (var snmpRequest in _snmpRequests)
                 {
                     // Poll each SNMP device
+                    Console.WriteLine($"[INFO] Polling SNMP data for device IP: {snmpRequest.IpAddress} on Port: {snmpRequest.Port}");
+
                     List<SnmpPoll> snmpPolls = SnmpCustomReceiver.PollSnmpV3(snmpRequest);
 
                     if (snmpPolls != null && snmpPolls.Count > 0)
                     {
-                        // Insert polled data into the database
-                        InsertSnmpPollDataAsync(snmpPolls, "SNMP", GetSnmpPollColumn());
+       
+                        Console.WriteLine($"[INFO] Received {snmpPolls.Count} SNMP poll results for device IP: {snmpRequest.IpAddress}");
+                        
+                        //TODO DATABASE
+                        // InsertSnmpPollDataAsync(snmpPolls, "SNMP", GetSnmpPollColumn());
+                    }else
+                    {
+                        Console.WriteLine($"[WARN] No data returned for device IP: {snmpRequest.IpAddress}. Check device connectivity or OID configuration.");
                     }
                 }
+                Console.WriteLine("[INFO] Polling cycle completed. Waiting for next interval...");
 
-                // Wait for the specified delay or until cancellation is requested
+
+               
                 try
                 {
-                    await Task.Delay(_pollInterval, cancellationToken);
+                    await Task.Delay(_delay * 1000, cancellationToken);
                 }
                 catch (TaskCanceledException)
                 {
-                    // Task was canceled, exit gracefully
-                    Console.WriteLine("SNMP Polling stopped gracefully.");
+                    
+                    Console.WriteLine("[INFO] SNMP Polling stopped gracefully.");
                     return;
                 }
             }
-            Console.WriteLine("SNMPPollScheduler stopped");
+            Console.WriteLine("[INFO] SNMP Poll Scheduler stopped.");
         }
 
         public void StopPolling()
@@ -59,6 +71,7 @@ namespace CS_SIEM_PROTOTYP
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 _cancellationTokenSource.Cancel();
+                Console.WriteLine("[INFO] SNMP Poll Scheduler is stopping...");
             }
         }
         
