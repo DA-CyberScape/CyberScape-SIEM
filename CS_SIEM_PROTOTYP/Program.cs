@@ -47,6 +47,9 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
+        ModuleStarter moduleStarter = new ModuleStarter();
+        moduleStarter.StartSIEM(@"/home/sai/CyberScape-SIEM/CS_SIEM_PROTOTYP/test.json");
+        Console.WriteLine("a;sldkfja;sldkfjas;dlkfjas ;dflkajsd ;flkajds;f lkasjdf ;lakdsjf ;alskdjf ;askldjfa ;lsdkjfa;sldkfja;sdlkfjas;dlkfjasd;lfkjasdl;fkaj sd;flkajsd");
         string absolutePath = @"/home/sai/CyberScape-SIEM/CS_SIEM_PROTOTYP/example_API.json";
         var jsonArray = ParseJson(absolutePath);
         // Console.WriteLine(test[0]);

@@ -1,0 +1,64 @@
+[
+  {
+    "snmpPolls": [
+      {
+        "name": "SwitchSNMP",
+        "id": 123123,
+        "ip": "192.168.10.20",
+        "hostname": "Switch-1",
+        "oids": [
+          {
+            "oid": "1.3.6.1.4.1.9.2.1.56.0",
+            "name": "CPU Load"
+          },
+          {
+            "oid": "1.3.6.1.4.1.9.2.1.8.0",
+            "name": "Memory Usage"
+          },
+          {
+            "oid": "1.3.6.1.2.1.1.3.0",
+            "name": "Uptime"
+          }
+        ],
+        "user": "MY-USER",
+        "authentication": "SHA1",
+        "encryption": "aes 128",
+        "authpass": "MyAuthPass",
+        "privpass": "MyPrivPass",
+        "port": 161
+      }
+    ]
+  },
+  {
+    "netflowReceiver": [
+      {
+        "name": "Netflow1",
+        "id": 12312,
+        "folderLocation": "/var/cache/nfdump/test",
+        "nfdumpBinaryLocation": "/usr/bin/nfdump",
+        "nfcapdBinaryLocation": "/usr/bin/nfcapd",
+        "port": 2055
+      }
+    ]
+  },
+  {
+    "Syslog": [
+      {
+        "name": "Sys1",
+        "id": 56756,
+        "port": 514
+      },
+      {
+        "name": "Sys2",
+        "id": 12312,
+        "port": 12312
+      }
+    ]
+  },
+  {
+    "ScyllaDB": {
+      "port": 123,
+      "ipaddresses": 12312
+    }
+  }
+]
