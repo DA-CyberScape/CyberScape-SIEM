@@ -21,6 +21,7 @@ public class NetflowScheduler
 
     public async Task StartAnalyzingAsync()
     {
+        Console.ForegroundColor = ConsoleColor.Green;
         var cancellationToken = _cancellationTokenSource.Token;
         Console.WriteLine("[INFO] Starting Netflow Scheduler...");
 
@@ -95,6 +96,7 @@ public class NetflowScheduler
         {
             Directory.CreateDirectory(nfDirectoryOld);
         }
+        Console.ForegroundColor = ConsoleColor.Red;
         foreach (var nfPath in netflowPaths)
         {
             string fileName = Path.GetFileName(nfPath);
@@ -121,6 +123,7 @@ public class NetflowScheduler
         if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
         {
             _cancellationTokenSource.Cancel();
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("[INFO] Netflow Scheduler is stopping...");
         }
     }

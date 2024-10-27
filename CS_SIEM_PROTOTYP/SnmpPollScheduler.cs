@@ -24,6 +24,7 @@ namespace CS_SIEM_PROTOTYP
         public async Task StartPollingAsync()
         {
             var cancellationToken = _cancellationTokenSource.Token;
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("[INFO] Starting SNMP polling...");
 
             while (!cancellationToken.IsCancellationRequested)
@@ -52,7 +53,9 @@ namespace CS_SIEM_PROTOTYP
                         }*/
                     }else
                     {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine($"[WARN] No data returned for device IP: {snmpRequest.IpAddress}. Check device connectivity or OID configuration.");
+                        Console.ForegroundColor = ConsoleColor.Green;
                     }
                 }
                 Console.WriteLine("[INFO] Polling cycle completed. Waiting for next interval...");
@@ -80,6 +83,7 @@ namespace CS_SIEM_PROTOTYP
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 _cancellationTokenSource.Cancel();
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("[INFO] SNMP Poll Scheduler is stopping...");
             }
         }
