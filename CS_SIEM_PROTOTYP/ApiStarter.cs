@@ -16,8 +16,14 @@ namespace CS_SIEM_PROTOTYP
     {
         private static WebApplication? _app;
         private static CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private IDatabaseManager _db;
 
-        public static async Task StartApiAsync(IDatabaseManager db)
+        public ApiStarter(IDatabaseManager db)
+        {
+            _db = db;
+        }
+
+        public async Task StartApiAsync()
         {
             Console.WriteLine("[INFO] Initializing API...");
 
@@ -36,7 +42,7 @@ namespace CS_SIEM_PROTOTYP
             _app = builder.Build();
 
             Console.WriteLine("[INFO] Starting API configuration...");
-            _app.ConfigureApi(db);
+            _app.ConfigureApi(_db);
 
             Console.WriteLine("[INFO] Running API...");
             try
@@ -49,7 +55,7 @@ namespace CS_SIEM_PROTOTYP
             }
         }
 
-        public static void StopApi()
+        public void StopApi()
         {
             if (_app != null && _cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {

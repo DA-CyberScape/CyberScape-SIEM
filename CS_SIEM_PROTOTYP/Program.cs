@@ -26,20 +26,7 @@ public static class Program
 
     
 
-    public static JArray ParseJson(string jsonPath)
-    {
-        string jsonText = File.ReadAllText(jsonPath);
-        
-        JArray jsonResult = JArray.Parse(jsonText);
-    
-        return jsonResult; 
-    }
-    
-    static void PrintDictionary<T>(T dict)
-    {
-        Console.WriteLine(JsonConvert.SerializeObject(dict, Formatting.Indented));
-        Console.WriteLine("------------------------------------");
-    }
+
 
     
 
@@ -47,95 +34,15 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
-        ModuleStarter moduleStarter = new ModuleStarter();
-        moduleStarter.StartSIEM(@"/home/sai/CyberScape-SIEM/CS_SIEM_PROTOTYP/test.json");
-        Console.WriteLine("a;sldkfja;sldkfjas;dlkfjas ;dflkajsd ;flkajds;f lkasjdf ;lakdsjf ;alskdjf ;askldjfa ;lsdkjfa;sldkfja;sdlkfjas;dlkfjasd;lfkjasdl;fkaj sd;flkajsd");
-        string absolutePath = @"/home/sai/CyberScape-SIEM/CS_SIEM_PROTOTYP/example_API.json";
-        var jsonArray = ParseJson(absolutePath);
-        // Console.WriteLine(test[0]);
-        // Console.WriteLine(test.Count);
-        var snmpPollsDict = new List<Dictionary<string, object>>();
-        var netflowReceiverDict = new List<Dictionary<string, object>>();
-        var prtgReceiverDict = new List<Dictionary<string, object>>();
-        var snmpTrapReceiverDict = new List<Dictionary<string, object>>();
-        var syslogDict = new List<Dictionary<string, object>>();
-        foreach (JObject item in jsonArray)
-        {
-            if (item["snmpPolls"] != null)
-            {
-                snmpPollsDict = item["snmpPolls"].ToObject<List<Dictionary<string, object>>>();
-                // PrintDictionary(snmpPollsDict);
-            }
-
-            if (item["netflowReceiver"] != null)
-            {
-                netflowReceiverDict = item["netflowReceiver"].ToObject<List<Dictionary<string, object>>>();
-                // PrintDictionary(netflowReceiverDict);
-            }
-
-            if (item["PRTGReceiver"] != null)
-            {
-                prtgReceiverDict = item["PRTGReceiver"].ToObject<List<Dictionary<string, object>>>();
-                // PrintDictionary(prtgReceiverDict);
-            }
-
-            if (item["snmpTrapReceiver"] != null)
-            {
-                snmpTrapReceiverDict = item["snmpTrapReceiver"].ToObject<List<Dictionary<string, object>>>();
-                // PrintDictionary(snmpTrapReceiverDict);
-            }
-
-            if (item["Syslog"] != null)
-            {
-                syslogDict = item["Syslog"].ToObject<List<Dictionary<string, object>>>();
-                // PrintDictionary(syslogDict);
-            }
-
-            if (item["ScyllaDB"] != null)
-            {
-                var scyllaDbDict = item["ScyllaDB"].ToObject<Dictionary<string, object>>();
-                // PrintDictionary(scyllaDbDict);
-            }
-        }
-
-        var tempSNMP = Converter.convertJsontoSNMPPollRequest(snmpPollsDict);
-
-        foreach (var element in tempSNMP)
-        {
-            
-            // Console.WriteLine(element);
-        }
-
-        var tempNetflow = Converter.convertJsontoNetflowDict(netflowReceiverDict);
-        foreach (var element in tempNetflow)
-        {
-            Console.WriteLine(element);
-            
-        }
-        var tempPRTG = Converter.convertJsontoPRTG(prtgReceiverDict);
-        foreach (var element in tempPRTG)
-        {
-            // Console.WriteLine(element);
-            
-        }
-        var tempSNMPTrap = Converter.convertJsontoSNMPTrap(snmpTrapReceiverDict);
-        foreach (var element in tempSNMPTrap)
-        {
-            // Console.WriteLine(element);
-            
-        }
-        var tempSyslogp = Converter.ConvertJsontoSyslogConfigs(syslogDict);
-        foreach (var element in tempSyslogp)
-        {
-            // Console.WriteLine(element);
-            
-        }
+        Console.WriteLine("------------------------------------------");
+        ModuleStarter moduleStarter = new ModuleStarter(null, 10);
+        var siemTask = moduleStarter.StartSIEM(@"/home/sai/CyberScape-SIEM/CS_SIEM_PROTOTYP/test.json");
         
-        Console.WriteLine("-----------------------------------------------------------------");
-
-        ApiStarter.StartApiAsync(null);
-        await Task.Delay(10 * 1000);
-        ApiStarter.StopApi();
+        Console.WriteLine("[SIMULATION] SIEM Started, waiting 11 seconds before stopping...");
+        await Task.Delay(11000);
+        moduleStarter.StopSIEM();
+        await siemTask;
+        Console.WriteLine("[SIMULATION] SIEM has been stopped.");
 
 
         // TESTING NETFLOW AND SNMP
