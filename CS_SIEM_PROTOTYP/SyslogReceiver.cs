@@ -11,31 +11,40 @@ namespace CS_SIEM_PROTOTYP
     public class SyslogReceiver : IDataReceiver
     {
         private static ConcurrentQueue<SyslogAnswer> _syslogMessagesQueue = new ConcurrentQueue<SyslogAnswer>();
-        private static int delay = 10;
+        private static int _delay = 10;
         private static CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private static CancellationToken cancellationToken = cancellationTokenSource.Token;
         private static UdpClient udpClient;
+        private IDatabaseManager _db;
+        private int _port;
 
         public void ReceiveData()
         {
             throw new NotImplementedException();
         }
-        
-       
 
-        public void ReceiveSyslogData(int port = 514)
+        public SyslogReceiver(IDatabaseManager db, int port, int delay = 10)
         {
-            udpClient = new UdpClient(port);
-            Console.WriteLine($"[INFO] Syslog Receiver is listening on port {port}...");
+            _db = db;
+            _delay = delay;
+            _port = port;
+        }
 
-            Task.Run(() => StartPeriodicDatabaseInsert(delay, cancellationToken), cancellationToken);
+
+
+        public void ReceiveSyslogData()
+        {
+            udpClient = new UdpClient(_port);
+            Console.WriteLine($"[INFO] Syslog Receiver is listening on port {_port}...");
+
+            Task.Run(() => StartPeriodicDatabaseInsert(_delay, cancellationToken), cancellationToken);
 
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     // listenting part
-                    IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, port);
+                    IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, _port);
 
                     if (udpClient.Available > 0)
                     {
@@ -74,14 +83,23 @@ namespace CS_SIEM_PROTOTYP
 
         private void InsertMessagesIntoDatabase()
         {
-            Console.WriteLine("[INFO] Inserting messages into the database...");
-            
             while (!_syslogMessagesQueue.IsEmpty)
             {
                 if (_syslogMessagesQueue.TryDequeue(out SyslogAnswer syslogMessage))
                 {
-                    Console.WriteLine($"[INFO] Inserted message from {syslogMessage.Hostname} into database.");
-                    // TODO: Implement actual database insertion logic here
+                    if (syslogMessage.Message.Length > 0)
+                    {
+                        Console.WriteLine($"[INFO] Inserted message from {syslogMessage.Hostname} into database.");
+                        Console.WriteLine(syslogMessage.Facility);
+                        Console.WriteLine(syslogMessage.Severity);
+                        Console.WriteLine(syslogMessage.Hostname);
+                        Console.WriteLine(syslogMessage.Timestamp);
+                        Console.WriteLine(syslogMessage.Message);
+                        
+                        // TODO: MEHMET DB LOGIK
+                    }
+
+                    
                 }
             }
         }
@@ -99,40 +117,51 @@ namespace CS_SIEM_PROTOTYP
                 RawMessage = syslogMessage,
                 SourceIP = sourceIP
             };
-
-            if (syslogMessage.StartsWith("<"))
+            try
             {
-                int priorityEnd = syslogMessage.IndexOf(">");
-                if (priorityEnd > 0 && int.TryParse(syslogMessage.Substring(1, priorityEnd - 1), out int priority))
+                if (syslogMessage.StartsWith("<"))
                 {
-                    syslogAnswer.Facility = priority / 8;
-                    syslogAnswer.Severity = priority % 8;
-
-                    string afterPriority = syslogMessage.Substring(priorityEnd + 1);
-                    string[] parts = afterPriority.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                    if (parts.Length > 1 && int.TryParse(parts[0], out int version))
+                    int priorityEnd = syslogMessage.IndexOf(">");
+                    if (priorityEnd > 0 && int.TryParse(syslogMessage.Substring(1, priorityEnd - 1), out int priority))
                     {
-                        syslogAnswer.Timestamp = DateTime.Parse(parts[1]);
-                        syslogAnswer.Hostname = parts[2];
-                        syslogAnswer.Message = string.Join(" ", parts.Skip(6));
-                    }
-                    else
-                    {
-                        string timestampString = afterPriority.Substring(0, 15);
-                        syslogAnswer.Timestamp = DateTime.ParseExact(timestampString, "MMM dd HH:mm:ss", null);
-                        string[] rfc3164Parts = afterPriority.Substring(16).Trim().Split(' ', 2);
-                        syslogAnswer.Hostname = rfc3164Parts[0];
-                        syslogAnswer.Message = rfc3164Parts.Length > 1 ? rfc3164Parts[1] : "";
+                        syslogAnswer.Facility = priority / 8;
+                        syslogAnswer.Severity = priority % 8;
+
+                        string afterPriority = syslogMessage.Substring(priorityEnd + 1);
+                        string[] parts = afterPriority.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                        if (parts.Length > 1 && int.TryParse(parts[0], out int version))
+                        {
+                            syslogAnswer.Timestamp = DateTime.Parse(parts[1]);
+                            syslogAnswer.Hostname = parts[2];
+                            syslogAnswer.Message = string.Join(" ", parts.Skip(6));
+                        }
+                        else
+                        {
+                            string timestampString = afterPriority.Substring(0, 15);
+                            syslogAnswer.Timestamp = DateTime.ParseExact(timestampString, "MMM dd HH:mm:ss", null);
+                            string[] rfc3164Parts = afterPriority.Substring(16).Trim().Split(' ', 2);
+                            syslogAnswer.Hostname = rfc3164Parts[0];
+                            syslogAnswer.Message = rfc3164Parts.Length > 1 ? rfc3164Parts[1] : "";
+                        }
                     }
                 }
+                else
+                {
+                    syslogAnswer.Timestamp = DateTime.Now;
+                    syslogAnswer.Hostname = sourceIP;
+                    syslogAnswer.Message = syslogMessage;
+                }
             }
-            else
+            catch
             {
                 syslogAnswer.Timestamp = DateTime.Now;
                 syslogAnswer.Hostname = sourceIP;
                 syslogAnswer.Message = syslogMessage;
             }
+
+
+            
 
             return syslogAnswer;
         }

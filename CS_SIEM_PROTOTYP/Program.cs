@@ -34,15 +34,20 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
+        SyslogReceiver syslogReceiver = new SyslogReceiver(null, 514, 10);
+        syslogReceiver.ReceiveSyslogData();
+        
+        await Task.Delay(60_000);
+        /*
         Console.WriteLine("------------------------------------------");
         ModuleStarter moduleStarter = new ModuleStarter(null, 10);
         var siemTask = moduleStarter.StartSIEM(@"/home/sai/CyberScape-SIEM/CS_SIEM_PROTOTYP/test.json");
-        
+
         Console.WriteLine("[SIMULATION] SIEM Started, waiting 11 seconds before stopping...");
         await Task.Delay(11000);
         moduleStarter.StopSIEM();
         await siemTask;
-        Console.WriteLine("[SIMULATION] SIEM has been stopped.");
+        Console.WriteLine("[SIMULATION] SIEM has been stopped.");*/
 
 
         // TESTING NETFLOW AND SNMP
