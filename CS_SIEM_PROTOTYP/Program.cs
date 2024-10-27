@@ -129,19 +129,23 @@ public static class Program
         }
         
         Console.WriteLine("-----------------------------------------------------------------");
-        
-        
+
+        ApiStarter.StartApiAsync(null);
+        await Task.Delay(10 * 1000);
+        ApiStarter.StopApi();
+
+
         // TESTING NETFLOW AND SNMP
         /*
         NetflowScheduler netflowScheduler = new NetflowScheduler(tempNetflow, null, 10);
         netflowScheduler.StartAnalyzingAsync();
-        
+
         SnmpPollScheduler snmpPollScheduler = new SnmpPollScheduler(tempSNMP, null, 10 );
         snmpPollScheduler.StartPollingAsync();
-        
+
         Console.WriteLine("Waiting for 60 Seconds TILL STOP");
         await Task.Delay(60 * 1000);
-         
+
         snmpPollScheduler.StopPolling();
         netflowScheduler.StopPolling();*/
 
