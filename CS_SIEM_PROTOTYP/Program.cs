@@ -127,28 +127,23 @@ public static class Program
             // Console.WriteLine(element);
             
         }
+        
         Console.WriteLine("-----------------------------------------------------------------");
-
+        
+        
+        // TESTING NETFLOW AND SNMP
         /*
         NetflowScheduler netflowScheduler = new NetflowScheduler(tempNetflow, null, 10);
         netflowScheduler.StartAnalyzingAsync();
         
-        Console.WriteLine("WAITING FOR 20 SECONDS THEN STOPPING SNMP SCHEDULER");
-        await Task.Delay(20 * 1000);
-
-        netflowScheduler.StopPolling();*/
-
-
-        /*
-         // TESTED OUT SNMPSCHEDULER AND INDEED IT WORKED
         SnmpPollScheduler snmpPollScheduler = new SnmpPollScheduler(tempSNMP, null, 10 );
         snmpPollScheduler.StartPollingAsync();
         
-        Console.WriteLine("WAITING FOR 60 SECONDS THEN STOPPING SNMP SCHEDULER");
-        await Task.Delay(20 * 1000);
-
-        snmpPollScheduler.StopPolling();*/
-        
+        Console.WriteLine("Waiting for 60 Seconds TILL STOP");
+        await Task.Delay(60 * 1000);
+         
+        snmpPollScheduler.StopPolling();
+        netflowScheduler.StopPolling();*/
 
 
         // SyslogReceiver.TestProcessSyslogMessage();

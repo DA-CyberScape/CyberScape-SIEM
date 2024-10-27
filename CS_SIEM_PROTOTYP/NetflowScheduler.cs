@@ -21,7 +21,7 @@ public class NetflowScheduler
 
     public async Task StartAnalyzingAsync()
     {
-        Console.ForegroundColor = ConsoleColor.Green;
+        Console.BackgroundColor = ConsoleColor.Green;
         var cancellationToken = _cancellationTokenSource.Token;
         Console.WriteLine("[INFO] Starting Netflow Scheduler...");
 
@@ -46,7 +46,12 @@ public class NetflowScheduler
                         MoveFilesToOldDirectory(config.FolderLocation, netflowPaths);
                     }
 
-                    Console.WriteLine($"[INFO] Successfully polled data for configuration ID: {config.Id}, Location: {config.FolderLocation}");
+                    if (_allNetFlowData.Count > 0)
+                    {
+                        Console.WriteLine($"[INFO] Successfully polled {_allNetFlowData.Count} Entries for configuration ID: {config.Id}, Location: {config.FolderLocation}");
+                    }
+
+                    
                 }
                 catch (Exception ex) when (!(ex is TaskCanceledException))
                 {
@@ -67,6 +72,7 @@ public class NetflowScheduler
                 Console.WriteLine("[INFO] Inserting Netflow data into the database...");
                  // await InsertNfDataAsync(_allNetFlowData, "Netflow", GetNetflowColumnTypes());
                  //TODO INSERT DATA INTO DATABASE
+                 _allNetFlowData = new List<NetFlowData>();
                  Console.WriteLine($"[INFO] Data from configurations has been inserted into the database.");
             }
             
