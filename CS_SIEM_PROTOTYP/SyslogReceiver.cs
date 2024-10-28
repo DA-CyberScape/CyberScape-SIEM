@@ -87,7 +87,7 @@ namespace CS_SIEM_PROTOTYP
 
         private void InsertMessagesIntoDatabase()
         {
-            // Console.WriteLine(" INSIDE THE INSERT METHOD IN SYSLOG");
+            Console.WriteLine(" INSIDE THE INSERT METHOD IN SYSLOG");
             while (!_syslogMessagesQueue.IsEmpty)
             {
                 Console.WriteLine(" INSIDE THE INSERT METHOD IN SYSLOG AND THERE ARE THINGS IN THE QUEUE");
@@ -104,7 +104,7 @@ namespace CS_SIEM_PROTOTYP
                         Console.WriteLine(syslogMessage.Message + " Message");
 
                         // TODO: MEHMET DB LOGIK
-                        InsertSyslogDataAsync(syslogMessage, "Syslog", GetSyslogColumnTypes());
+                        // InsertSyslogDataAsync(syslogMessage, "Syslog", GetSyslogColumnTypes());
                     }
                 }
             }

@@ -47,6 +47,12 @@ public class ModuleStarter
 
         Console.WriteLine("[INFO] Starting the SIEM");
 
+        
+        if (syslogList.Count > 0)
+        {
+            _syslogScheduler = new SyslogScheduler(syslogList, _db, _delay);
+            _syslogScheduler.StartAnalyzingAsync();
+        }
         if (netflowList.Count > 0)
         {
             _netflowScheduler = new NetflowScheduler(netflowList, _db, _delay);
@@ -59,11 +65,7 @@ public class ModuleStarter
             _snmpPollScheduler.StartPollingAsync();
         }
 
-        if (syslogList.Count > 0)
-        {
-            _syslogScheduler = new SyslogScheduler(syslogList, _db, _delay);
-            _syslogScheduler.StartAnalyzingAsync();
-        }
+        
 
         _apiStarter.StartApiAsync();
 
