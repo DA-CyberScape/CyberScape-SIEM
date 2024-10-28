@@ -32,7 +32,7 @@ namespace CS_SIEM_PROTOTYP
 
 
 
-        public void ReceiveSyslogData()
+        public async Task ReceiveSyslogData()
         {
             udpClient = new UdpClient(_port);
             Console.WriteLine($"[INFO] Syslog Receiver is listening on port {_port}...");
@@ -43,6 +43,7 @@ namespace CS_SIEM_PROTOTYP
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
+                    // Console.WriteLine($"LISTENING ON PORT {_port}");
                     // listenting part
                     IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, _port);
 
@@ -50,7 +51,8 @@ namespace CS_SIEM_PROTOTYP
                     {
                         byte[] receivedBytes = udpClient.Receive(ref remoteEndPoint);
                         string syslogMessage = Encoding.UTF8.GetString(receivedBytes);
-
+                        
+                        
                         SyslogAnswer syslogAnswer = ProcessSyslogMessage(syslogMessage, remoteEndPoint.Address.ToString());
                         _syslogMessagesQueue.Enqueue(syslogAnswer);
                     }
@@ -77,31 +79,86 @@ namespace CS_SIEM_PROTOTYP
             while (!token.IsCancellationRequested)
             {
                 await Task.Delay(1000 * delay, token);
+                Console.WriteLine("INSERTING EVERYTH(ING S:DLFKJSD:LFKJSD:LFKJSD:FLKJSDF");
+                Console.WriteLine(_syslogMessagesQueue.Count + " THIS WAS THE COUNT");
                 InsertMessagesIntoDatabase();
             }
         }
 
         private void InsertMessagesIntoDatabase()
         {
+            // Console.WriteLine(" INSIDE THE INSERT METHOD IN SYSLOG");
             while (!_syslogMessagesQueue.IsEmpty)
             {
+                Console.WriteLine(" INSIDE THE INSERT METHOD IN SYSLOG AND THERE ARE THINGS IN THE QUEUE");
+
                 if (_syslogMessagesQueue.TryDequeue(out SyslogAnswer syslogMessage))
                 {
                     if (syslogMessage.Message.Length > 0)
                     {
                         Console.WriteLine($"[INFO] Inserted message from {syslogMessage.Hostname} into database.");
-                        Console.WriteLine(syslogMessage.Facility);
-                        Console.WriteLine(syslogMessage.Severity);
-                        Console.WriteLine(syslogMessage.Hostname);
-                        Console.WriteLine(syslogMessage.Timestamp);
-                        Console.WriteLine(syslogMessage.Message);
+                        Console.WriteLine(syslogMessage.Facility + " Facility");
+                        Console.WriteLine(syslogMessage.Severity + " Severity");
+                        Console.WriteLine(syslogMessage.Hostname + " Hostname");
+                        Console.WriteLine(syslogMessage.Timestamp + " Timestamp");
+                        Console.WriteLine(syslogMessage.Message + " Message");
                         
                         // TODO: MEHMET DB LOGIK
+                        InsertSyslogDataAsync(syslogMessage, "Syslog", GetSyslogColumnTypes());
                     }
-
-                    
                 }
             }
+        }
+        
+        public async Task InsertSyslogDataAsync(SyslogAnswer syslogAnswer, string table, Dictionary<string, Type> columns)
+        {
+            
+            var data = MapSyslogDataToData(syslogAnswer);
+
+            // foreach (var value in data)
+            // {
+            //     Console.WriteLine(value);
+            // }
+            
+            try
+            {
+                await _db.InsertData(table, columns, data);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to insert data {ex}");
+            }
+            
+        }
+        
+        public Dictionary<string, Type> GetSyslogColumnTypes()
+        {
+            return new Dictionary<string, Type>
+            {
+                { "srcIP", typeof(string)},
+                { "timestamp", typeof(DateTime)},
+                { "facility", typeof(int) },
+                { "severity", typeof(int) },
+                { "rawMessage", typeof(string) },
+                { "message", typeof(string) },
+                { "hostname", typeof(string) },
+                { "UUID", typeof(Guid) } 
+            };
+        }
+        
+        public Dictionary<string, object> MapSyslogDataToData(SyslogAnswer syslogAnswer)
+        {
+            return new Dictionary<string, object>
+            {
+                { "srcIP", syslogAnswer.SourceIP},
+                { "timestamp", syslogAnswer.Timestamp},
+                { "facility", syslogAnswer.Facility },
+                { "severity", syslogAnswer.Severity },
+                { "rawMessage", syslogAnswer.RawMessage },
+                { "message", syslogAnswer.Message },
+                { "hostname", syslogAnswer.Hostname },
+                { "UUID", Guid.NewGuid() } 
+            };
         }
 
         public void StopReceiver()

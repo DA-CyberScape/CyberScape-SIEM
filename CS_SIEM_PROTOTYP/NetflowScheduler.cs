@@ -9,7 +9,7 @@ public class NetflowScheduler
     private readonly IDatabaseManager _databaseManager;
     private CancellationTokenSource _cancellationTokenSource;
     private static List<NetFlowData> _allNetFlowData = new List<NetFlowData>();
-    
+
     public NetflowScheduler(List<NfConfig> nfConfigs, IDatabaseManager databaseManager, int delayInSeconds = 10)
     {
         _nfConfigs = nfConfigs;
@@ -21,21 +21,19 @@ public class NetflowScheduler
 
     public async Task StartAnalyzingAsync()
     {
-        Console.BackgroundColor = ConsoleColor.Green;
         var cancellationToken = _cancellationTokenSource.Token;
         Console.WriteLine("[INFO] Starting Netflow Scheduler...");
 
         while (!cancellationToken.IsCancellationRequested)
         {
             Console.WriteLine("[INFO] Polling cycle started.");
-            
-            
-            
-            
+
+
             foreach (var config in _nfConfigs)
             {
-                Console.WriteLine($"[INFO] Polling Netflow data for configuration ID: {config.Id}, Name: {config.Name}, Port: {config.Port}, Location: {config.FolderLocation}");
-        
+                Console.WriteLine(
+                    $"[INFO] Polling Netflow data for configuration ID: {config.Id}, Name: {config.Name}, Port: {config.Port}, Location: {config.FolderLocation}");
+
                 try
                 {
                     string[] netflowPaths = NetflowReceiver.GetFilePaths(config.FolderLocation);
@@ -48,20 +46,18 @@ public class NetflowScheduler
 
                     if (_allNetFlowData.Count > 0)
                     {
-                        Console.WriteLine($"[INFO] Successfully polled {_allNetFlowData.Count} Entries for configuration ID: {config.Id}, Location: {config.FolderLocation}");
+                        Console.WriteLine(
+                            $"[INFO] Successfully polled {_allNetFlowData.Count} Entries for configuration ID: {config.Id}, Location: {config.FolderLocation}");
                     }
-
-                    
                 }
                 catch (Exception ex) when (!(ex is TaskCanceledException))
                 {
-                    Console.WriteLine($"[ERROR] Error while polling data for configuration ID: {config.Id}: {ex.Message}");
+                    Console.WriteLine(
+                        $"[ERROR] Error while polling data for configuration ID: {config.Id}: {ex.Message}");
                 }
             }
-            
-            
-            
-            
+
+
             /*
             foreach (var nfdata in _allNetFlowData)
             {
@@ -70,13 +66,13 @@ public class NetflowScheduler
             if (_allNetFlowData.Count > 0)
             {
                 Console.WriteLine("[INFO] Inserting Netflow data into the database...");
-                 // await InsertNfDataAsync(_allNetFlowData, "Netflow", GetNetflowColumnTypes());
-                 //TODO INSERT DATA INTO DATABASE
-                 _allNetFlowData = new List<NetFlowData>();
-                 Console.WriteLine($"[INFO] Data from configurations has been inserted into the database.");
+                // await InsertNfDataAsync(_allNetFlowData, "Netflow", GetNetflowColumnTypes());
+                //TODO INSERT DATA INTO DATABASE
+                _allNetFlowData = new List<NetFlowData>();
+                Console.WriteLine($"[INFO] Data from configurations has been inserted into the database.");
             }
-            
-            
+
+
             Console.WriteLine("[INFO] Polling cycle completed. Waiting for the next interval...");
             try
             {
@@ -90,9 +86,9 @@ public class NetflowScheduler
                 break;
             }
         }
+
         Console.WriteLine("[INFO] Netflow Scheduler stopped.");
     }
-
 
 
     public void MoveFilesToOldDirectory(string nfdump_files, string[] netflowPaths)
@@ -102,6 +98,7 @@ public class NetflowScheduler
         {
             Directory.CreateDirectory(nfDirectoryOld);
         }
+
         Console.ForegroundColor = ConsoleColor.Red;
         foreach (var nfPath in netflowPaths)
         {
@@ -109,9 +106,7 @@ public class NetflowScheduler
             string destFilePath = Path.Combine(nfDirectoryOld, fileName);
             try
             {
-                
                 File.Move(nfPath, destFilePath);
-                
             }
             catch (IOException ioEx)
             {
@@ -133,81 +128,68 @@ public class NetflowScheduler
             Console.WriteLine("[INFO] Netflow Scheduler is stopping...");
         }
     }
-    
+
     public Dictionary<string, object> MapnfDataToData(NetFlowData nfData)
+    {
+        return new Dictionary<string, object>
         {
-            return new Dictionary<string, object>
-            {
-                { "srcIP", nfData.srcIP },
-                { "dstIP", nfData.dstIP },
-                { "srcPort", nfData.srcPort },
-                { "dstPort", nfData.dstPort },
-                { "bytes", nfData.bytes },
-                { "timestamp", nfData.timestamp },
-                { "duration", nfData.duration },
-                { "protocol", nfData.protocol },
-                { "flag", nfData.flag },
-                { "typeOfService", nfData.typeOfService },
-                { "packets", nfData.packets },
-                { "flows", nfData.flows },
-                { "icmpType", nfData.icmpType },
-                { "UUID", Guid.NewGuid() } 
-            };
-        }
-            
-        public Dictionary<string, Type> GetNetflowColumnTypes()
+            { "srcIP", nfData.srcIP },
+            { "dstIP", nfData.dstIP },
+            { "srcPort", nfData.srcPort },
+            { "dstPort", nfData.dstPort },
+            { "bytes", nfData.bytes },
+            { "timestamp", nfData.timestamp },
+            { "duration", nfData.duration },
+            { "protocol", nfData.protocol },
+            { "flag", nfData.flag },
+            { "typeOfService", nfData.typeOfService },
+            { "packets", nfData.packets },
+            { "flows", nfData.flows },
+            { "icmpType", nfData.icmpType },
+            { "UUID", Guid.NewGuid() }
+        };
+    }
+
+    public Dictionary<string, Type> GetNetflowColumnTypes()
+    {
+        return new Dictionary<string, Type>
         {
-            return new Dictionary<string, Type>
-            {
-                { "srcIP", typeof(string) },
-                { "dstIP", typeof(string) },
-                { "srcPort", typeof(int) },
-                { "dstPort", typeof(int) },
-                { "bytes", typeof(long) },
-                { "timestamp", typeof(DateTime) },
-                { "duration", typeof(DateTime) },
-                { "protocol", typeof(string) },
-                { "flag", typeof(string) },
-                { "typeOfService", typeof(int) },
-                { "packets", typeof(int) },
-                { "flows", typeof(int) },
-                { "icmpType", typeof(double) },
-                { "UUID", typeof(Guid)} 
-            };
-        }
-        
-        public async Task InsertNfDataAsync(List<NetFlowData> nfDatas, string table, Dictionary<string, Type> columns)
+            { "srcIP", typeof(string) },
+            { "dstIP", typeof(string) },
+            { "srcPort", typeof(int) },
+            { "dstPort", typeof(int) },
+            { "bytes", typeof(long) },
+            { "timestamp", typeof(DateTime) },
+            { "duration", typeof(DateTime) },
+            { "protocol", typeof(string) },
+            { "flag", typeof(string) },
+            { "typeOfService", typeof(int) },
+            { "packets", typeof(int) },
+            { "flows", typeof(int) },
+            { "icmpType", typeof(double) },
+            { "UUID", typeof(Guid) }
+        };
+    }
+
+    public async Task InsertNfDataAsync(List<NetFlowData> nfDatas, string table, Dictionary<string, Type> columns)
+    {
+        foreach (var nfData in nfDatas)
         {
-    
-            foreach (var nfData in nfDatas)
+            var data = MapnfDataToData(nfData);
+
+            foreach (var value in data)
             {
-                var data = MapnfDataToData(nfData);
-    
-                foreach (var value in data)
-                {
-                    Console.WriteLine(value);
-                }
-                
-                try
-                {
-                    await _databaseManager.InsertData(table, columns, data);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Failed to insert data");
-                }
+                Console.WriteLine(value);
+            }
+
+            try
+            {
+                await _databaseManager.InsertData(table, columns, data);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to insert data");
             }
         }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    }
 }

@@ -25,31 +25,31 @@ namespace CS_SIEM_PROTOTYP
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
-        /*
+        
         public async Task StartAnalyzingAsync()
         {
             var cancellationToken = _cancellationTokenSource.Token;
 
             Console.WriteLine("[INFO] Starting Syslog Scheduler...");
 
-            // Initialize a SyslogReceiver for each SyslogConfig and start it in a separate task
+            
             foreach (var config in _syslogConfigs)
             {
-                var syslogReceiver = new SyslogReceiver(_databaseManager, _delay); // Adjust constructor as per changes
+                var syslogReceiver = new SyslogReceiver(_databaseManager, config.Port,_delay);
                 _syslogReceivers.Add(syslogReceiver);
 
-                // Start receiving data on the specified port asynchronously
-                var task = Task.Run(() => syslogReceiver.ReceiveSyslogData(config.Port, cancellationToken), cancellationToken);
+                
+                var task = Task.Run(() => syslogReceiver.ReceiveSyslogData(), cancellationToken);
                 _syslogTasks.Add(task);
 
-                Console.WriteLine($"[INFO] Syslog Receiver '{config.Name}' started on port {config.Port}.");
+                Console.WriteLine($"[INFO] Syslog Receiver '{config.Name}' started listening on port {config.Port}.");
             }
 
-            // Await all syslog receiver tasks to complete or be canceled
+            
             await Task.WhenAll(_syslogTasks);
 
             Console.WriteLine("[INFO] Syslog Scheduler has stopped all receivers.");
-        }*/
+        }
 
         public void StopPolling()
         {

@@ -14,6 +14,7 @@ public class ModuleStarter
 {
     private SnmpPollScheduler _snmpPollScheduler;
     private NetflowScheduler _netflowScheduler;
+    private SyslogScheduler _syslogScheduler;
     private ApiStarter _apiStarter;
     private readonly IDatabaseManager _db;
     private readonly int _delay;
@@ -58,6 +59,12 @@ public class ModuleStarter
             _snmpPollScheduler.StartPollingAsync();
         }
 
+        if (syslogList.Count > 0)
+        {
+            _syslogScheduler = new SyslogScheduler(syslogList, _db, _delay);
+            _syslogScheduler.StartAnalyzingAsync();
+        }
+
         _apiStarter.StartApiAsync();
 
         try
@@ -80,6 +87,7 @@ public class ModuleStarter
         _apiStarter.StopApi();
         _snmpPollScheduler?.StopPolling();
         _netflowScheduler?.StopPolling();
+        _syslogScheduler?.StopPolling();
 
         Console.WriteLine("[INFO] SIEM Stopped");
     }
