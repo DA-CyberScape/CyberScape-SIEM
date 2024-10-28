@@ -1,6 +1,7 @@
 ﻿using SnmpSharpNet;
 
 namespace CS_SIEM_PROTOTYP;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -11,7 +12,7 @@ public class Converter
         var jsonSNMP = JsonConvert.SerializeObject(dictSNMP);
         List<SnmpDevice> devices = JsonConvert.DeserializeObject<List<SnmpDevice>>(jsonSNMP);
         List<SnmpPollRequest> pollRequests = new List<SnmpPollRequest>();
-        
+
         foreach (var device in devices)
         {
             var pollRequest = new SnmpPollRequest
@@ -37,14 +38,9 @@ public class Converter
 
             pollRequests.Add(pollRequest);
         }
-        
-        
-
 
 
         return pollRequests;
-
-
     }
 
     public static List<NfConfig> convertJsontoNetflowDict(List<Dictionary<string, object>> dictNetflow)
@@ -54,6 +50,7 @@ public class Converter
 
         return configList;
     }
+
     public static List<PrtgConfig> convertJsontoPRTG(List<Dictionary<string, object>> dictPRTG)
     {
         var jsonPrtg = JsonConvert.SerializeObject(dictPRTG);
@@ -61,19 +58,19 @@ public class Converter
 
         return configList;
     }
-    
+
     public static List<SnmpTrapConfig> convertJsontoSNMPTrap(List<Dictionary<string, object>> dictSNMPTrap)
     {
         var jsonTrap = JsonConvert.SerializeObject(dictSNMPTrap);
         List<SnmpTrapConfig> configList = JsonConvert.DeserializeObject<List<SnmpTrapConfig>>(jsonTrap);
-        
+
         return configList;
     }
+
     public static List<SyslogConfig> ConvertJsontoSyslogConfigs(List<Dictionary<string, object>> dictSyslog)
     {
         var jsonSyslog = JsonConvert.SerializeObject(dictSyslog);
         List<SyslogConfig> configList = JsonConvert.DeserializeObject<List<SyslogConfig>>(jsonSyslog);
         return configList;
     }
-    
 }

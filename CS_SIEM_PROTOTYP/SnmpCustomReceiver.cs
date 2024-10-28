@@ -1,7 +1,9 @@
 namespace CS_SIEM_PROTOTYP;
+
 using CS_DatabaseManager;
 using System;
 using SnmpSharpNet;
+
 //https://github.com/rqx110/SnmpSharpNet/wiki
 public class SnmpCustomReceiver : IDataReceiver
 {
@@ -9,14 +11,12 @@ public class SnmpCustomReceiver : IDataReceiver
     {
         throw new NotImplementedException();
     }
-    
-    
-    
-    
+
+
     // snmp-server group MY-GROUP v3 priv
     // snmp-server user MY-USER MY-GROUP v3 auth sha MyAuthPass priv aes 128 MyPrivPass
     // snmp-server enable traps
-    
+
     public static string PollSnmp(string oid, string ipAddress, string community)
     {
         try
@@ -34,10 +34,10 @@ public class SnmpCustomReceiver : IDataReceiver
             // ausfuehren
             SnmpV2Packet result = (SnmpV2Packet)target.Request(pdu, param);
 
-            
+
             target.Close();
 
-            
+
             if (result == null)
             {
                 return "Error: No response from SNMP agent.";
@@ -58,7 +58,7 @@ public class SnmpCustomReceiver : IDataReceiver
             return "Exception: " + ex.Message;
         }
     }
-    
+
     public static Dictionary<string, string> PollMultipleOids(List<string> oids, string ipAddress, string community)
     {
         Dictionary<string, string> results = new Dictionary<string, string>();
@@ -75,10 +75,13 @@ public class SnmpCustomReceiver : IDataReceiver
     public static List<SnmpPoll> PollSnmpV3(SnmpPollRequest snmpRequest)
     {
         return PollSnmpV3(snmpRequest.Oids, snmpRequest.IpAddress, snmpRequest.User, snmpRequest.AuthPass,
-            snmpRequest.PrivPass, snmpRequest.AuthDigest, snmpRequest.PrivProtocol, snmpRequest.Port, snmpRequest.Hostname);
+            snmpRequest.PrivPass, snmpRequest.AuthDigest, snmpRequest.PrivProtocol, snmpRequest.Port,
+            snmpRequest.Hostname);
     }
 
-    public static List<SnmpPoll> PollSnmpV3(Dictionary <string, string> oidDict, string ipAddress,string user,  string authPass, string privPass, AuthenticationDigests authenticationDigests, PrivacyProtocols privacyProtocols, int port, string hostname)
+    public static List<SnmpPoll> PollSnmpV3(Dictionary<string, string> oidDict, string ipAddress, string user,
+        string authPass, string privPass, AuthenticationDigests authenticationDigests,
+        PrivacyProtocols privacyProtocols, int port, string hostname)
     {
         try
         {
@@ -90,10 +93,9 @@ public class SnmpCustomReceiver : IDataReceiver
                 Console.WriteLine("Discovery failed. Unable to continue...");
                 target.Close();
                 return null;
-              
             }
-            
-            List <string> oids = oidDict.Keys.ToList();
+
+            List<string> oids = oidDict.Keys.ToList();
             foreach (var oid in oids)
             {
                 Console.WriteLine(oid);
@@ -106,7 +108,7 @@ public class SnmpCustomReceiver : IDataReceiver
             {
                 pdu.VbList.Add(oid);
             }
-            
+
 
             param.authPriv(
                 user,
@@ -114,12 +116,10 @@ public class SnmpCustomReceiver : IDataReceiver
                 privacyProtocols, privPass);
 
 
-
-
             // ausfuehren
             SnmpV3Packet result = (SnmpV3Packet)target.Request(pdu, param);
-            
-            
+
+
             target.Close();
             if (result == null)
             {
@@ -131,49 +131,31 @@ public class SnmpCustomReceiver : IDataReceiver
                 // SNMP error
                 Console.WriteLine("Error: " + result.Pdu.ErrorStatus.ToString());
                 return null;
-                
             }
             else
             {
                 // SNMP antwort
                 var values = result.Pdu.VbList;
-                Dictionary<string, string> answer = new  Dictionary<string, string>();
+                Dictionary<string, string> answer = new Dictionary<string, string>();
                 List<SnmpPoll> answerSnmpPolls = new List<SnmpPoll>();
                 foreach (var value in values)
                 {
                     // string name = "temp";
                     string oid = value.Oid.ToString();
-                    SnmpPoll snmpPoll = new SnmpPoll(ipAddress,oid , value.Value.ToString(),
+                    SnmpPoll snmpPoll = new SnmpPoll(ipAddress, oid, value.Value.ToString(),
                         hostname, DateTime.Now, oidDict[oid]);
                     answerSnmpPolls.Add(snmpPoll);
-                    
                 }
+
                 return answerSnmpPolls;
             }
-            
         }
         catch (Exception ex)
         {
-           
             Console.WriteLine("Exception: " + ex.Message);
             return null;
         }
-        
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-
 }
 
 public class SnmpPollRequest
@@ -192,9 +174,9 @@ public class SnmpPollRequest
     public int Id { get; set; }
 
 
-
-    public SnmpPollRequest(Dictionary<string, string> oids, string ipAddress, string user, string authPass, string privPass, 
-                           AuthenticationDigests authDigest, PrivacyProtocols privProtocol, int port, string hostname)
+    public SnmpPollRequest(Dictionary<string, string> oids, string ipAddress, string user, string authPass,
+        string privPass,
+        AuthenticationDigests authDigest, PrivacyProtocols privProtocol, int port, string hostname)
     {
         Oids = oids;
         Port = port;
@@ -206,11 +188,12 @@ public class SnmpPollRequest
         AuthDigest = authDigest;
         PrivProtocol = privProtocol;
     }
-    
+
     public SnmpPollRequest()
     {
         Oids = new Dictionary<string, string>(); // damit man kein null reference fehler bekommt
     }
+
     public override string ToString()
     {
         // Start building the output string
@@ -227,7 +210,6 @@ public class SnmpPollRequest
     }
 }
 
-
 public class SnmpPoll
 {
     public string IpAddress { get; set; }
@@ -238,7 +220,7 @@ public class SnmpPoll
     public string Name { get; set; }
     public DateTime Timestamp { get; set; }
 
-    
+
     public SnmpPoll(string ipAddress, string oid, string oidValue, string hostname, DateTime timestamp, string name)
     {
         IpAddress = ipAddress;
@@ -249,7 +231,7 @@ public class SnmpPoll
         Name = name;
     }
 
-    
+
     public override string ToString()
     {
         return $"SNMP Poll [IP Address: {IpAddress}, OID: {Oid}, OID Value: {OidValue}, " +
@@ -290,12 +272,12 @@ public class SnmpDevice
     public int Id { get; set; }
 }
 
-
-
 public class SnmpTrapConfig
 {
     public int Port { get; set; }
+
     public string Version { get; set; }
+
     // public AuthParameters AuthParameters { get; set; }
     public string Username { get; set; }
     public string AuthProtocol { get; set; }
@@ -304,13 +286,11 @@ public class SnmpTrapConfig
     public string PrivacyPassword { get; set; }
     public string Name { get; set; }
     public int Id { get; set; }
-    
-    
-    
+
+
     public override string ToString()
     {
-        return $"Port: {Port}, Version: {Version} id: {Id} name: {Name} Username: {Username}, Auth Protocol: {AuthProtocol}, Auth Password: {AuthPassword}, Privacy Protocol: {PrivacyProtocol}, Privacy Password: {PrivacyPassword}";
+        return
+            $"Port: {Port}, Version: {Version} id: {Id} name: {Name} Username: {Username}, Auth Protocol: {AuthProtocol}, Auth Password: {AuthPassword}, Privacy Protocol: {PrivacyProtocol}, Privacy Password: {PrivacyPassword}";
     }
 }
-
-

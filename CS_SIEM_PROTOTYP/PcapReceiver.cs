@@ -6,5 +6,4 @@ public class PcapReceiver : IDataReceiver
     {
         throw new NotImplementedException();
     }
-
 }

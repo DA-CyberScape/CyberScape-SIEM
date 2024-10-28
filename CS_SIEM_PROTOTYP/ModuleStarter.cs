@@ -71,12 +71,10 @@ public class ModuleStarter
         {
             await Task.Delay(Timeout.Infinite, _cancellationTokenSource.Token);
         }
-        catch(TaskCanceledException)
+        catch (TaskCanceledException)
         {
             Console.WriteLine("[INFO] The Stop SIEM Method has been called STOPPING SIEM");
         }
-
-
     }
 
     public void StopSIEM()
@@ -108,7 +106,6 @@ public class ModuleStarter
             {
                 // Additional logic for ScyllaDB (if needed)
                 //TODO MEHMET IRGENDWAS MIT SCYLLADB MACHEN
-
             }
         }
     }
@@ -126,13 +123,13 @@ public class ModuleStarter
             targetDict = item[key].ToObject<List<Dictionary<string, object>>>();
         }
     }
-    
+
     public static void PrintDictionary<T>(T dict)
     {
         Console.WriteLine(JsonConvert.SerializeObject(dict, Formatting.Indented));
         Console.WriteLine("------------------------------------");
     }
-    
+
     public static async void StartPrtg(IDatabaseManager db, ServiceProvider serviceProvider, string url)
     {
         var prtg = serviceProvider.GetService<PrtgReceiver>()!;
@@ -140,17 +137,16 @@ public class ModuleStarter
 
 
         // creating and insert data into the database
-        
+
         var snmpColumns = prtg.GetSensorColumnTypes();
         string primaryKey = "UUID";
         await db.CreateTable("SNMP", snmpColumns, primaryKey);
-        
+
         // ------------------------LOOP---------------------------------
         List<Device> devices = prtg.FetchDeviceWithSensors(url, apiKey).GetAwaiter().GetResult();
         foreach (var device in devices)
         {
             await prtg.InsertSensorsAsync(device, "SNMP", snmpColumns);
-        
         }
         // ------------------------LOOP---------------------------------
     }

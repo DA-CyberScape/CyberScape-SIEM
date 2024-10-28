@@ -13,7 +13,8 @@ namespace CS_SIEM_PROTOTYP
         private readonly IDatabaseManager _databaseManager;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public SnmpPollScheduler(List<SnmpPollRequest> snmpRequests, IDatabaseManager databaseManager, int delayInSeconds = 10)
+        public SnmpPollScheduler(List<SnmpPollRequest> snmpRequests, IDatabaseManager databaseManager,
+            int delayInSeconds = 10)
         {
             _snmpRequests = snmpRequests;
             _delay = delayInSeconds;
@@ -33,48 +34,50 @@ namespace CS_SIEM_PROTOTYP
                 foreach (var snmpRequest in _snmpRequests)
                 {
                     // Poll each SNMP device
-                    Console.WriteLine($"[INFO] Polling SNMP data for device IP: {snmpRequest.IpAddress} on Port: {snmpRequest.Port}");
+                    Console.WriteLine(
+                        $"[INFO] Polling SNMP data for device IP: {snmpRequest.IpAddress} on Port: {snmpRequest.Port}");
 
                     List<SnmpPoll> snmpPolls = SnmpCustomReceiver.PollSnmpV3(snmpRequest);
                     Console.WriteLine(snmpRequest);
 
                     if (snmpPolls != null && snmpPolls.Count > 0)
                     {
-       
-                        Console.WriteLine($"[INFO] Received {snmpPolls.Count} SNMP poll results for device IP: {snmpRequest.IpAddress}");
-                        
+                        Console.WriteLine(
+                            $"[INFO] Received {snmpPolls.Count} SNMP poll results for device IP: {snmpRequest.IpAddress}");
+
                         //TODO DATABASE
                         // await InsertSnmpPollDataAsync(snmpPolls, "SNMP", GetSnmpPollColumn());
                         /*
                         foreach (var snmpPoll in snmpPolls)
                         {
                             Console.WriteLine(snmpPoll);
-                            
+
                         }*/
-                    }else
+                    }
+                    else
                     {
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine($"[WARN] No data returned for device IP: {snmpRequest.IpAddress}. Check device connectivity or OID configuration.");
+                        Console.WriteLine(
+                            $"[WARN] No data returned for device IP: {snmpRequest.IpAddress}. Check device connectivity or OID configuration.");
                         Console.ForegroundColor = ConsoleColor.Green;
                     }
                 }
+
                 Console.WriteLine("[INFO] Polling cycle completed. Waiting for next interval...");
 
 
-               
                 try
                 {
                     Console.WriteLine($"[INFO] Waiting for {_delay} seconds");
                     await Task.Delay(_delay * 1000, cancellationToken);
-                    
                 }
                 catch (TaskCanceledException)
                 {
-                    
                     Console.WriteLine("[INFO] SNMP Polling stopped gracefully.");
                     return;
                 }
             }
+
             Console.WriteLine("[INFO] SNMP Poll Scheduler stopped.");
         }
 
@@ -87,9 +90,10 @@ namespace CS_SIEM_PROTOTYP
                 Console.WriteLine("[INFO] SNMP Poll Scheduler is stopping...");
             }
         }
-        
 
-        public async Task InsertSnmpPollDataAsync(List<SnmpPoll> snmpDatas, string table, Dictionary<string, Type> columns)
+
+        public async Task InsertSnmpPollDataAsync(List<SnmpPoll> snmpDatas, string table,
+            Dictionary<string, Type> columns)
         {
             foreach (var snmpData in snmpDatas)
             {
@@ -123,6 +127,7 @@ namespace CS_SIEM_PROTOTYP
                 { "UUID", Guid.NewGuid() }
             };
         }
+
         public Dictionary<string, Type> GetSnmpPollColumn()
         {
             return new Dictionary<string, Type>
@@ -133,12 +138,10 @@ namespace CS_SIEM_PROTOTYP
                 { "oid", typeof(string) },
                 { "oidValue", typeof(string) },
                 { "timestamp", typeof(DateTime) },
-                { "UUID", typeof(Guid)} 
+                { "UUID", typeof(Guid) }
             };
         }
     }
-    
-    
 }
 
 // https://chatgpt.com/share/6713a9bf-d594-8000-9eaf-47dbabf9333a

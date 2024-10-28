@@ -31,7 +31,6 @@ namespace CS_SIEM_PROTOTYP
         }
 
 
-
         public async Task ReceiveSyslogData()
         {
             udpClient = new UdpClient(_port);
@@ -51,9 +50,10 @@ namespace CS_SIEM_PROTOTYP
                     {
                         byte[] receivedBytes = udpClient.Receive(ref remoteEndPoint);
                         string syslogMessage = Encoding.UTF8.GetString(receivedBytes);
-                        
-                        
-                        SyslogAnswer syslogAnswer = ProcessSyslogMessage(syslogMessage, remoteEndPoint.Address.ToString());
+
+
+                        SyslogAnswer syslogAnswer =
+                            ProcessSyslogMessage(syslogMessage, remoteEndPoint.Address.ToString());
                         _syslogMessagesQueue.Enqueue(syslogAnswer);
                     }
                     else
@@ -102,24 +102,24 @@ namespace CS_SIEM_PROTOTYP
                         Console.WriteLine(syslogMessage.Hostname + " Hostname");
                         Console.WriteLine(syslogMessage.Timestamp + " Timestamp");
                         Console.WriteLine(syslogMessage.Message + " Message");
-                        
+
                         // TODO: MEHMET DB LOGIK
                         InsertSyslogDataAsync(syslogMessage, "Syslog", GetSyslogColumnTypes());
                     }
                 }
             }
         }
-        
-        public async Task InsertSyslogDataAsync(SyslogAnswer syslogAnswer, string table, Dictionary<string, Type> columns)
+
+        public async Task InsertSyslogDataAsync(SyslogAnswer syslogAnswer, string table,
+            Dictionary<string, Type> columns)
         {
-            
             var data = MapSyslogDataToData(syslogAnswer);
 
             // foreach (var value in data)
             // {
             //     Console.WriteLine(value);
             // }
-            
+
             try
             {
                 await _db.InsertData(table, columns, data);
@@ -128,36 +128,35 @@ namespace CS_SIEM_PROTOTYP
             {
                 Console.WriteLine($"Failed to insert data {ex}");
             }
-            
         }
-        
+
         public Dictionary<string, Type> GetSyslogColumnTypes()
         {
             return new Dictionary<string, Type>
             {
-                { "srcIP", typeof(string)},
-                { "timestamp", typeof(DateTime)},
+                { "srcIP", typeof(string) },
+                { "timestamp", typeof(DateTime) },
                 { "facility", typeof(int) },
                 { "severity", typeof(int) },
                 { "rawMessage", typeof(string) },
                 { "message", typeof(string) },
                 { "hostname", typeof(string) },
-                { "UUID", typeof(Guid) } 
+                { "UUID", typeof(Guid) }
             };
         }
-        
+
         public Dictionary<string, object> MapSyslogDataToData(SyslogAnswer syslogAnswer)
         {
             return new Dictionary<string, object>
             {
-                { "srcIP", syslogAnswer.SourceIP},
-                { "timestamp", syslogAnswer.Timestamp},
+                { "srcIP", syslogAnswer.SourceIP },
+                { "timestamp", syslogAnswer.Timestamp },
                 { "facility", syslogAnswer.Facility },
                 { "severity", syslogAnswer.Severity },
                 { "rawMessage", syslogAnswer.RawMessage },
                 { "message", syslogAnswer.Message },
                 { "hostname", syslogAnswer.Hostname },
-                { "UUID", Guid.NewGuid() } 
+                { "UUID", Guid.NewGuid() }
             };
         }
 
@@ -218,8 +217,6 @@ namespace CS_SIEM_PROTOTYP
             }
 
 
-            
-
             return syslogAnswer;
         }
 
@@ -228,9 +225,12 @@ namespace CS_SIEM_PROTOTYP
             List<(string Message, string SourceIP)> testData = new List<(string, string)>
             {
                 ("<34>Oct 18 14:32:16 myhost su: 'su root' failed for user on /dev/pts/2", "192.168.1.50"),
-                ("<165>1 2024-10-18T14:33:44.003Z myapp.example.com MyApp 1234 ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"] User login attempt failed", "10.0.0.25"),
-                ("<13>Oct 18 14:35:02 firewall.local kernel: IPTables packet dropped: SRC=192.168.2.10 DST=192.168.1.100 PROTO=TCP SPT=445 DPT=80", "172.16.10.100"),
-                ("<14>Oct 18 14:36:50 app-server.local myapp: [WARNING] Memory usage exceeded threshold: current usage at 85%", "203.0.113.45"),
+                ("<165>1 2024-10-18T14:33:44.003Z myapp.example.com MyApp 1234 ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"] User login attempt failed",
+                    "10.0.0.25"),
+                ("<13>Oct 18 14:35:02 firewall.local kernel: IPTables packet dropped: SRC=192.168.2.10 DST=192.168.1.100 PROTO=TCP SPT=445 DPT=80",
+                    "172.16.10.100"),
+                ("<14>Oct 18 14:36:50 app-server.local myapp: [WARNING] Memory usage exceeded threshold: current usage at 85%",
+                    "203.0.113.45"),
                 ("This is a raw syslog message without any standard format.", "192.168.0.10")
             };
 
@@ -268,7 +268,8 @@ namespace CS_SIEM_PROTOTYP
 
         public override string ToString()
         {
-            return $"[{Timestamp}] {Hostname} (Facility: {Facility}, Severity: {Severity}, Source: {SourceIP}): {Message}";
+            return
+                $"[{Timestamp}] {Hostname} (Facility: {Facility}, Severity: {Severity}, Source: {SourceIP}): {Message}";
         }
     }
 }

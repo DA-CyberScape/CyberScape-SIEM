@@ -11,12 +11,13 @@ using System.Xml.Linq;
 
 public class PrtgReceiver : IDataReceiver
 {
-    
     private readonly IDatabaseManager _databaseManager;
+
     public PrtgReceiver(IDatabaseManager databaseManager)
     {
         _databaseManager = databaseManager;
     }
+
     public void ReceiveData()
     {
         throw new NotImplementedException();
@@ -120,7 +121,6 @@ public class PrtgReceiver : IDataReceiver
         }
 
         return devices;
-        
     }
 
     public async Task<List<Sensor>> FetchSensorsHistoric(string prtgUrl, string apitoken, string deviceName,
@@ -164,22 +164,22 @@ public class PrtgReceiver : IDataReceiver
 
         return sensors;
     }
-    
+
     public Dictionary<string, object> MapSensorToData(Sensor sensor)
     {
         return new Dictionary<string, object>
         {
-            { "DeviceName", sensor.DeviceName},
-            { "SensorName", sensor.SensorName},
+            { "DeviceName", sensor.DeviceName },
+            { "SensorName", sensor.SensorName },
             { "SensorId", sensor.SensorId },
-            { "LastValue", sensor.LastValue},
-            { "Status", sensor.Status},
-            { "MessageRaw", sensor.MessageRaw},
+            { "LastValue", sensor.LastValue },
+            { "Status", sensor.Status },
+            { "MessageRaw", sensor.MessageRaw },
             { "fetchDateTime", sensor.fetchDateTime },
-            { "UUID", Guid.NewGuid()}
+            { "UUID", Guid.NewGuid() }
         };
     }
-    
+
     public Dictionary<string, Type> GetSensorColumnTypes()
     {
         return new Dictionary<string, Type>
@@ -193,10 +193,9 @@ public class PrtgReceiver : IDataReceiver
             { "fetchDateTime", typeof(DateTime) }
         };
     }
-    
+
     public async Task InsertSensorsAsync(Device device, string table, Dictionary<string, Type> columns)
     {
-
         foreach (var sensor in device.Sensors)
         {
             var data = MapSensorToData(sensor);
@@ -205,7 +204,7 @@ public class PrtgReceiver : IDataReceiver
             {
                 Console.WriteLine(value);
             }
-            
+
             try
             {
                 await _databaseManager.InsertData(table, columns, data);
@@ -217,9 +216,6 @@ public class PrtgReceiver : IDataReceiver
         }
     }
 }
-
-
-
 
 public class Device
 {
@@ -245,7 +241,7 @@ public class PrtgConfig
     public string ApiToken { get; set; }
     public string Name { get; set; }
     public int Id { get; set; }
-    
+
     public override string ToString()
     {
         return $"PRTG URL: {PRTGUrl}, " +

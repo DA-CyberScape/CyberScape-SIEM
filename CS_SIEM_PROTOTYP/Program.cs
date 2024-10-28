@@ -24,13 +24,6 @@ public static class Program
 {
     private static short _counter;
 
-    
-
-
-
-    
-
-
 
     public static async Task Main(string[] args)
     {
@@ -43,8 +36,8 @@ public static class Program
 
         await receiveTask;
         Console.WriteLine("FINISHED");*/
-        
-        
+
+
         Console.WriteLine("------------------------------------------");
         ModuleStarter moduleStarter = new ModuleStarter(null, 10);
         var siemTask = moduleStarter.StartSIEM(@"/home/sai/CyberScape-SIEM/CS_SIEM_PROTOTYP/test.json");
@@ -136,14 +129,12 @@ public static class Program
         */
 
 
-
         /*
 
 
         // Syslog THREAD
         Thread syslogThread = new Thread(() => startSyslogReceiver(514));
         syslogThread.Start();*/
-
 
 
         /*
@@ -224,9 +215,6 @@ public static class Program
         */
 
 
-
-
-
         // PRTG/SNMP THREAD
         /*
         string url = "http://192.168.10.3";
@@ -246,13 +234,9 @@ public static class Program
         // Netflow THREAD
 
 
-
-
-
         #region SNMP
 
 #if !DISABLE_SNMP_TEST
-
         //---------------------------------
 
         var results = await db.SelectData("SNMP");
