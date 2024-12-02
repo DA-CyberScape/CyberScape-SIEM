@@ -12,9 +12,9 @@ namespace CS_SIEM_PROTOTYP
     {
         private static ConcurrentQueue<SyslogAnswer> _syslogMessagesQueue = new ConcurrentQueue<SyslogAnswer>();
         private static int _delay = 10;
-        private static CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        private static CancellationToken cancellationToken = cancellationTokenSource.Token;
-        private static UdpClient udpClient;
+        private static CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private static CancellationToken cancellationToken = _cancellationTokenSource.Token;
+        private static UdpClient _udpClient;
         private IDatabaseManager _db;
         private int _port;
 
@@ -28,12 +28,14 @@ namespace CS_SIEM_PROTOTYP
             _db = db;
             _delay = delay;
             _port = port;
+            _db.CreateTable("Syslog", GetSyslogColumnTypes(), "UUID, timestamp"); 
+            _db.CreateTable("WinEvents", GetSyslogColumnTypes(), "UUID, timestamp");
         }
 
 
         public async Task ReceiveSyslogData()
         {
-            udpClient = new UdpClient(_port);
+            _udpClient = new UdpClient(_port);
             Console.WriteLine($"[INFO] Syslog Receiver is listening on port {_port}...");
 
             Task.Run(() => StartPeriodicDatabaseInsert(_delay, cancellationToken), cancellationToken);
@@ -46,10 +48,11 @@ namespace CS_SIEM_PROTOTYP
                     // listenting part
                     IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, _port);
 
-                    if (udpClient.Available > 0)
+                    if (_udpClient.Available > 0)
                     {
-                        byte[] receivedBytes = udpClient.Receive(ref remoteEndPoint);
+                        byte[] receivedBytes = _udpClient.Receive(ref remoteEndPoint);
                         string syslogMessage = Encoding.UTF8.GetString(receivedBytes);
+                        // Console.WriteLine(syslogMessage + " I AM HERE MAN");
 
 
                         SyslogAnswer syslogAnswer =
@@ -67,11 +70,6 @@ namespace CS_SIEM_PROTOTYP
             {
                 Console.WriteLine($"[ERROR] An error occurred: {e.Message}");
             }
-            finally
-            {
-                udpClient.Close();
-                Console.WriteLine("[INFO] Syslog Receiver has stopped listening.");
-            }
         }
 
         private async Task StartPeriodicDatabaseInsert(int delay, CancellationToken token)
@@ -79,18 +77,18 @@ namespace CS_SIEM_PROTOTYP
             while (!token.IsCancellationRequested)
             {
                 await Task.Delay(1000 * delay, token);
-                Console.WriteLine("INSERTING EVERYTH(ING S:DLFKJSD:LFKJSD:LFKJSD:FLKJSDF");
-                Console.WriteLine(_syslogMessagesQueue.Count + " THIS WAS THE COUNT");
-                InsertMessagesIntoDatabase();
+                // Console.WriteLine("INSERTING EVERYTH(ING S:DLFKJSD:LFKJSD:LFKJSD:FLKJSDF");
+                // Console.WriteLine(_syslogMessagesQueue.Count + " THIS WAS THE COUNT");
+                await InsertMessagesIntoDatabase();
             }
         }
 
-        private void InsertMessagesIntoDatabase()
+        private async Task InsertMessagesIntoDatabase()
         {
-            Console.WriteLine(" INSIDE THE INSERT METHOD IN SYSLOG");
+            // Console.WriteLine(" INSIDE THE INSERT METHOD IN SYSLOG");
             while (!_syslogMessagesQueue.IsEmpty)
             {
-                Console.WriteLine(" INSIDE THE INSERT METHOD IN SYSLOG AND THERE ARE THINGS IN THE QUEUE");
+                // Console.WriteLine(" INSIDE THE INSERT METHOD IN SYSLOG AND THERE ARE THINGS IN THE QUEUE");
 
                 if (_syslogMessagesQueue.TryDequeue(out SyslogAnswer syslogMessage))
                 {
@@ -104,12 +102,13 @@ namespace CS_SIEM_PROTOTYP
                         Console.WriteLine(syslogMessage.Message + " Message");
 
                         // TODO: MEHMET DB LOGIK
-                        // InsertSyslogDataAsync(syslogMessage, "Syslog", GetSyslogColumnTypes());
+                        await InsertSyslogDataAsync(syslogMessage, "Syslog", GetSyslogColumnTypes());
                     }
                 }
             }
         }
 
+        //TODO MEHMET austesten DB
         public async Task InsertSyslogDataAsync(SyslogAnswer syslogAnswer, string table,
             Dictionary<string, Type> columns)
         {
@@ -119,10 +118,24 @@ namespace CS_SIEM_PROTOTYP
             // {
             //     Console.WriteLine(value);
             // }
-
+            
             try
             {
-                await _db.InsertData(table, columns, data);
+                // Console.WriteLine(data["message"].ToString().StartsWith("MSWinEventLog"));
+                // Console.WriteLine("CHICKENLEGPIECE");
+                if (data["message"].ToString().StartsWith("MSWinEventLog"))
+                {
+                    
+                    await _db.InsertData("WinEvents",columns, data);
+                    
+                }
+                else
+                {
+                    await _db.InsertData(table, columns, data);
+                    
+                }
+
+                
             }
             catch (Exception ex)
             {
@@ -162,7 +175,18 @@ namespace CS_SIEM_PROTOTYP
 
         public void StopReceiver()
         {
-            cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Cancel();
+            //von Mehmet. Falls keine UDP Clients verbunden/vorhanden sind und die SIEM schließt
+            //wird eine null reference exception geworfen. Deswegen:
+            if (_udpClient != null)
+            {
+                _udpClient.Close();
+                _udpClient.Dispose();
+                _udpClient = null;
+            }
+
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
             Console.WriteLine("[INFO] Syslog Receiver shutdown initiated...");
         }
 
@@ -204,14 +228,14 @@ namespace CS_SIEM_PROTOTYP
                 }
                 else
                 {
-                    syslogAnswer.Timestamp = DateTime.Now;
+                    syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
                     syslogAnswer.Hostname = sourceIP;
                     syslogAnswer.Message = syslogMessage;
                 }
             }
             catch
             {
-                syslogAnswer.Timestamp = DateTime.Now;
+                syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
                 syslogAnswer.Hostname = sourceIP;
                 syslogAnswer.Message = syslogMessage;
             }

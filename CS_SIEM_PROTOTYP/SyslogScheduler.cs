@@ -56,16 +56,16 @@ namespace CS_SIEM_PROTOTYP
         {
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
-                _cancellationTokenSource.Cancel(); // Signal cancellation for all receivers
+                _cancellationTokenSource.Cancel(); 
                 Console.WriteLine("[INFO] Stopping all Syslog Receivers...");
 
-                // Stop each receiver and log confirmation
+                
                 foreach (var receiver in _syslogReceivers)
                 {
                     receiver.StopReceiver();
                 }
 
-                Task.WaitAll(_syslogTasks.ToArray()); // Ensure all tasks have stopped
+                Task.WaitAll(_syslogTasks.ToArray()); 
                 Console.WriteLine("[INFO] All Syslog Receivers have been stopped.");
             }
         }

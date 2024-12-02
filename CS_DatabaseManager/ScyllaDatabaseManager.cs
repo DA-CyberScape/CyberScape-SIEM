@@ -14,7 +14,6 @@ public class ScyllaDatabaseManager : IDatabaseManager
     public ScyllaDatabaseManager(DbHostProvider dbHostProvider)
     {
         //TODO: cache a Map with table names and their column definitions from a file?
-        //TODO: have a Config file ?
 
         _cluster =
             Cluster.Builder()
@@ -24,18 +23,26 @@ public class ScyllaDatabaseManager : IDatabaseManager
 
         _session =
             _cluster.Connect();
+        Console.WriteLine("[INFO] Successfully Connected with the Database.");
 
 
-        //Collects Metadata and caches it locally
-//        Console.WriteLine("Collecting Metadata on Startup");
-//            var tables = _cluster.Metadata.GetTables(_session.Keyspace);
-//            foreach (var tableName in tables)
-//            {
-//                Console.WriteLine("______________");
-//                Console.WriteLine(tableName);
-////                UpdateCache(_session.Keyspace, tableName);
-//            }
+        SetKeySpace(dbHostProvider.isProduction() ? "Production" : "Testing");
 
+        var infoRunningDatabaseInProductionMode = dbHostProvider.isProduction()
+            ? "[INFO] Running Database in Production mode."
+            : "[INFO] Running Database in Testing mode.";
+        Console.WriteLine(infoRunningDatabaseInProductionMode);
+
+
+        // Collects Metadata and caches it locally
+        // Console.WriteLine("Collecting Metadata on Startup");
+        //     var tables = _cluster.Metadata.GetTables(_session.Keyspace);
+        //     foreach (var tableName in tables)
+        //     {
+        //         Console.WriteLine("______________");
+        //         Console.WriteLine(tableName);
+        //         UpdateCache(_session.Keyspace, tableName);
+        //     }
     }
 
 
@@ -93,6 +100,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
                 ////UpdateCache(_session.Keyspace, tableName);
             }
         });
+        // await Task.Delay(5000);
     }
 
     /*
@@ -142,14 +150,14 @@ public class ScyllaDatabaseManager : IDatabaseManager
         {
             _session.ChangeKeyspace(keySpaceName);
 
-            Console.Write("Set Keyspace to " + keySpaceName);
+            Console.WriteLine("Set Keyspace to " + keySpaceName);
         }
         else
         {
             Console.WriteLine("Keyspace does not exist. Creating Keyspace...");
             var datacentersReplicationFactors = new Dictionary<string, int>
             {
-                { "datacenter1", 3 }
+                { "cyberscape_datacenter", 3 }
             };
             var replicationProperty =
                 ReplicationStrategies.CreateNetworkTopologyStrategyReplicationProperty(datacentersReplicationFactors);
@@ -161,7 +169,20 @@ public class ScyllaDatabaseManager : IDatabaseManager
     public async Task InsertData(string table, Dictionary<string, Type> columns, Dictionary<string, object> data)
     {
         if (!columns.Keys.All(data.ContainsKey))
+
         {
+            Console.WriteLine("Data Dictionary: _____________________-");
+            foreach (var d in data)
+            {
+                Console.WriteLine(d.Key + ": " + d.Value);
+            }
+
+            Console.WriteLine("Column Dictionary: _____________________-");
+            foreach (var c in columns)
+            {
+                Console.WriteLine(c.Key + ": " + c.Value);
+            }
+
             throw new ArgumentException("Data dictionary contains keys not present in columns dictionary.");
         }
         //TODO: get the column definitions from the cache and internally add the primary key to the data (which is a UUID)
@@ -174,16 +195,24 @@ public class ScyllaDatabaseManager : IDatabaseManager
             INSERT INTO ""{_session.Keyspace}"".""{table}"" ({columnNames})
             VALUES ({valuePlaceholders})
         ";
-
         var values = columns.Keys.Select(column => data[column]).ToArray();
 
+        // Console.WriteLine(insertCql);
+        // Console.WriteLine(values);
         var statement = new SimpleStatement(insertCql, values);
+        // Console.WriteLine(statement.ToString());
+
+        // foreach (var val in values)
+        // {
+        // Console.Write(val + " " + val.GetType() + " ");
+        // Console.WriteLine();
+        // }
+
         await _session.ExecuteAsync(statement).ContinueWith(t =>
         {
-            Console.WriteLine(t.IsFaulted
-                ? $"Error inserting data: {t.Exception?.GetBaseException().Message}"
-                : "Data inserted successfully.");
+            if (t.IsFaulted) Console.WriteLine($"Error inserting data: {t.Exception?.GetBaseException().Message}");
         });
+        // await Task.Delay(1000);
     }
 
     public async Task InsertBatchedData(string table, Dictionary<string, Type> columns,
@@ -225,13 +254,17 @@ public class ScyllaDatabaseManager : IDatabaseManager
         });
     }
 
-    public async Task<List<Dictionary<string, object>>> SelectData(string table, string condition = "", string order = "")
+    public async Task<List<Dictionary<string, object>>> SelectData(string table, string condition = "",
+        string order = "")
     {
         //check if table exists in keyspace
-        var contains = _cluster.Metadata.GetTables(_session.Keyspace).Contains(table);
-        if (!contains)
+        var containsInTable = _cluster.Metadata.GetTables(_session.Keyspace).Contains(table);
+
+        if (!containsInTable)
         {
-            throw new ArgumentException($"Table '{table}' does not exist in keyspace '{_session.Keyspace}'.");
+            // var containsInView = _cluster.Metadata.GetMaterializedView(_session.Keyspace, table);
+            // Console.WriteLine("VIEW: " + containsInView);
+            // throw new ArgumentException($"Table '{table}' does not exist in keyspace '{_session.Keyspace}'.");
         }
 
 
@@ -239,8 +272,9 @@ public class ScyllaDatabaseManager : IDatabaseManager
 
         if (!string.IsNullOrWhiteSpace(condition))
         {
-            selectCql += $" WHERE {condition} ALLOW FILTERING";
+            selectCql += condition;
         }
+
         if (!string.IsNullOrWhiteSpace(order))
         {
             selectCql += $" ORDER {order}";
@@ -248,6 +282,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
         //TODO: SAI SCHAU DIR DAS AN FUER DIE API
         //https://opensource.docs.scylladb.com/stable/
 
+        selectCql += ";";
         Console.WriteLine("Executing Query: \n" + selectCql);
 
         var statement = new SimpleStatement(selectCql);
@@ -274,7 +309,14 @@ public class ScyllaDatabaseManager : IDatabaseManager
             // {
             // Console.WriteLine(string.Join(", ", row.Select(kv => $"{kv.Key}: {kv.Value}")));
             // }
-
+            // foreach (var v in results)
+            // {
+            //     foreach (var a in v)
+            //     {
+            //         Console.WriteLine("KEY: "+a.Key);
+            //         Console.WriteLine("VALUE: "+a.Value.GetType());
+            //     }
+            // }
             Console.WriteLine("Query executed successfully.");
 
             return results;

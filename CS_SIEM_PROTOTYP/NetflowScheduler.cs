@@ -16,6 +16,7 @@ public class NetflowScheduler
         _delay = delayInSeconds;
         _databaseManager = databaseManager;
         _cancellationTokenSource = new CancellationTokenSource();
+        _databaseManager.CreateTable("Netflow", GetNetflowColumnTypes(), "UUID, timestamp");
     }
 
 
@@ -23,9 +24,10 @@ public class NetflowScheduler
     {
         var cancellationToken = _cancellationTokenSource.Token;
         Console.WriteLine("[INFO] Starting Netflow Scheduler...");
-
+        int i = 1;
         while (!cancellationToken.IsCancellationRequested)
         {
+            // Console.WriteLine($"RUN {i}");
             Console.WriteLine("[INFO] Polling cycle started.");
 
 
@@ -37,12 +39,16 @@ public class NetflowScheduler
                 try
                 {
                     string[] netflowPaths = NetflowReceiver.GetFilePaths(config.FolderLocation);
+                    // Console.WriteLine(netflowPaths.Length);
                     foreach (string nfpath in netflowPaths)
                     {
+                        // Console.WriteLine(nfpath);
+                        // Console.WriteLine($"Hello {i}");
                         List<string> lines = NetflowReceiver.ProcessCapturedFile(nfpath, config.NfdumpBinaryLocation);
                         _allNetFlowData.AddRange(NetflowReceiver.ParseNetFlowData(lines));
-                        MoveFilesToOldDirectory(config.FolderLocation, netflowPaths);
+                        
                     }
+                    MoveFilesToOldDirectory(config.FolderLocation, netflowPaths);
 
                     if (_allNetFlowData.Count > 0)
                     {
@@ -99,7 +105,6 @@ public class NetflowScheduler
             Directory.CreateDirectory(nfDirectoryOld);
         }
 
-        Console.ForegroundColor = ConsoleColor.Red;
         foreach (var nfPath in netflowPaths)
         {
             string fileName = Path.GetFileName(nfPath);
@@ -170,6 +175,7 @@ public class NetflowScheduler
             { "UUID", typeof(Guid) }
         };
     }
+    //TODO MEHMET austesten DB
 
     public async Task InsertNfDataAsync(List<NetFlowData> nfDatas, string table, Dictionary<string, Type> columns)
     {
@@ -177,10 +183,10 @@ public class NetflowScheduler
         {
             var data = MapnfDataToData(nfData);
 
-            foreach (var value in data)
-            {
-                Console.WriteLine(value);
-            }
+            // foreach (var value in data)
+            // {
+            //     Console.WriteLine(value);
+            // }
 
             try
             {

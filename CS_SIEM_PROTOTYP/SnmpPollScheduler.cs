@@ -20,6 +20,7 @@ namespace CS_SIEM_PROTOTYP
             _delay = delayInSeconds;
             _databaseManager = databaseManager;
             _cancellationTokenSource = new CancellationTokenSource();
+            _databaseManager.CreateTable("SNMP", GetSnmpPollColumn(), "UUID, timestamp");
         }
 
         public async Task StartPollingAsync()
@@ -38,7 +39,7 @@ namespace CS_SIEM_PROTOTYP
                         $"[INFO] Polling SNMP data for device IP: {snmpRequest.IpAddress} on Port: {snmpRequest.Port}");
 
                     List<SnmpPoll> snmpPolls = SnmpCustomReceiver.PollSnmpV3(snmpRequest);
-                    Console.WriteLine(snmpRequest);
+                    // Console.WriteLine(snmpRequest);
 
                     if (snmpPolls != null && snmpPolls.Count > 0)
                     {
@@ -46,13 +47,12 @@ namespace CS_SIEM_PROTOTYP
                             $"[INFO] Received {snmpPolls.Count} SNMP poll results for device IP: {snmpRequest.IpAddress}");
 
                         //TODO DATABASE
-                        // await InsertSnmpPollDataAsync(snmpPolls, "SNMP", GetSnmpPollColumn());
-                        /*
-                        foreach (var snmpPoll in snmpPolls)
-                        {
-                            Console.WriteLine(snmpPoll);
+                        await InsertSnmpPollDataAsync(snmpPolls, "SNMP", GetSnmpPollColumn());
 
-                        }*/
+                        // foreach (var snmpPoll in snmpPolls)
+                        // {
+                        //     Console.WriteLine(snmpPoll);
+                        // }
                     }
                     else
                     {
@@ -91,7 +91,7 @@ namespace CS_SIEM_PROTOTYP
             }
         }
 
-
+        //TODO MEHMET austesten DB
         public async Task InsertSnmpPollDataAsync(List<SnmpPoll> snmpDatas, string table,
             Dictionary<string, Type> columns)
         {
@@ -99,14 +99,16 @@ namespace CS_SIEM_PROTOTYP
             {
                 var data = MapSnmpPollDataToData(snmpData);
 
-                foreach (var value in data)
-                {
-                    Console.WriteLine(value);
-                }
+                // foreach (var value in data)
+                // {
+                //     Console.WriteLine(value);
+                // }
 
                 try
                 {
+                    // Console.WriteLine("Starting with SNMP Insert");
                     await _databaseManager.InsertData(table, columns, data);
+                    // Console.WriteLine("Ending with SNMP Insert");
                 }
                 catch (Exception ex)
                 {
@@ -121,20 +123,20 @@ namespace CS_SIEM_PROTOTYP
             {
                 { "deviceIP", snmp.IpAddress },
                 { "hostname", snmp.Hostname },
+                { "oid_name", snmp.Name },
                 { "oid", snmp.Oid },
                 { "oidValue", snmp.OidValue },
                 { "timestamp", snmp.Timestamp },
                 { "UUID", Guid.NewGuid() }
             };
         }
-
         public Dictionary<string, Type> GetSnmpPollColumn()
         {
             return new Dictionary<string, Type>
             {
                 { "deviceIP", typeof(string) },
                 { "hostname", typeof(string) },
-                { "devicePort", typeof(int) },
+                { "oid_name", typeof(string) },
                 { "oid", typeof(string) },
                 { "oidValue", typeof(string) },
                 { "timestamp", typeof(DateTime) },

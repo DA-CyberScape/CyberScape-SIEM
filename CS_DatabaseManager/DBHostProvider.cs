@@ -1,26 +1,79 @@
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
+
 namespace CS_DatabaseManager;
 
 public class DbHostProvider
 {
     //Custom list of DB Cluster Hosts.
-    private readonly Dictionary<string, string[]> _hosts = new();
-    
-    private readonly string[] _remoteServerHosts = ["192.168.0.110", "192.168.0.111", "192.168.0.112"];
-    private readonly string[] _dockerContainerHosts = ["172.17.0.2", "172.17.0.3", "172.17.0.4"];
-    private readonly string[] _dockerContainerHosts2 = ["172.18.0.2", "172.18.0.3", "172.18.0.4"];
+    private List<ClusterList> _clusterLists = new();
 
-    
+    private const string
+        ConfigFilePath =
+            "/home/cyberscape_admin/CyberScape-SIEM/App_Configurations/Database_IPs.yaml"; // Path to your YAML file
+
     public DbHostProvider()
     {
-        _hosts.Add("RemoteServer", _remoteServerHosts);
-        _hosts.Add("DockerContainer", _dockerContainerHosts);
-        _hosts.Add("DockerContainer2", _dockerContainerHosts2);
-
+        LoadHosts();
     }
 
-    //choose the hosts you want to connect to
-    public string[] ProvideHosts()      
+    private void LoadHosts()
     {
-        return _hosts["RemoteServer"];
+        if (File.Exists(ConfigFilePath))
+        {
+            var yamlContent = File.ReadAllText(ConfigFilePath);
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+    
+            // Deserialize YAML content into ClusterListsConfiguration
+            var config = deserializer.Deserialize<ClusterListsConfiguration>(yamlContent);
+            
+            if (config != null && config.clusterlists != null)
+            {
+                _clusterLists = config.clusterlists;  // Assign to the internal list
+            }
+            else
+            {
+                throw new Exception("Deserialization failed, config is null or clusterlists is empty.");
+            }
+        }
+        else
+        {
+            throw new FileNotFoundException($"Config file not found: {ConfigFilePath}");
+        }
     }
+
+
+    public string[] ProvideHosts()
+    {
+        // Find the active cluster list
+        var activeCluster = _clusterLists.FirstOrDefault(c => c.Active);
+        return activeCluster != null ? activeCluster.list.ToArray() : Array.Empty<string>();
+    }
+
+    public bool isProduction()
+    {
+        //if active cluster is Local Cluster then yes, else no
+        var activeCluster = _clusterLists.FirstOrDefault(c => c.Active);
+        return activeCluster is { Production: true };
+    }
+    
+    public void SaveHosts()
+    {
+        
+    }
+}
+
+public class ClusterList
+{
+    public string listname { get; set; }
+    public List<string> list { get; set; }
+    public bool Active { get; set; }
+    public bool Production { get; set; }
+}
+
+public class ClusterListsConfiguration
+{
+    public List<ClusterList> clusterlists { get; set; } // Should match 'clusterlists' in YAML
 }

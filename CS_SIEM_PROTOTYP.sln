@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS_SIEM_PROTOTYP", "CS_SIEM_PROTOTYP\CS_SIEM_PROTOTYP.csproj", "{F88B28D5-541E-4B34-AFA6-F804469D732A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS_DatabaseManager", "CS_DatabaseManager\CS_DatabaseManager.csproj", "{A64D222E-A220-4B3E-BF11-40148FE8CFEB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CS_API", "CS_API", "{1A57B228-2067-4836-A014-F74BB1F0D8E2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS_API", "CS_API\CS_API.csproj", "{52A23D4C-C380-44DB-93AB-EEC262982520}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS_SIEM_PROTOTYP", "CS_SIEM_PROTOTYP\CS_SIEM_PROTOTYP.csproj", "{2F08055C-FC09-4535-8F20-A5B203BA0A08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,10 +14,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F88B28D5-541E-4B34-AFA6-F804469D732A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F88B28D5-541E-4B34-AFA6-F804469D732A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F88B28D5-541E-4B34-AFA6-F804469D732A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F88B28D5-541E-4B34-AFA6-F804469D732A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A64D222E-A220-4B3E-BF11-40148FE8CFEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A64D222E-A220-4B3E-BF11-40148FE8CFEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A64D222E-A220-4B3E-BF11-40148FE8CFEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -26,6 +22,10 @@ Global
 		{52A23D4C-C380-44DB-93AB-EEC262982520}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52A23D4C-C380-44DB-93AB-EEC262982520}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52A23D4C-C380-44DB-93AB-EEC262982520}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F08055C-FC09-4535-8F20-A5B203BA0A08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F08055C-FC09-4535-8F20-A5B203BA0A08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F08055C-FC09-4535-8F20-A5B203BA0A08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F08055C-FC09-4535-8F20-A5B203BA0A08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{52A23D4C-C380-44DB-93AB-EEC262982520} = {1A57B228-2067-4836-A014-F74BB1F0D8E2}

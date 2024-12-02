@@ -27,6 +27,8 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
+        
+        // SnmpV3TrapReceiver.StartReceiver();
         /*
         SyslogReceiver syslogReceiver = new SyslogReceiver(null, 514, 10);
         Task receiveTask = Task.Run(() => syslogReceiver.ReceiveSyslogData());
@@ -38,15 +40,18 @@ public static class Program
         Console.WriteLine("FINISHED");*/
 
 
-        Console.WriteLine("------------------------------------------");
-        ModuleStarter moduleStarter = new ModuleStarter(null, 10);
-        var siemTask = moduleStarter.StartSIEM(@"/home/sai/CyberScape-SIEM/CS_SIEM_PROTOTYP/test.json");
+        // Console.WriteLine("------------------------------------------");
+        // DbHostProvider dbHost = new DbHostProvider();
+        //IDatabaseManager db = new ScyllaDatabaseManager(dbHost);
+        
+        //ModuleStarter moduleStarter = new ModuleStarter(db, 10);
+        //var siemTask = moduleStarter.StartSIEM(@"/home/cyberscape_admin/CyberScape-SIEM/CS_SIEM_PROTOTYP/test.json");
 
-        Console.WriteLine("[SIMULATION] SIEM Started, waiting 60 seconds before stopping...");
-        await Task.Delay(60_000);
-        moduleStarter.StopSIEM();
-        await siemTask;
-        Console.WriteLine("[SIMULATION] SIEM has been stopped.");
+        //Console.WriteLine("[SIMULATION] SIEM Started, waiting 60 seconds before stopping...");
+        //await Task.Delay(60_000);
+        //moduleStarter.StopSIEM();
+        //await siemTask;
+        //Console.WriteLine("[SIMULATION] SIEM has been stopped.");
 
 
         // TESTING NETFLOW AND SNMP

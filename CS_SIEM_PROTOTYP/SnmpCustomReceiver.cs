@@ -79,7 +79,7 @@ public class SnmpCustomReceiver : IDataReceiver
             snmpRequest.Hostname);
     }
 
-    public static List<SnmpPoll> PollSnmpV3(Dictionary<string, string> oidDict, string ipAddress, string user,
+    public static List<SnmpPoll> PollSnmpV3Temp(Dictionary<string, string> oidDict, string ipAddress, string user,
         string authPass, string privPass, AuthenticationDigests authenticationDigests,
         PrivacyProtocols privacyProtocols, int port, string hostname)
     {
@@ -143,7 +143,7 @@ public class SnmpCustomReceiver : IDataReceiver
                     // string name = "temp";
                     string oid = value.Oid.ToString();
                     SnmpPoll snmpPoll = new SnmpPoll(ipAddress, oid, value.Value.ToString(),
-                        hostname, DateTime.Now, oidDict[oid]);
+                        hostname, DateTime.UtcNow.AddHours(1), oidDict[oid]);
                     answerSnmpPolls.Add(snmpPoll);
                 }
 
@@ -156,6 +156,119 @@ public class SnmpCustomReceiver : IDataReceiver
             return null;
         }
     }
+    public static List<SnmpPoll> PollSnmpV3(Dictionary<string, string> oidDict, string ipAddress, string user,
+        string authPass, string privPass, AuthenticationDigests authenticationDigests,
+        PrivacyProtocols privacyProtocols, int port, string hostname)
+    {
+        try
+        {
+            // Set up the SNMP target with port 161 and a timeout
+            UdpTarget target = new UdpTarget((System.Net.IPAddress)new IpAddress(ipAddress), port, 2000, 1);
+            SecureAgentParameters param = new SecureAgentParameters();
+    
+            if (!target.Discovery(param))
+            {
+                Console.WriteLine("Discovery failed. Unable to continue...");
+                target.Close();
+                return null;
+            }
+    
+            // Prepare the secure parameters for SNMPv3
+            param.authPriv(user, authenticationDigests, authPass, privacyProtocols, privPass);
+    
+            List<SnmpPoll> answerSnmpPolls = new List<SnmpPoll>();
+    
+            // Process each OID in the dictionary
+            foreach (var entry in oidDict)
+            {
+                string baseOid = entry.Key;
+                string baseName = entry.Value;
+    
+                // Check if the OID does not end with ".0"
+                if (!baseOid.EndsWith(".0"))
+                {
+                    // Loop to append ".x" to the base OID where x ranges from 1 to 100
+                    for (int x = 1; x <= 30; x++)
+                    {
+                        string modifiedOid = $"{baseOid}.{x}";
+                        string modifiedName = $"{baseName}.{x}";
+    
+                        // Prepare PDU for the modified OID
+                        Pdu pdu = new Pdu(PduType.Get);
+                        pdu.VbList.Add(modifiedOid);
+    
+                        // Execute the SNMP request
+                        SnmpV3Packet result = (SnmpV3Packet)target.Request(pdu, param);
+    
+                        // Check for valid response
+                        if (result != null && result.Pdu.ErrorStatus == 0)
+                        {
+                            // Add to list if no error and valid response
+                            foreach (var value in result.Pdu.VbList)
+                            {
+                                string value_string = value.Value.ToString();
+                                if (!value_string.Equals("SNMP No-Such-Instance"))
+                                {  
+                                    
+                                    SnmpPoll snmpPoll = new SnmpPoll(ipAddress, value.Oid.ToString(),
+                                                                        value_string, hostname, DateTime.UtcNow.AddHours(1), modifiedName);
+                                                                    answerSnmpPolls.Add(snmpPoll);
+                                }
+
+                                
+                            }
+                        }
+                        else
+                        {
+                            // Skip if "No Such Instance" error or other error
+                            Console.WriteLine($"OID {modifiedOid} not found or instance doesn't exist.");
+                        }
+                    }
+                }
+                else
+                {
+                    // Directly add non-.1 OIDs
+                    Pdu pdu = new Pdu(PduType.Get);
+                    pdu.VbList.Add(baseOid);
+    
+                    // Execute the SNMP request
+                    SnmpV3Packet result = (SnmpV3Packet)target.Request(pdu, param);
+    
+                    if (result != null && result.Pdu.ErrorStatus == 0)
+                    {
+                        // Add to list if no error and valid response
+                        foreach (var value in result.Pdu.VbList)
+                        {
+                            string value_string = value.Value.ToString();
+                            if (!value_string.Equals("SNMP No-Such-Instance"))
+                            {
+                                SnmpPoll snmpPoll = new SnmpPoll(ipAddress, value.Oid.ToString(),
+                                    value_string, hostname, DateTime.UtcNow.AddHours(1), baseName);
+                                answerSnmpPolls.Add(snmpPoll);
+                            }
+
+                            
+                            
+                            
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"OID {baseOid} not found or instance doesn't exist.");
+                    }
+                }
+            }
+    
+            target.Close();
+            return answerSnmpPolls;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception: " + ex.Message);
+            return null;
+        }
+    }
+
 }
 
 public class SnmpPollRequest
@@ -272,25 +385,3 @@ public class SnmpDevice
     public int Id { get; set; }
 }
 
-public class SnmpTrapConfig
-{
-    public int Port { get; set; }
-
-    public string Version { get; set; }
-
-    // public AuthParameters AuthParameters { get; set; }
-    public string Username { get; set; }
-    public string AuthProtocol { get; set; }
-    public string AuthPassword { get; set; }
-    public string PrivacyProtocol { get; set; }
-    public string PrivacyPassword { get; set; }
-    public string Name { get; set; }
-    public int Id { get; set; }
-
-
-    public override string ToString()
-    {
-        return
-            $"Port: {Port}, Version: {Version} id: {Id} name: {Name} Username: {Username}, Auth Protocol: {AuthProtocol}, Auth Password: {AuthPassword}, Privacy Protocol: {PrivacyProtocol}, Privacy Password: {PrivacyPassword}";
-    }
-}

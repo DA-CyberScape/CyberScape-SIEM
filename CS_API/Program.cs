@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CS_API;
+using System.IdentityModel.Tokens.Jwt;
+
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -10,10 +12,13 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolver = AppJsonSerializerContext.Default;
 });
 
+// builder.Services.AddAuthentication(options => { options.DefaultAuthenticateScheme = JwtB})
+
 var app = builder.Build();
 
 // Directory setup
-var configDirectory = Path.Combine(Directory.GetCurrentDirectory(), "configurations_example");
+var configDirectory = Path.Combine(Directory.GetCurrentDirectory(),
+    "/home/cyberscape_admin/CyberScape-SIEM/CS_API/Configurations_Example");
 
 if (!Directory.Exists(configDirectory))
 {
@@ -23,7 +28,7 @@ if (!Directory.Exists(configDirectory))
 // This variable will hold the cancellation token for stopping the process
 CancellationTokenSource cts = new CancellationTokenSource();
 
-// On startup, start the process with the first configuration asynchronously
+// SIEM wird zum ersten Mal ausgefuehrt (startup)
 var files = Directory.GetFiles(configDirectory, "*.json");
 if (files.Length > 0)
 {
@@ -31,7 +36,7 @@ if (files.Length > 0)
     Task.Run(() => ProcessStarter.StartProcessAsync(firstFile, cts.Token));
 }
 
-// GET request to retrieve configurations
+
 app.MapGet("/configurations", () =>
 {
     var files = Directory.GetFiles(configDirectory, "*.json");
@@ -49,25 +54,41 @@ app.MapGet("/configurations", () =>
 
 // POST request to add a new configuration
 app.MapPost("/configurations", async (HttpRequest request) =>
-{   
-    // Console.WriteLine(1);
+{
     using var reader = new StreamReader(request.Body);
     var jsonContent = await reader.ReadToEndAsync();
-    // Console.WriteLine(2);
-
     var newFileName = Path.Combine(configDirectory, "example_API.json");
-    // Console.WriteLine(3);
+    Console.WriteLine(newFileName);
 
     await File.WriteAllTextAsync(newFileName, jsonContent);
-    // Console.WriteLine(4);
-    
     ProcessStarter.StopProcess();
+    await Task.Delay(10_000);
 
-    // Start the new process asynchronously
-    cts = new CancellationTokenSource(); // Create a new CancellationTokenSource for the new task
+    cts = new CancellationTokenSource();
     Task.Run(() => ProcessStarter.StartProcessAsync(newFileName, cts.Token));
 
-    var response = new SaveResponse("Configuration saved successfully. Restarting SIEM with new Configuration", "example_API.json");
+    var response = new SaveResponse("Configuration saved successfully. Restarting SIEM with new Configuration",
+        "example_API.json");
+    return Results.Ok(response);
+});
+
+//TODO Scylla Configuration hinzufügen
+app.MapPost("/configurations/Scylla", async (HttpRequest request) =>
+{
+    using var reader = new StreamReader(request.Body);
+    var jsonContent = await reader.ReadToEndAsync();
+    var newFileName = Path.Combine("App_Configurations", "Database_IPs.yaml");
+    Console.WriteLine(newFileName);
+
+    await File.WriteAllTextAsync(newFileName, jsonContent);
+    ProcessStarter.StopProcess();
+    await Task.Delay(10_000);
+
+    cts = new CancellationTokenSource();
+    Task.Run(() => ProcessStarter.StartProcessAsync(newFileName, cts.Token));
+
+    var response = new SaveResponse("Configuration saved successfully. Restarting SIEM with new Configuration",
+        "example_API.json");
     return Results.Ok(response);
 });
 

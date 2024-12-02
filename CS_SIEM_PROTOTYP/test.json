@@ -56,6 +56,15 @@
     ]
   },
   {
+    "snmpTrapReceiver": [
+      {
+        "port": 162,
+        "name": "SNMP-Trap-Receiver",
+        "id": 12312
+      }
+    ]
+  },
+  {
     "ScyllaDB": {
       "port": 123,
       "ipaddresses": 12312

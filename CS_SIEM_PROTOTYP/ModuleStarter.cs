@@ -15,6 +15,7 @@ public class ModuleStarter
     private SnmpPollScheduler _snmpPollScheduler;
     private NetflowScheduler _netflowScheduler;
     private SyslogScheduler _syslogScheduler;
+    private SnmpTrapScheduler _snmpTrapScheduler;
     private ApiStarter _apiStarter;
     private readonly IDatabaseManager _db;
     private readonly int _delay;
@@ -37,8 +38,9 @@ public class ModuleStarter
 
     public async Task StartSIEM(string PathToJsonConfiguration)
     {
+        Console.WriteLine("PROCESSING DATA");
         ProcessData(PathToJsonConfiguration);
-
+        Console.WriteLine("FINISHED PROCESSING DATA");
         List<SnmpPollRequest> snmpPollList = Converter.convertJsontoSNMPPollRequest(snmpPollsDict);
         List<NfConfig> netflowList = Converter.convertJsontoNetflowDict(netflowReceiverDict);
         List<PrtgConfig> prtgList = Converter.convertJsontoPRTG(prtgReceiverDict);
@@ -46,8 +48,12 @@ public class ModuleStarter
         List<SyslogConfig> syslogList = Converter.ConvertJsontoSyslogConfigs(syslogDict);
 
         Console.WriteLine("[INFO] Starting the SIEM");
+        if (snmpTrapList.Count > 0)
+        {
+            _snmpTrapScheduler = new SnmpTrapScheduler(snmpTrapList, _db, _delay);
+            _snmpTrapScheduler.StartAnalyzingAsync();
 
-        
+        }
         if (syslogList.Count > 0)
         {
             _syslogScheduler = new SyslogScheduler(syslogList, _db, _delay);
@@ -88,8 +94,23 @@ public class ModuleStarter
         _snmpPollScheduler?.StopPolling();
         _netflowScheduler?.StopPolling();
         _syslogScheduler?.StopPolling();
+        _snmpTrapScheduler?.StopPolling();
 
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
         Console.WriteLine("[INFO] SIEM Stopped");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
+        Console.WriteLine("---------------------------------------------------");
     }
 
     private void ProcessData(string PathToJsonConfiguration)
@@ -108,6 +129,7 @@ public class ModuleStarter
             {
                 // Additional logic for ScyllaDB (if needed)
                 //TODO MEHMET IRGENDWAS MIT SCYLLADB MACHEN
+                // K.A was du hier haben willst sai.
             }
         }
     }

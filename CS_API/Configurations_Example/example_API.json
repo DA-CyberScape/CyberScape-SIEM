@@ -2,26 +2,38 @@
   {
     "snmpPolls": [
       {
-        "name": "FirewallSNMP",
-        "id": 123,
-        "ip": "192.168.10.254",
-        "hostname": "FW-1123123123123123123123123",
+        "name": "FG-SNMP",
+        "id": 123123,
+        "ip": "10.0.1.254",
+        "hostname": "FG-SNMP",
         "oids": [
           {
-            "oid": "1.3.6.1.4.1.9.2.1.56.0",
-            "name": "CPU Load"
+            "oid": "1.3.6.1.4.1.12356.101.4.1.3.0",
+            "name": "CPU LOAD"
           },
           {
-            "oid": "1.3.6.1.4.1.9.2.1.8.0",
-            "name": "Memory Usage"
+            "oid": "1.3.6.1.4.1.12356.101.4.1.4.0",
+            "name": "MEMORY USAGE"
           },
           {
             "oid": "1.3.6.1.2.1.1.3.0",
-            "name": "Uptime"
+            "name": "UPTIME"
           },
           {
-            "oid": "1.3.6.1.2.1.6.9.0",
-            "name": "TCP Connections"
+            "oid": "1.3.6.1.4.1.12356.101.4.1.1.0",
+            "name": "VERSION"
+          },
+          {
+            "oid": "1.3.6.1.4.1.12356.101.7.2.2.1.1",
+            "name": "VLANS"
+          },
+          {
+            "oid": "1.3.6.1.4.1.12356.101.3.2.1.1.7.1",
+            "name": "SESSION COUNT"
+          },
+          {
+            "oid": "1.3.6.1.2.1.47.1.1.1.1.14",
+            "name": "INTERFACES"
           }
         ],
         "user": "MY-USER",
@@ -32,29 +44,50 @@
         "port": 161
       },
       {
-        "name": "SwitchSNMP",
-        "id": 123123,
-        "ip": "192.168.10.20",
-        "hostname": "Switch-1",
+        "name": "Switch-SNMP",
+        "id": 293485234,
+        "ip": "192.168.50.1",
+        "hostname": "Switch-SNMP",
         "oids": [
           {
-            "oid": "1.3.6.1.4.1.9.2.1.56.0",
-            "name": "CPU Load"
+            "oid": ".1.3.6.1.2.1.1.5.0",
+            "name": "HOSTNAME"
           },
           {
-            "oid": "1.3.6.1.4.1.9.2.1.8.0",
-            "name": "Memory Usage"
+            "oid": ".1.3.6.1.4.1.9.2.1.57.0",
+            "name": "CPU LOAD"
+          },
+          {
+            "oid": ".1.3.6.1.4.1.9.2.1.9.0",
+            "name": "MEMORY USAGE"
+          },
+          {
+            "oid": ".1.3.6.1.4.1.9.2.1.73.0",
+            "name": "VERSION"
           },
           {
             "oid": "1.3.6.1.2.1.1.3.0",
-            "name": "Uptime"
+            "name": "UPTIME"
+          },
+          
+          {
+            "oid": ".1.3.6.1.2.1.2.2.1.2",
+            "name": "INTERFACES"
+          },
+          {
+            "oid": ".1.3.6.1.2.1.2.2.1.16",
+            "name": "OUTBOUND TRAFFIC INTERFACES"
+          },
+          {
+            "oid": ".1.3.6.1.2.1.2.2.1.10",
+            "name": "INBOUND TRAFFIC INTERFACES"
           }
         ],
-        "user": "MY-USER",
+        "user": "my-user",
         "authentication": "SHA1",
         "encryption": "aes 128",
-        "authpass": "MyAuthPass",
-        "privpass": "MyPrivPass",
+        "authpass": "junioradmin",
+        "privpass": "junioradmin",
         "port": 161
       }
     ]
@@ -64,60 +97,10 @@
       {
         "name": "Netflow1",
         "id": 12312,
-        "folderLocation": "/path/to/folder",
-        "nfdumpBinaryLocation": "/usr/local/bin/nfdump",
-        "nfcapdBinaryLocation": "/usr/local/bin/nfcapd",
+        "folderLocation": "/home/cyberscape_admin/Netflow_example_files",
+        "nfdumpBinaryLocation": "/usr/bin/nfdump",
+        "nfcapdBinaryLocation": "/usr/bin/nfcapd",
         "port": 2055
-      },
-      {
-        "name": "Netflow2",
-        "id": 12312123,
-        "folderLocation": "/path/to/123123",
-        "nfdumpBinaryLocation": "/usr/local/bin/nfdump123123",
-        "nfcapdBinaryLocation": "/usr/local/bin/nfcapd1231231",
-        "port": 21231231231
-      }
-    ]
-  },
-  {
-    "PRTGReceiver": [
-      {
-        "name": "PRTG1",
-        "id": 12312123,
-        "PRTGUrl": "http://192.168.10.0",
-        "apiToken": "abcdefghijklmneopqrstuvwxyz"
-      },
-      {
-        "name": "PRTG2",
-        "id": 3452,
-        "PRTGUrl": "http://192.168.120.0",
-        "apiToken": "abcdefghijklmneopqr12312312312312312stuvwxyz"
-      }
-    ]
-  },
-  {
-    "snmpTrapReceiver": [
-      {
-        "name": "Trap1",
-        "id": 12312312,
-        "port": 162,
-        "version": "SNMPv3",
-        "username": "snmpv3user",
-        "authProtocol": "SHA",
-        "authPassword": "authPassword123",
-        "privacyProtocol": "AES",
-        "privacyPassword": "privPassword123"
-      },
-      {
-        "name": "Trap2",
-        "id": 5675,
-        "port": 162,
-        "version": "SNMPv2",
-        "username": "snmpv3user",
-        "authProtocol": "SHA",
-        "authPassword": "authPassword123",
-        "privacyProtocol": "AES",
-        "privacyPassword": "privPassword123"
       }
     ]
   },
@@ -127,14 +110,17 @@
         "name": "Sys1",
         "id": 56756,
         "port": 514
-      },
-      {
-        "name": "Sys2",
-        "id": 12312,
-        "port": 12312
       }
     ]
-  },
+  },{
+  "snmpTrapReceiver": [
+    {
+      "name": "SNMP-Trap-Receiver",
+      "id": 123123,
+      "port": 162
+    }
+  ]
+},
   {
     "ScyllaDB": {
       "port": 123,
