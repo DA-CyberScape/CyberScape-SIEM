@@ -120,11 +120,5 @@
       "port": 162
     }
   ]
-},
-  {
-    "ScyllaDB": {
-      "port": 123,
-      "ipaddresses": 12312
-    }
-  }
+}
 ]
