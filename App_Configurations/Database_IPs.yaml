@@ -6,7 +6,7 @@ clusterlists:
   - listname: "Local Cluster"
     list: [ 10.0.1.12, 10.0.1.13, 10.0.1.14 ]
     active: true
-    production: true
+    production: false
   - listname: "Remote Cluster"
     list: [ 192.168.0.110, 192.168.0.111, 192.168.0.112 ]
     active: false

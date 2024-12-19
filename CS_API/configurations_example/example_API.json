@@ -1,16 +1,3 @@
-@CS_API_HostAddress = http://localhost:5073
-
-
-
-### Get all configurations
-GET {{CS_API_HostAddress}}/configurations/
-Accept: application/json
-###
-
-### Post a new configuration (JSON object)
-POST {{CS_API_HostAddress}}/configurations/
-Content-Type: application/json
-
 [
   {
     "snmpPolls": [
@@ -70,11 +57,3 @@ Content-Type: application/json
     }
   }
 ]
-
-
-###
-
-###
-GET {{CS_API_HostAddress}}/configurations/Database/
-Accept: application/json
-###

@@ -73,7 +73,32 @@ app.MapPost("/configurations", async (HttpRequest request) =>
 });
 
 //TODO Scylla Configuration hinzufügen
-app.MapPost("/configurations/Scylla", async (HttpRequest request) =>
+app.MapGet("/configurations/Database", () =>
+{
+    var files = Directory.GetFiles("../App_Configurations", "Database_IPs.yaml");
+    
+    if (files.Length == 0)
+    {
+        return Results.NotFound("No configuration files found.");
+    }
+
+    var firstFile = files[0];
+    var yamlContent = File.ReadAllText(firstFile);
+    var xyz = yamlContent.Split("\n");
+    var returnContent = "";
+    foreach (String s in xyz)
+    {
+        if (!s.StartsWith('#') || s.Equals(""))
+        {
+            returnContent += s + "\n";
+        }
+    }
+    
+    return Results.Content(returnContent, "application/json");
+});
+
+
+app.MapPost("/configurations/Database", async (HttpRequest request) =>
 {
     using var reader = new StreamReader(request.Body);
     var jsonContent = await reader.ReadToEndAsync();
