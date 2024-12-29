@@ -29,7 +29,6 @@ namespace CS_SIEM_PROTOTYP
         public async Task StartPollingAsync()
         {
             var cancellationToken = _cancellationTokenSource.Token;
-            Console.ForegroundColor = ConsoleColor.Green;
             _logger.LogInformation("[INFO] Starting SNMP polling...");
 
             while (!cancellationToken.IsCancellationRequested)

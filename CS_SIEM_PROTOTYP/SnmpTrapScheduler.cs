@@ -60,19 +60,25 @@ namespace CS_SIEM_PROTOTYP
 
         public void StopPolling()
         {
-            if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
+            _logger.LogDebug($"SNMP Trap Stop Polling Cancellation Token: {_cancellationTokenSource.IsCancellationRequested}");
+            if (!_cancellationTokenSource.IsCancellationRequested)
             {
+                Console.WriteLine("INSIDE TRAP RECEIVER STOP FUNCTION 1 ");
                 _cancellationTokenSource.Cancel(); // Signal cancellation for all receivers
                 _logger.LogInformation("[INFO] Stopping all SNMP Trap Receivers...");
-
+                Console.WriteLine("INSIDE TRAP RECEIVER STOP FUNCTION 2");
                 // Stop each receiver and log confirmation
                 foreach (var receiver in _snmpTrapReceivers)
                 {
                     receiver.StopReceiver();
+                    Console.WriteLine("INSIDE TRAP RECEIVER STOP FUNCTION 3");
                 }
+                Console.WriteLine("INSIDE TRAP RECEIVER STOP FUNCTION 4 ");
 
-                Task.WaitAll(_snmpTrapTasks.ToArray()); // Ensure all tasks have stopped
-                _logger.LogInformation("[INFO] All SNMP Trap Receivers have been stopped.");
+                
+                // Task.WaitAll(_snmpTrapTasks.ToArray()); // Ensure all tasks have stopped
+                Console.WriteLine("INSIDE TRAP RECEIVER STOP FUNCTION 5 ");
+                _logger.LogInformation("[INFO] All SNMP Trap Receivers have been stopped. [INSIDE SCHEDULER]");
             }
         }
     }

@@ -36,6 +36,7 @@ public class SnmpTrapReceiver
     {
         try
         {
+            cancellationToken = new CancellationToken();
             _logger.LogInformation($"Attempting to bind to port {_port}...");
     
             // Bind the client to the specified port
@@ -44,11 +45,11 @@ public class SnmpTrapReceiver
     
             // Start periodic database insertion
             _ = Task.Run(() => StartPeriodicDatabaseInsert(_delay, cancellationToken), cancellationToken);
-    
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
+                    _logger.LogDebug($"Cancellation Token inside WHILE: {cancellationToken.IsCancellationRequested}");
                     // Block until a message is received
                     UdpReceiveResult result = await udpClient.ReceiveAsync();
     
@@ -76,6 +77,7 @@ public class SnmpTrapReceiver
         }
         finally
         {
+            _logger.LogInformation("UDP client close initiated.");
             udpClient?.Close();
             _logger.LogInformation("UDP client closed.");
         }
@@ -161,7 +163,8 @@ public class SnmpTrapReceiver
     public void StopReceiver()
     {
         cancellationTokenSource.Cancel();
-        _logger.LogInformation("[INFO] SNMP Trap Receiver shutdown initiated...");
+        _logger.LogInformation($"[INFO] SNMP Trap Receiver shutdown initiated... {cancellationTokenSource.IsCancellationRequested}");
+        udpClient?.Close();
     }
 
     

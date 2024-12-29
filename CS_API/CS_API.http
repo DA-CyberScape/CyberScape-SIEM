@@ -74,7 +74,43 @@ Content-Type: application/json
 
 ###
 
-###
-GET {{CS_API_HostAddress}}/configurations/Database/
-Accept: application/json
-###
+### POST A NEW CONFIGURATION (TEST OF RESTARTING)
+POST {{CS_API_HostAddress}}/configurations/
+Content-Type: application/json
+
+[
+  {
+    "snmpTrapReceiver": [
+      {
+        "port": 162,
+        "name": "SNMP-Trap-Receiver",
+        "id": 456
+      }
+    ]
+  },
+  {
+    "Syslog": [
+      {
+        "name": "Sys1",
+        "id": 56756,
+        "port": 514
+      }
+    ]
+  }
+]
+
+### POST A NEW CONFIGURATION (TEST OF RESTARTING (SYSLOG TRAP ONLY))
+POST {{CS_API_HostAddress}}/configurations/
+Content-Type: application/json
+
+[
+  {
+    "Syslog": [
+      {
+        "name": "Sys1",
+        "id": 56756,
+        "port": 514
+      }
+    ]
+  }
+]

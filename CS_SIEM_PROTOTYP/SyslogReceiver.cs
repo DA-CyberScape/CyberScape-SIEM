@@ -37,6 +37,7 @@ namespace CS_SIEM_PROTOTYP
 
         public async Task ReceiveSyslogData()
         {
+            cancellationToken = new CancellationToken();
             _udpClient = new UdpClient(_port);
             _logger.LogInformation($"[INFO] Syslog Receiver is listening on port {_port}...");
 
@@ -46,6 +47,7 @@ namespace CS_SIEM_PROTOTYP
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
+                    _logger.LogInformation($"Cancellation Token inside WHILE: {cancellationToken.IsCancellationRequested}");
                     // Console.WriteLine($"LISTENING ON PORT {_port}");
                     // listenting part
                     IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, _port);
@@ -68,9 +70,19 @@ namespace CS_SIEM_PROTOTYP
                     // listenting part
                 }
             }
-            catch (Exception e)
+            catch (SocketException se)
             {
-                _logger.LogError($"[ERROR] An error occurred: {e.Message}");
+                _logger.LogError($"[Error] Could not bind to port {_port}: {se.Message}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[Error] Unexpected error: {ex.Message}");
+            }
+            finally
+            {
+                _logger.LogInformation("UDP client close initiated.");
+                _udpClient?.Close();
+                _logger.LogInformation("UDP client closed.");
             }
         }
 
@@ -177,19 +189,12 @@ namespace CS_SIEM_PROTOTYP
 
         public void StopReceiver()
         {
-            _cancellationTokenSource.Cancel();
-            //von Mehmet. Falls keine UDP Clients verbunden/vorhanden sind und die SIEM schließt
-            //wird eine null reference exception geworfen. Deswegen:
-            if (_udpClient != null)
-            {
-                _udpClient.Close();
-                _udpClient.Dispose();
-                _udpClient = null;
-            }
+            _logger.LogInformation($"[INFO] Syslog Receiver shutdown initiated... {_cancellationTokenSource.IsCancellationRequested}");
 
-            _cancellationTokenSource.Dispose();
-            _cancellationTokenSource = null;
+            _cancellationTokenSource.Cancel();
+            
             _logger.LogInformation("[INFO] Syslog Receiver shutdown initiated...");
+            _udpClient?.Close();
         }
 
         private static SyslogAnswer ProcessSyslogMessage(string syslogMessage, string sourceIP)

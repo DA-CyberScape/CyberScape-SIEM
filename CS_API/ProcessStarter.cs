@@ -33,6 +33,7 @@ public class ProcessStarter
             var siemTask =
                 _moduleStarter.StartSIEM(
                     @"/home/cyberscape_admin/CyberScape-SIEM/CS_API/Configurations_Example/example_API.json");
+            return siemTask;
         }, cancellationToken);
 
         await _currentTask;
@@ -50,8 +51,9 @@ public class ProcessStarter
         {
             Console.WriteLine("Stopping process...");
             // _cts.Cancel();
+            Console.WriteLine(_currentTask.Status);
             _moduleStarter.StopSIEM();
-            _currentTask.Wait();
+            Console.WriteLine(_currentTask.Status);
             Console.WriteLine(
                 "STOPPED J:LSDKFJS:DLKFJSD:LFKJSDLFKJSD:FLKJSD:FLKJSD:FLKSJD:FLKSJDF:LSKDJF:SLDKJFS:DLKJF");
             _cts = null;

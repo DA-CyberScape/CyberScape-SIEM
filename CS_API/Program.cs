@@ -17,11 +17,6 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 // builder.Services.AddAuthentication(options => { options.DefaultAuthenticateScheme = JwtB})
 
-// builder.Services.AddSingleton<ProcessStarter>();
-// builder.Services.AddSingleton<ModuleStarter>();
-// builder.Services.AddSingleton<IDatabaseManager, ScyllaDatabaseManager>();
-// builder.Services.AddSingleton<DbHostProvider>();
-
 
 var app = builder.Build();
 
@@ -72,10 +67,10 @@ app.MapPost("/configurations", async (HttpRequest request) =>
     var jsonContent = await reader.ReadToEndAsync();
     var newFileName = Path.Combine(configDirectory, "example_API.json");
     Console.WriteLine(newFileName);
-
+    Console.WriteLine(jsonContent);
     await File.WriteAllTextAsync(newFileName, jsonContent);
     ps.StopProcess();
-    await Task.Delay(10_000);
+    // await Task.Delay(10_000);
 
     cts = new CancellationTokenSource();
     await Task.Run(() => ps.StartProcessAsync(newFileName, cts.Token));

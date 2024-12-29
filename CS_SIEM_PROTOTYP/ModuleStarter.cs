@@ -41,11 +41,11 @@ public class ModuleStarter
             builder
                 .AddConsole()
                 .SetMinimumLevel(LogLevel.Information)
-                .AddFilter("Snmp Trap", LogLevel.Information)
+                .AddFilter("Snmp Trap", LogLevel.Debug)
                 .AddFilter("Syslog", LogLevel.Information)
                 .AddFilter("Netflow", LogLevel.Information)
                 .AddFilter("Snmp Poll", LogLevel.Information)
-                .AddFilter("ModuleStarter", LogLevel.Information));
+                .AddFilter("ModuleStarter", LogLevel.Debug));
         _logger = _loggerFactory.CreateLogger("ModuleStarter");
     }
 
@@ -66,7 +66,6 @@ public class ModuleStarter
         {
             _snmpTrapScheduler = new SnmpTrapScheduler(snmpTrapList, _db, _loggerFactory.CreateLogger("Snmp Trap"), _delay);
             _snmpTrapScheduler.StartAnalyzingAsync();
-
         }
         if (syslogList.Count > 0)
         {
@@ -87,7 +86,8 @@ public class ModuleStarter
 
         
 
-        await _apiStarter.StartApiAsync();
+        // await _apiStarter.StartApiAsync();
+        // brauchen wir nicht mehr, da es jetzt einen dedizierten Query Server gibt
 
         try
         {
@@ -102,13 +102,18 @@ public class ModuleStarter
     public void StopSIEM()
     {
         _cancellationTokenSource.Cancel();
+        _logger.LogDebug($"Cancellation Token: {_cancellationTokenSource.IsCancellationRequested}");
         _logger.LogInformation("Stopping the SIEM");
 
-        _apiStarter.StopApi();
+        // _apiStarter.StopApi();
+        // brauchen wir nicht mehr, da es jetzt einen dedizierten Query Server gibt
+        // object?.stop wird nur aufgerufen wenn object nicht null ist
         _snmpPollScheduler?.StopPolling();
         _netflowScheduler?.StopPolling();
         _syslogScheduler?.StopPolling();
-        _snmpTrapScheduler?.StopPolling();
+        _snmpTrapScheduler.StopPolling();
+        
+        
         
         _logger.LogInformation("---------------------------------------------------");
         _logger.LogInformation("---------------------------------------------------");
