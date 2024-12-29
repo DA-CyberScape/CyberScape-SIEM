@@ -1,4 +1,5 @@
-﻿using CS_DatabaseManager;
+﻿using Cassandra;
+using CS_DatabaseManager;
 using Microsoft.Extensions.Logging;
 
 namespace CS_SIEM_PROTOTYP;
@@ -75,8 +76,7 @@ public class NetflowScheduler
             if (_allNetFlowData.Count > 0)
             {
                 _logger.LogInformation("[INFO] Inserting Netflow data into the database...");
-                // await InsertNfDataAsync(_allNetFlowData, "Netflow", GetNetflowColumnTypes());
-                //TODO INSERT DATA INTO DATABASE
+                await InsertNfDataAsync(_allNetFlowData, "Netflow", GetNetflowColumnTypes());
                 _allNetFlowData = new List<NetFlowData>();
                 _logger.LogInformation($"[INFO] Data from configurations has been inserted into the database.");
             }
@@ -168,7 +168,7 @@ public class NetflowScheduler
             { "dstPort", typeof(int) },
             { "bytes", typeof(long) },
             { "timestamp", typeof(DateTime) },
-            { "duration", typeof(DateTime) },
+            { "duration", typeof(Duration) },
             { "protocol", typeof(string) },
             { "flag", typeof(string) },
             { "typeOfService", typeof(int) },

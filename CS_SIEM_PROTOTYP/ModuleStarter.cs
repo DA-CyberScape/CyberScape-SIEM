@@ -41,10 +41,10 @@ public class ModuleStarter
             builder
                 .AddConsole()
                 .SetMinimumLevel(LogLevel.Information)
-                .AddFilter("Snmp Trap", LogLevel.Critical)
-                .AddFilter("Syslog", LogLevel.Critical)
+                .AddFilter("Snmp Trap", LogLevel.Information)
+                .AddFilter("Syslog", LogLevel.Information)
                 .AddFilter("Netflow", LogLevel.Information)
-                .AddFilter("Snmp Poll", LogLevel.Critical)
+                .AddFilter("Snmp Poll", LogLevel.Information)
                 .AddFilter("ModuleStarter", LogLevel.Information));
         _logger = _loggerFactory.CreateLogger("ModuleStarter");
     }
