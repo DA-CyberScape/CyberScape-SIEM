@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace CS_SIEM_PROTOTYP;
 
 using SnmpSharpNet;
@@ -17,13 +19,15 @@ public class SnmpTrapReceiver
     private static UdpClient udpClient;
     private IDatabaseManager _db;
     private int _port;
+    private ILogger _logger;
     
-    public SnmpTrapReceiver(IDatabaseManager db, int port = 162, int delay = 10)
+    public SnmpTrapReceiver(IDatabaseManager db, ILogger logger, int port = 162, int delay = 10)
     {
         
         _db = db;
         _delay = delay;
         _port = port;
+        _logger = logger;
     }
 
 
@@ -32,11 +36,11 @@ public class SnmpTrapReceiver
     {
         try
         {
-            Console.WriteLine($"Attempting to bind to port {_port}...");
+            _logger.LogInformation($"Attempting to bind to port {_port}...");
     
             // Bind the client to the specified port
             udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, _port));
-            Console.WriteLine($"Successfully bound to port {_port}. Listening for SNMPv2c traps...");
+            _logger.LogInformation($"Successfully bound to port {_port}. Listening for SNMPv2c traps...");
     
             // Start periodic database insertion
             _ = Task.Run(() => StartPeriodicDatabaseInsert(_delay, cancellationToken), cancellationToken);
@@ -53,27 +57,27 @@ public class SnmpTrapReceiver
                 }
                 catch (SocketException se)
                 {
-                    Console.WriteLine($"[Socket Error] {se.Message}");
+                    _logger.LogError($"[Socket Error] {se.Message}");
                     break;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[Error] {ex.Message}");
+                    _logger.LogError($"[Error] {ex.Message}");
                 }
             }
         }
         catch (SocketException se)
         {
-            Console.WriteLine($"[Error] Could not bind to port {_port}: {se.Message}");
+            _logger.LogError($"[Error] Could not bind to port {_port}: {se.Message}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Error] Unexpected error: {ex.Message}");
+            _logger.LogError($"[Error] Unexpected error: {ex.Message}");
         }
         finally
         {
             udpClient?.Close();
-            Console.WriteLine("UDP client closed.");
+            _logger.LogInformation("UDP client closed.");
         }
     }
 
@@ -105,17 +109,17 @@ public class SnmpTrapReceiver
                 
                 _snmpTraps.Enqueue(trapData);
                 
-                Console.WriteLine($"Received Trap from {trapData.Source}");
-                Console.WriteLine($"Community: {trapData.Community}, OID: {trapData.TrapOid}");
+                _logger.LogInformation($"Received Trap from {trapData.Source}");
+                _logger.LogInformation($"Community: {trapData.Community}, OID: {trapData.TrapOid}");
                 foreach (var kvp in trapData.Variables)
                 {
-                    Console.WriteLine($"  {kvp.Key}: {kvp.Value}");
+                    _logger.LogInformation($"  {kvp.Key}: {kvp.Value}");
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error processing trap: {ex.Message}");
+            _logger.LogError($"Error processing trap: {ex.Message}");
         }
     }
     
@@ -124,28 +128,28 @@ public class SnmpTrapReceiver
         while (!token.IsCancellationRequested)
         {
             await Task.Delay(1000 * delay, token);
-            Console.WriteLine("INSERTING EVERYTH(ING S:DLFKJSD:LFKJSD:LFKJSD:FLKJSDF");
-            Console.WriteLine(_snmpTraps.Count + " THIS WAS THE COUNT");
+            _logger.LogInformation("INSERTING EVERYTH(ING S:DLFKJSD:LFKJSD:LFKJSD:FLKJSDF");
+            _logger.LogInformation(_snmpTraps.Count + " THIS WAS THE COUNT");
             InsertMessagesIntoDatabase();
         }
     }
     
     private void InsertMessagesIntoDatabase()
     {
-        Console.WriteLine(" INSIDE THE INSERT METHOD IN SNMP TRAP");
+        _logger.LogInformation(" INSIDE THE INSERT METHOD IN SNMP TRAP");
         while (!_snmpTraps.IsEmpty)
         {
-            Console.WriteLine(" INSIDE THE INSERT METHOD IN SNMP TRAP AND THERE ARE THINGS IN THE QUEUE");
+            _logger.LogInformation(" INSIDE THE INSERT METHOD IN SNMP TRAP AND THERE ARE THINGS IN THE QUEUE");
 
             if (_snmpTraps.TryDequeue(out SnmpTrapData trapData))
             {
                 if (trapData.Community.Length > 0)
                 {
-                    Console.WriteLine($"Received Trap from {trapData.Source}");
-                    Console.WriteLine($"Community: {trapData.Community}, OID: {trapData.TrapOid}");
+                    _logger.LogInformation($"Received Trap from {trapData.Source}");
+                    _logger.LogInformation($"Community: {trapData.Community}, OID: {trapData.TrapOid}");
                     foreach (var kvp in trapData.Variables)
                     {
-                        Console.WriteLine($"  {kvp.Key}: {kvp.Value}");
+                        _logger.LogInformation($"  {kvp.Key}: {kvp.Value}");
                     }
 
                     // TODO: MEHMET DB LOGIK
@@ -157,7 +161,7 @@ public class SnmpTrapReceiver
     public void StopReceiver()
     {
         cancellationTokenSource.Cancel();
-        Console.WriteLine("[INFO] SNMP Trap Receiver shutdown initiated...");
+        _logger.LogInformation("[INFO] SNMP Trap Receiver shutdown initiated...");
     }
 
     

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CS_DatabaseManager;
+using Microsoft.Extensions.Logging;
 
 namespace CS_SIEM_PROTOTYP
 {
@@ -14,8 +15,9 @@ namespace CS_SIEM_PROTOTYP
         private readonly List<SyslogReceiver> _syslogReceivers;
         private readonly List<Task> _syslogTasks;
         private CancellationTokenSource _cancellationTokenSource;
+        private ILogger _logger;
 
-        public SyslogScheduler(List<SyslogConfig> syslogConfigs, IDatabaseManager databaseManager,
+        public SyslogScheduler(List<SyslogConfig> syslogConfigs, IDatabaseManager databaseManager, ILogger logger,
             int delayInSeconds = 10)
         {
             _syslogConfigs = syslogConfigs;
@@ -24,6 +26,7 @@ namespace CS_SIEM_PROTOTYP
             _syslogReceivers = new List<SyslogReceiver>();
             _syslogTasks = new List<Task>();
             _cancellationTokenSource = new CancellationTokenSource();
+            _logger = logger;
         }
 
 
@@ -31,25 +34,25 @@ namespace CS_SIEM_PROTOTYP
         {
             var cancellationToken = _cancellationTokenSource.Token;
 
-            Console.WriteLine("[INFO] Starting Syslog Scheduler...");
+            _logger.LogInformation("[INFO] Starting Syslog Scheduler...");
 
 
             foreach (var config in _syslogConfigs)
             {
-                var syslogReceiver = new SyslogReceiver(_databaseManager, config.Port, _delay);
+                var syslogReceiver = new SyslogReceiver(_databaseManager, config.Port, _logger,_delay);
                 _syslogReceivers.Add(syslogReceiver);
 
 
                 var task = Task.Run(() => syslogReceiver.ReceiveSyslogData(), cancellationToken);
                 _syslogTasks.Add(task);
 
-                Console.WriteLine($"[INFO] Syslog Receiver '{config.Name}' started listening on port {config.Port}.");
+                _logger.LogInformation($"[INFO] Syslog Receiver '{config.Name}' started listening on port {config.Port}.");
             }
 
 
             await Task.WhenAll(_syslogTasks);
 
-            Console.WriteLine("[INFO] Syslog Scheduler has stopped all receivers.");
+            _logger.LogInformation("[INFO] Syslog Scheduler has stopped all receivers.");
         }
 
         public void StopPolling()
@@ -57,7 +60,7 @@ namespace CS_SIEM_PROTOTYP
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 _cancellationTokenSource.Cancel(); 
-                Console.WriteLine("[INFO] Stopping all Syslog Receivers...");
+                _logger.LogInformation("[INFO] Stopping all Syslog Receivers...");
 
                 
                 foreach (var receiver in _syslogReceivers)
@@ -66,7 +69,7 @@ namespace CS_SIEM_PROTOTYP
                 }
 
                 Task.WaitAll(_syslogTasks.ToArray()); 
-                Console.WriteLine("[INFO] All Syslog Receivers have been stopped.");
+                _logger.LogInformation("[INFO] All Syslog Receivers have been stopped.");
             }
         }
     }

@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
 using Cassandra;
-using Cassandra.Data.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace CS_DatabaseManager;
 
@@ -10,11 +10,16 @@ public class ScyllaDatabaseManager : IDatabaseManager
     private readonly Cluster _cluster;
     private readonly ISession _session;
     private Dictionary<String, object> _tableCache = new();
-
+    //private readonly ILogger _logger;
+    
+    
     public ScyllaDatabaseManager(DbHostProvider dbHostProvider)
     {
+        // ILogger<ScyllaDatabaseManager> logger
         //TODO: cache a Map with table names and their column definitions from a file?
-
+        
+        //_logger = null;
+        
         _cluster =
             Cluster.Builder()
                 .AddContactPoints(dbHostProvider.ProvideHosts()).WithExecutionProfiles(options =>
@@ -23,6 +28,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
 
         _session =
             _cluster.Connect();
+        //_logger.LogInformation("Successfully Connected with the Database.");
         Console.WriteLine("[INFO] Successfully Connected with the Database.");
 
 

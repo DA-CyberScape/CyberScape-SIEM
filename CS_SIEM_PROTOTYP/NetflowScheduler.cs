@@ -1,4 +1,5 @@
 ﻿using CS_DatabaseManager;
+using Microsoft.Extensions.Logging;
 
 namespace CS_SIEM_PROTOTYP;
 
@@ -9,31 +10,33 @@ public class NetflowScheduler
     private readonly IDatabaseManager _databaseManager;
     private CancellationTokenSource _cancellationTokenSource;
     private static List<NetFlowData> _allNetFlowData = new List<NetFlowData>();
+    private ILogger _logger;
 
-    public NetflowScheduler(List<NfConfig> nfConfigs, IDatabaseManager databaseManager, int delayInSeconds = 10)
+    public NetflowScheduler(List<NfConfig> nfConfigs, IDatabaseManager databaseManager, ILogger logger,int delayInSeconds = 10)
     {
         _nfConfigs = nfConfigs;
         _delay = delayInSeconds;
         _databaseManager = databaseManager;
         _cancellationTokenSource = new CancellationTokenSource();
         _databaseManager.CreateTable("Netflow", GetNetflowColumnTypes(), "UUID, timestamp");
+        _logger = logger;
     }
 
 
     public async Task StartAnalyzingAsync()
     {
         var cancellationToken = _cancellationTokenSource.Token;
-        Console.WriteLine("[INFO] Starting Netflow Scheduler...");
+        _logger.LogInformation("[INFO] Starting Netflow Scheduler...");
         int i = 1;
         while (!cancellationToken.IsCancellationRequested)
         {
             // Console.WriteLine($"RUN {i}");
-            Console.WriteLine("[INFO] Polling cycle started.");
+            _logger.LogInformation("[INFO] Polling cycle started.");
 
 
             foreach (var config in _nfConfigs)
             {
-                Console.WriteLine(
+                _logger.LogInformation(
                     $"[INFO] Polling Netflow data for configuration ID: {config.Id}, Name: {config.Name}, Port: {config.Port}, Location: {config.FolderLocation}");
 
                 try
@@ -52,13 +55,13 @@ public class NetflowScheduler
 
                     if (_allNetFlowData.Count > 0)
                     {
-                        Console.WriteLine(
+                        _logger.LogInformation(
                             $"[INFO] Successfully polled {_allNetFlowData.Count} Entries for configuration ID: {config.Id}, Location: {config.FolderLocation}");
                     }
                 }
                 catch (Exception ex) when (!(ex is TaskCanceledException))
                 {
-                    Console.WriteLine(
+                    _logger.LogError(
                         $"[ERROR] Error while polling data for configuration ID: {config.Id}: {ex.Message}");
                 }
             }
@@ -71,29 +74,29 @@ public class NetflowScheduler
             }*/
             if (_allNetFlowData.Count > 0)
             {
-                Console.WriteLine("[INFO] Inserting Netflow data into the database...");
+                _logger.LogInformation("[INFO] Inserting Netflow data into the database...");
                 // await InsertNfDataAsync(_allNetFlowData, "Netflow", GetNetflowColumnTypes());
                 //TODO INSERT DATA INTO DATABASE
                 _allNetFlowData = new List<NetFlowData>();
-                Console.WriteLine($"[INFO] Data from configurations has been inserted into the database.");
+                _logger.LogInformation($"[INFO] Data from configurations has been inserted into the database.");
             }
 
 
-            Console.WriteLine("[INFO] Polling cycle completed. Waiting for the next interval...");
+            _logger.LogInformation("[INFO] Polling cycle completed. Waiting for the next interval...");
             try
             {
-                Console.WriteLine($"[INFO] Waiting for {_delay} seconds");
+                _logger.LogInformation($"[INFO] Waiting for {_delay} seconds");
                 await Task.Delay(_delay * 1000, cancellationToken);
-                Console.WriteLine("[INFO] Delay completed, resuming polling cycle...");
+                _logger.LogInformation("[INFO] Delay completed, resuming polling cycle...");
             }
             catch (TaskCanceledException)
             {
-                Console.WriteLine("[INFO] Polling has been canceled.");
+                _logger.LogInformation("[INFO] Polling has been canceled.");
                 break;
             }
         }
 
-        Console.WriteLine("[INFO] Netflow Scheduler stopped.");
+        _logger.LogInformation("[INFO] Netflow Scheduler stopped.");
     }
 
 
@@ -115,11 +118,11 @@ public class NetflowScheduler
             }
             catch (IOException ioEx)
             {
-                Console.WriteLine($"I/O error occurred: {ioEx.Message}");
+                _logger.LogError($"I/O error occurred: {ioEx.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error occurred: {ex.Message}");
+                _logger.LogError($"Error occurred: {ex.Message}");
             }
         }
     }
@@ -130,7 +133,7 @@ public class NetflowScheduler
         {
             _cancellationTokenSource.Cancel();
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("[INFO] Netflow Scheduler is stopping...");
+            _logger.LogInformation("[INFO] Netflow Scheduler is stopping...");
         }
     }
 
@@ -194,7 +197,7 @@ public class NetflowScheduler
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to insert data");
+                _logger.LogError($"Failed to insert data");
             }
         }
     }

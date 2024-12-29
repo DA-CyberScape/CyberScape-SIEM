@@ -7,13 +7,13 @@ namespace CS_API;
 
 using CS_SIEM_PROTOTYP;
 
-public static class ProcessStarter
+public class ProcessStarter
 {
     private static CancellationTokenSource? _cts = null;
     private static Task? _currentTask = null;
-    private static ModuleStarter _moduleStarter;
+    private ModuleStarter _moduleStarter;
 
-    public static async Task StartProcessAsync(string configPath, CancellationToken cancellationToken)
+    public async Task StartProcessAsync(string configPath, CancellationToken cancellationToken)
     {
         if (!File.Exists(configPath))
         {
@@ -38,7 +38,7 @@ public static class ProcessStarter
         await _currentTask;
     }
 
-    public static void StopProcess()
+    public void StopProcess()
     {
         if (_cts == null || _currentTask == null)
         {

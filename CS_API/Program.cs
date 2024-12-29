@@ -1,6 +1,9 @@
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CS_API;
+using CS_SIEM_PROTOTYP;
+using CS_DatabaseManager;
 using System.IdentityModel.Tokens.Jwt;
 
 
@@ -14,7 +17,17 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 // builder.Services.AddAuthentication(options => { options.DefaultAuthenticateScheme = JwtB})
 
+// builder.Services.AddSingleton<ProcessStarter>();
+// builder.Services.AddSingleton<ModuleStarter>();
+// builder.Services.AddSingleton<IDatabaseManager, ScyllaDatabaseManager>();
+// builder.Services.AddSingleton<DbHostProvider>();
+
+
 var app = builder.Build();
+
+// var ps = (ProcessStarter) app.Services.GetService(typeof(ProcessStarter))!;
+var ps = new ProcessStarter();
+
 
 // Directory setup
 var configDirectory = Path.Combine(Directory.GetCurrentDirectory(),
@@ -33,20 +46,20 @@ var files = Directory.GetFiles(configDirectory, "*.json");
 if (files.Length > 0)
 {
     var firstFile = files[0];
-    Task.Run(() => ProcessStarter.StartProcessAsync(firstFile, cts.Token));
+    await Task.Run(() => ps.StartProcessAsync(firstFile, cts.Token));
 }
 
 
 app.MapGet("/configurations", () =>
 {
-    var files = Directory.GetFiles(configDirectory, "*.json");
+    var lFiles= Directory.GetFiles(configDirectory, "*.json");
 
-    if (files.Length == 0)
+    if (lFiles.Length == 0)
     {
         return Results.NotFound("No configuration files found.");
     }
 
-    var firstFile = files[0];
+    var firstFile = lFiles[0];
     var jsonContent = File.ReadAllText(firstFile);
 
     return Results.Content(jsonContent, "application/json");
@@ -61,11 +74,11 @@ app.MapPost("/configurations", async (HttpRequest request) =>
     Console.WriteLine(newFileName);
 
     await File.WriteAllTextAsync(newFileName, jsonContent);
-    ProcessStarter.StopProcess();
+    ps.StopProcess();
     await Task.Delay(10_000);
 
     cts = new CancellationTokenSource();
-    Task.Run(() => ProcessStarter.StartProcessAsync(newFileName, cts.Token));
+    await Task.Run(() => ps.StartProcessAsync(newFileName, cts.Token));
 
     var response = new SaveResponse("Configuration saved successfully. Restarting SIEM with new Configuration",
         "example_API.json");
@@ -75,14 +88,14 @@ app.MapPost("/configurations", async (HttpRequest request) =>
 //TODO Scylla Configuration hinzufügen
 app.MapGet("/configurations/Database", () =>
 {
-    var files = Directory.GetFiles("../App_Configurations", "Database_IPs.yaml");
+    var lFiles = Directory.GetFiles("../App_Configurations", "Database_IPs.yaml");
     
-    if (files.Length == 0)
+    if (lFiles.Length == 0)
     {
         return Results.NotFound("No configuration files found.");
     }
 
-    var firstFile = files[0];
+    var firstFile = lFiles[0];
     var yamlContent = File.ReadAllText(firstFile);
     var xyz = yamlContent.Split("\n");
     var returnContent = "";
@@ -106,11 +119,11 @@ app.MapPost("/configurations/Database", async (HttpRequest request) =>
     Console.WriteLine(newFileName);
 
     await File.WriteAllTextAsync(newFileName, jsonContent);
-    ProcessStarter.StopProcess();
+    ps.StopProcess();
     await Task.Delay(10_000);
 
     cts = new CancellationTokenSource();
-    Task.Run(() => ProcessStarter.StartProcessAsync(newFileName, cts.Token));
+    await Task.Run(() => ps.StartProcessAsync(newFileName, cts.Token));
 
     var response = new SaveResponse("Configuration saved successfully. Restarting SIEM with new Configuration",
         "example_API.json");

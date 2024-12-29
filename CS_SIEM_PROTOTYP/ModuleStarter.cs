@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using CS_DatabaseManager;
+using Microsoft.Extensions.Logging;
 
 namespace CS_SIEM_PROTOTYP;
 
@@ -19,6 +20,8 @@ public class ModuleStarter
     private ApiStarter _apiStarter;
     private readonly IDatabaseManager _db;
     private readonly int _delay;
+    private ILoggerFactory _loggerFactory;
+    private ILogger _logger;
 
     private CancellationTokenSource _cancellationTokenSource;
 
@@ -34,46 +37,57 @@ public class ModuleStarter
         _db = db;
         _apiStarter = new ApiStarter(db);
         _cancellationTokenSource = new CancellationTokenSource();
+        _loggerFactory = LoggerFactory.Create(builder => 
+            builder
+                .AddConsole()
+                .SetMinimumLevel(LogLevel.Information)
+                .AddFilter("Snmp Trap", LogLevel.Critical)
+                .AddFilter("Syslog", LogLevel.Critical)
+                .AddFilter("Netflow", LogLevel.Information)
+                .AddFilter("Snmp Poll", LogLevel.Critical)
+                .AddFilter("ModuleStarter", LogLevel.Information));
+        _logger = _loggerFactory.CreateLogger("ModuleStarter");
     }
 
     public async Task StartSIEM(string PathToJsonConfiguration)
     {
-        Console.WriteLine("PROCESSING DATA");
+        _logger.LogInformation("Processing data");
         ProcessData(PathToJsonConfiguration);
-        Console.WriteLine("FINISHED PROCESSING DATA");
+        _logger.LogInformation("Finished processing data");
         List<SnmpPollRequest> snmpPollList = Converter.convertJsontoSNMPPollRequest(snmpPollsDict);
         List<NfConfig> netflowList = Converter.convertJsontoNetflowDict(netflowReceiverDict);
         List<PrtgConfig> prtgList = Converter.convertJsontoPRTG(prtgReceiverDict);
         List<SnmpTrapConfig> snmpTrapList = Converter.convertJsontoSNMPTrap(snmpTrapReceiverDict);
         List<SyslogConfig> syslogList = Converter.ConvertJsontoSyslogConfigs(syslogDict);
-
-        Console.WriteLine("[INFO] Starting the SIEM");
+    
+        
+        _logger.LogInformation("Starting the SIEM");
         if (snmpTrapList.Count > 0)
         {
-            _snmpTrapScheduler = new SnmpTrapScheduler(snmpTrapList, _db, _delay);
+            _snmpTrapScheduler = new SnmpTrapScheduler(snmpTrapList, _db, _loggerFactory.CreateLogger("Snmp Trap"), _delay);
             _snmpTrapScheduler.StartAnalyzingAsync();
 
         }
         if (syslogList.Count > 0)
         {
-            _syslogScheduler = new SyslogScheduler(syslogList, _db, _delay);
+            _syslogScheduler = new SyslogScheduler(syslogList, _db, _loggerFactory.CreateLogger("Syslog"), _delay);
             _syslogScheduler.StartAnalyzingAsync();
         }
         if (netflowList.Count > 0)
         {
-            _netflowScheduler = new NetflowScheduler(netflowList, _db, _delay);
+            _netflowScheduler = new NetflowScheduler(netflowList, _db, _loggerFactory.CreateLogger("Netflow"), _delay);
             _netflowScheduler.StartAnalyzingAsync();
         }
 
         if (snmpPollList.Count > 0)
         {
-            _snmpPollScheduler = new SnmpPollScheduler(snmpPollList, _db, _delay);
+            _snmpPollScheduler = new SnmpPollScheduler(snmpPollList, _db, _loggerFactory.CreateLogger("Snmp Poll"), _delay);
             _snmpPollScheduler.StartPollingAsync();
         }
 
         
 
-        _apiStarter.StartApiAsync();
+        await _apiStarter.StartApiAsync();
 
         try
         {
@@ -81,36 +95,27 @@ public class ModuleStarter
         }
         catch (TaskCanceledException)
         {
-            Console.WriteLine("[INFO] The Stop SIEM Method has been called STOPPING SIEM");
+            _logger.LogInformation("The Stop SIEM Method has been called STOPPING SIEM");
         }
     }
 
     public void StopSIEM()
     {
-        Console.WriteLine("[INFO] Stopping the SIEM");
         _cancellationTokenSource.Cancel();
+        _logger.LogInformation("Stopping the SIEM");
 
         _apiStarter.StopApi();
         _snmpPollScheduler?.StopPolling();
         _netflowScheduler?.StopPolling();
         _syslogScheduler?.StopPolling();
         _snmpTrapScheduler?.StopPolling();
-
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("[INFO] SIEM Stopped");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine("---------------------------------------------------");
+        
+        _logger.LogInformation("---------------------------------------------------");
+        _logger.LogInformation("---------------------------------------------------");
+        _logger.LogInformation("SIEM Stopped");
+        _logger.LogInformation("---------------------------------------------------");
+        _logger.LogInformation("---------------------------------------------------");
+        _loggerFactory.Dispose();
     }
 
     private void ProcessData(string PathToJsonConfiguration)

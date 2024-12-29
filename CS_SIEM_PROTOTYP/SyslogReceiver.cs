@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using CS_DatabaseManager;
+using Microsoft.Extensions.Logging;
 
 namespace CS_SIEM_PROTOTYP
 {
@@ -17,26 +18,27 @@ namespace CS_SIEM_PROTOTYP
         private static UdpClient _udpClient;
         private IDatabaseManager _db;
         private int _port;
-
+        private ILogger _logger;
         public void ReceiveData()
         {
             throw new NotImplementedException();
         }
 
-        public SyslogReceiver(IDatabaseManager db, int port, int delay = 10)
+        public SyslogReceiver(IDatabaseManager db, int port, ILogger logger,int delay = 10)
         {
             _db = db;
             _delay = delay;
             _port = port;
             _db.CreateTable("Syslog", GetSyslogColumnTypes(), "UUID, timestamp"); 
             _db.CreateTable("WinEvents", GetSyslogColumnTypes(), "UUID, timestamp");
+            _logger = logger;
         }
 
 
         public async Task ReceiveSyslogData()
         {
             _udpClient = new UdpClient(_port);
-            Console.WriteLine($"[INFO] Syslog Receiver is listening on port {_port}...");
+            _logger.LogInformation($"[INFO] Syslog Receiver is listening on port {_port}...");
 
             Task.Run(() => StartPeriodicDatabaseInsert(_delay, cancellationToken), cancellationToken);
 
@@ -68,7 +70,7 @@ namespace CS_SIEM_PROTOTYP
             }
             catch (Exception e)
             {
-                Console.WriteLine($"[ERROR] An error occurred: {e.Message}");
+                _logger.LogError($"[ERROR] An error occurred: {e.Message}");
             }
         }
 
@@ -94,12 +96,12 @@ namespace CS_SIEM_PROTOTYP
                 {
                     if (syslogMessage.Message.Length > 0)
                     {
-                        Console.WriteLine($"[INFO] Inserted message from {syslogMessage.Hostname} into database.");
-                        Console.WriteLine(syslogMessage.Facility + " Facility");
-                        Console.WriteLine(syslogMessage.Severity + " Severity");
-                        Console.WriteLine(syslogMessage.Hostname + " Hostname");
-                        Console.WriteLine(syslogMessage.Timestamp + " Timestamp");
-                        Console.WriteLine(syslogMessage.Message + " Message");
+                        _logger.LogInformation($"[INFO] Inserted message from {syslogMessage.Hostname} into database.");
+                        // Console.WriteLine(syslogMessage.Facility + " Facility");
+                        // Console.WriteLine(syslogMessage.Severity + " Severity");
+                        // Console.WriteLine(syslogMessage.Hostname + " Hostname");
+                        // Console.WriteLine(syslogMessage.Timestamp + " Timestamp");
+                        // Console.WriteLine(syslogMessage.Message + " Message");
 
                         // TODO: MEHMET DB LOGIK
                         await InsertSyslogDataAsync(syslogMessage, "Syslog", GetSyslogColumnTypes());
@@ -139,7 +141,7 @@ namespace CS_SIEM_PROTOTYP
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to insert data {ex}");
+                _logger.LogError($"Failed to insert data {ex}");
             }
         }
 
@@ -187,7 +189,7 @@ namespace CS_SIEM_PROTOTYP
 
             _cancellationTokenSource.Dispose();
             _cancellationTokenSource = null;
-            Console.WriteLine("[INFO] Syslog Receiver shutdown initiated...");
+            _logger.LogInformation("[INFO] Syslog Receiver shutdown initiated...");
         }
 
         private static SyslogAnswer ProcessSyslogMessage(string syslogMessage, string sourceIP)
