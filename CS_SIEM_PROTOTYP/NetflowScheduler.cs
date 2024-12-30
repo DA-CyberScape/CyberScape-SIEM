@@ -13,7 +13,8 @@ public class NetflowScheduler
     private static List<NetFlowData> _allNetFlowData = new List<NetFlowData>();
     private ILogger _logger;
 
-    public NetflowScheduler(List<NfConfig> nfConfigs, IDatabaseManager databaseManager, ILogger logger,int delayInSeconds = 10)
+    public NetflowScheduler(List<NfConfig> nfConfigs, IDatabaseManager databaseManager, ILogger logger,
+        int delayInSeconds = 10)
     {
         _nfConfigs = nfConfigs;
         _delay = delayInSeconds;
@@ -50,8 +51,8 @@ public class NetflowScheduler
                         // Console.WriteLine($"Hello {i}");
                         List<string> lines = NetflowReceiver.ProcessCapturedFile(nfpath, config.NfdumpBinaryLocation);
                         _allNetFlowData.AddRange(NetflowReceiver.ParseNetFlowData(lines));
-                        
                     }
+
                     MoveFilesToOldDirectory(config.FolderLocation, netflowPaths);
 
                     if (_allNetFlowData.Count > 0)
@@ -168,7 +169,7 @@ public class NetflowScheduler
             { "dstPort", typeof(int) },
             { "bytes", typeof(long) },
             { "timestamp", typeof(DateTime) },
-            { "duration", typeof(Duration) },
+            { "duration", typeof(Cassandra.Duration) },
             { "protocol", typeof(string) },
             { "flag", typeof(string) },
             { "typeOfService", typeof(int) },
@@ -185,12 +186,16 @@ public class NetflowScheduler
         foreach (var nfData in nfDatas)
         {
             var data = MapnfDataToData(nfData);
-
+            
+            // _logger.LogDebug("Begin Row");
+            // // _logger.LogDebug(nfData.duration.ToString());
+            // //
             // foreach (var value in data)
             // {
-            //     Console.WriteLine(value);
+            //     Console.Write(value + " --- ");
             // }
-
+            // Console.WriteLine();
+            // _logger.LogDebug("End Row");
             try
             {
                 await _databaseManager.InsertData(table, columns, data);

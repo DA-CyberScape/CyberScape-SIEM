@@ -63,6 +63,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
             { typeof(bool), "BOOLEAN" },
             { typeof(string), "TEXT" },
             { typeof(DateTime), "TIMESTAMP" },
+            { typeof(Cassandra.Duration), "DURATION"},
             { typeof(Guid), "UUID" },
             { typeof(byte[]), "BLOB" },
             { typeof(IPAddress), "INET" }
@@ -216,7 +217,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
 
         await _session.ExecuteAsync(statement).ContinueWith(t =>
         {
-            if (t.IsFaulted) Console.WriteLine($"Error inserting data: {t.Exception?.GetBaseException().Message}");
+            if (t.IsFaulted) Console.WriteLine($"Error inserting data: {t.Exception?.Message}");
         });
         // await Task.Delay(1000);
     }

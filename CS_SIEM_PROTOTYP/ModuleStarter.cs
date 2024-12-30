@@ -41,10 +41,10 @@ public class ModuleStarter
             builder
                 .AddConsole()
                 .SetMinimumLevel(LogLevel.Information)
-                .AddFilter("Snmp Trap", LogLevel.Debug)
-                .AddFilter("Syslog", LogLevel.Information)
-                .AddFilter("Netflow", LogLevel.Information)
-                .AddFilter("Snmp Poll", LogLevel.Information)
+                .AddFilter("Snmp Trap", LogLevel.Critical)
+                .AddFilter("Syslog", LogLevel.Critical)
+                .AddFilter("Netflow", LogLevel.Debug)
+                .AddFilter("Snmp Poll", LogLevel.Critical)
                 .AddFilter("ModuleStarter", LogLevel.Debug));
         _logger = _loggerFactory.CreateLogger("ModuleStarter");
     }
@@ -75,7 +75,9 @@ public class ModuleStarter
         if (netflowList.Count > 0)
         {
             _netflowScheduler = new NetflowScheduler(netflowList, _db, _loggerFactory.CreateLogger("Netflow"), _delay);
+            _logger.LogDebug("Netflow Scheduler start initialized");
             _netflowScheduler.StartAnalyzingAsync();
+            _logger.LogDebug("Netflow Scheduler started");
         }
 
         if (snmpPollList.Count > 0)

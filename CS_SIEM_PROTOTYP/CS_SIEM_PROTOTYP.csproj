@@ -21,6 +21,12 @@
     <ItemGroup>
         <ProjectReference Include="..\CS_DatabaseManager\CS_DatabaseManager.csproj"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Cassandra">
+        <HintPath>..\..\.nuget\packages\cassandracsharpdriver\3.22.0\lib\netstandard2.0\Cassandra.dll</HintPath>
+      </Reference>
+    </ItemGroup>
     
 
 

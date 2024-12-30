@@ -1,10 +1,13 @@
 [
   {
-    "Syslog": [
+    "netflowReceiver": [
       {
-        "name": "Sys1",
-        "id": 56756,
-        "port": 514
+        "name": "Netflow1",
+        "id": 12312,
+        "folderLocation": "/home/cyberscape_admin/Netflow_example_files",
+        "nfdumpBinaryLocation": "/usr/bin/nfdump",
+        "nfcapdBinaryLocation": "/usr/bin/nfcapd",
+        "port": 2055
       }
     ]
   }
