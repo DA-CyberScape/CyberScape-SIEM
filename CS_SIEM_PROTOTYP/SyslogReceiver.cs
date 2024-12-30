@@ -47,7 +47,6 @@ namespace CS_SIEM_PROTOTYP
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogInformation($"Cancellation Token inside WHILE: {cancellationToken.IsCancellationRequested}");
                     // Console.WriteLine($"LISTENING ON PORT {_port}");
                     // listenting part
                     IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, _port);
