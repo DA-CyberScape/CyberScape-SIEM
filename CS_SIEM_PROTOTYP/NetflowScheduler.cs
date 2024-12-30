@@ -52,8 +52,9 @@ public class NetflowScheduler
                         List<string> lines = NetflowReceiver.ProcessCapturedFile(nfpath, config.NfdumpBinaryLocation);
                         _allNetFlowData.AddRange(NetflowReceiver.ParseNetFlowData(lines));
                     }
-
-                    MoveFilesToOldDirectory(config.FolderLocation, netflowPaths);
+                    
+                    //TODO: reenable the code below later when the log generator is fully functional
+                    // MoveFilesToOldDirectory(config.FolderLocation, netflowPaths);
 
                     if (_allNetFlowData.Count > 0)
                     {
