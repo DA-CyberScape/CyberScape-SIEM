@@ -9,23 +9,32 @@
 
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="CsvHelper" Version="33.0.1" />
         <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.5" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1"/>
-        <PackageReference Include="DotNetEnv" Version="3.1.0"/>
-        <PackageReference Include="PacketDotNet" Version="1.4.7"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
+        <PackageReference Include="DotNetEnv" Version="3.1.0" />
+        <PackageReference Include="PacketDotNet" Version="1.4.7" />
         <PackageReference Include="SnmpSharpNet" Version="0.9.6" />
         <PackageReference Include="YamlDotNet" Version="16.1.3" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CS_DatabaseManager\CS_DatabaseManager.csproj"/>
+        <ProjectReference Include="..\CS_DatabaseManager\CS_DatabaseManager.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Reference Include="Cassandra">
         <HintPath>..\..\.nuget\packages\cassandracsharpdriver\3.22.0\lib\netstandard2.0\Cassandra.dll</HintPath>
       </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Update="Configurations_Example\example_API.json">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
     </ItemGroup>
     
 

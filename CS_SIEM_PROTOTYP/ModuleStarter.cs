@@ -8,6 +8,11 @@ using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using CS_DatabaseManager;
 using Microsoft.Extensions.Logging;
+using CsvHelper;
+using CsvHelper.Configuration;
+using System.Globalization;
+
+
 
 namespace CS_SIEM_PROTOTYP;
 
@@ -59,8 +64,20 @@ public class ModuleStarter
         List<PrtgConfig> prtgList = Converter.convertJsontoPRTG(prtgReceiverDict);
         List<SnmpTrapConfig> snmpTrapList = Converter.convertJsontoSNMPTrap(snmpTrapReceiverDict);
         List<SyslogConfig> syslogList = Converter.ConvertJsontoSyslogConfigs(syslogDict);
-    
+        _logger.LogInformation("Converted everything correctly");
+        _logger.LogInformation("Current Directory: " + Environment.CurrentDirectory);
         
+        _logger.LogInformation("Turning CSV of OIDs into a Dictionary ");
+        var oidDetailsDictionary = new Dictionary<string, (string ObjectName, string Description)>();
+        oidDetailsDictionary = PrepareSnmpOidDictionary("OID_CSV");
+        _logger.LogInformation("Successfully turned CSV of OIDs into a Dictionary ");
+        foreach (var item in oidDetailsDictionary)
+        {
+            _logger.LogInformation($"OID: {item.Key}, Name: {item.Value.ObjectName}, Description: {item.Value.Description}");
+        }
+
+
+
         _logger.LogInformation("Starting the SIEM");
         if (snmpTrapList.Count > 0)
         {
@@ -123,6 +140,50 @@ public class ModuleStarter
         _logger.LogInformation("---------------------------------------------------");
         _logger.LogInformation("---------------------------------------------------");
         _loggerFactory.Dispose();
+    }
+
+    public Dictionary<String, (string ObjectName, string Description)> PrepareSnmpOidDictionary(string PathToFolder)
+    {
+        var oidDetailsDictionary = new Dictionary<string, (string ObjectName, string Description)>();
+        PathToFolder = Path.Combine(Environment.CurrentDirectory, PathToFolder);
+        _logger.LogInformation("Path to the Folder of CSV with OIDs "+ PathToFolder);
+        string[] csvFiles = Directory.GetFiles(PathToFolder, "*.csv");
+        
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            Delimiter = ",",
+            MissingFieldFound = null,
+            TrimOptions = TrimOptions.Trim,
+            HeaderValidated = null,
+            HasHeaderRecord = true
+        };
+        
+        foreach (var file in csvFiles)
+        {
+            _logger.LogInformation("Current CSV Files Data being extracted " + file);
+            using (var reader = new StreamReader(file)) 
+            using (var csv = new CsvReader(reader, config))
+            {
+                
+                if (reader.Peek() == -1)
+                {
+                    _logger.LogWarning($"File {file} is empty.");
+                    continue;
+                }
+                
+                Console.WriteLine(1);
+                var records = csv.GetRecords<OidCsv>();
+                Console.WriteLine(2);
+                
+                foreach (var record in records)
+                {
+                    oidDetailsDictionary[record.OBJECT_IDENTIFIER] = (record.OBJECT_NAME, record.OBJECT_DESCRIPTION);
+                }
+            }
+        }
+        
+
+        return oidDetailsDictionary;
     }
 
     private void ProcessData(string PathToJsonConfiguration)

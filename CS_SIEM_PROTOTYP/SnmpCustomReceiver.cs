@@ -187,8 +187,8 @@ public class SnmpCustomReceiver : IDataReceiver
                 // Check if the OID does not end with ".0"
                 if (!baseOid.EndsWith(".0"))
                 {
-                    // Loop to append ".x" to the base OID where x ranges from 1 to 100
-                    for (int x = 1; x <= 30; x++)
+                    // Loop to append ".x" to the base OID where x ranges from 0 to 100
+                    for (int x = 0; x <= 100; x++)
                     {
                         string modifiedOid = $"{baseOid}.{x}";
                         string modifiedName = $"{baseName}.{x}";
