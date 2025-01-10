@@ -16,9 +16,10 @@ namespace CS_SIEM_PROTOTYP
         private readonly List<Task> _snmpTrapTasks;
         private CancellationTokenSource _cancellationTokenSource;
         private ILogger _logger;
+        private Dictionary<string, (string ObjectName, string Description)> _oidDictionary;
 
         public SnmpTrapScheduler(List<SnmpTrapConfig> snmpTrapConfigs, IDatabaseManager databaseManager,
-            ILogger logger,
+            ILogger logger,Dictionary<string, (string ObjectName, string Description)> oidDictionary,
             int delayInSeconds = 10)
         {
             _snmpTrapConfigs = snmpTrapConfigs;
@@ -28,6 +29,7 @@ namespace CS_SIEM_PROTOTYP
             _snmpTrapTasks = new List<Task>();
             _cancellationTokenSource = new CancellationTokenSource();
             _logger = logger;
+            _oidDictionary = oidDictionary;
         }
 
 
@@ -41,7 +43,7 @@ namespace CS_SIEM_PROTOTYP
             foreach (var config in _snmpTrapConfigs)
             {
                 _logger.LogInformation($"{config}");
-                var snmpTrapReceiver = new SnmpTrapReceiver(_databaseManager, _logger, config.Port, _delay);
+                var snmpTrapReceiver = new SnmpTrapReceiver(_databaseManager, _logger,_oidDictionary,  config.Port, _delay);
                 _snmpTrapReceivers.Add(snmpTrapReceiver);
                 
 

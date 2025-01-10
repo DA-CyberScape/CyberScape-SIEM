@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Cassandra;
 using Microsoft.Extensions.Logging;
 
 namespace CS_SIEM_PROTOTYP
@@ -22,7 +23,7 @@ namespace CS_SIEM_PROTOTYP
             _delay = delayInSeconds;
             _databaseManager = databaseManager;
             _cancellationTokenSource = new CancellationTokenSource();
-            _databaseManager.CreateTable("SNMP", GetSnmpPollColumn(), "UUID, timestamp");
+            _databaseManager.CreateTable("SNMP", GetSnmpPollColumn(), "date, UUID, time");
             _logger = logger;
         }
 
@@ -122,7 +123,8 @@ namespace CS_SIEM_PROTOTYP
                 { "oid_name", snmp.Name },
                 { "oid", snmp.Oid },
                 { "oidValue", snmp.OidValue },
-                { "timestamp", snmp.Timestamp },
+                { "time", snmp.Time },
+                { "date", snmp.Date},
                 { "UUID", Guid.NewGuid() }
             };
         }
@@ -135,8 +137,9 @@ namespace CS_SIEM_PROTOTYP
                 { "oid_name", typeof(string) },
                 { "oid", typeof(string) },
                 { "oidValue", typeof(string) },
-                { "timestamp", typeof(DateTime) },
-                { "UUID", typeof(Guid) }
+                { "time", typeof(LocalTime) },
+                { "UUID", typeof(Guid) },
+                { "date", typeof(LocalDate)}
             };
         }
     }

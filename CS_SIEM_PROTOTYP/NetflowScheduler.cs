@@ -20,7 +20,7 @@ public class NetflowScheduler
         _delay = delayInSeconds;
         _databaseManager = databaseManager;
         _cancellationTokenSource = new CancellationTokenSource();
-        _databaseManager.CreateTable("Netflow", GetNetflowColumnTypes(), "UUID, timestamp");
+        _databaseManager.CreateTable("Netflow", GetNetflowColumnTypes(), "date, UUID, time");
         _logger = logger;
     }
 
@@ -148,7 +148,8 @@ public class NetflowScheduler
             { "srcPort", nfData.srcPort },
             { "dstPort", nfData.dstPort },
             { "bytes", nfData.bytes },
-            { "timestamp", nfData.timestamp },
+            { "time", nfData.time },
+            { "date", nfData.date},
             { "duration", nfData.duration },
             { "protocol", nfData.protocol },
             { "flag", nfData.flag },
@@ -169,8 +170,9 @@ public class NetflowScheduler
             { "srcPort", typeof(int) },
             { "dstPort", typeof(int) },
             { "bytes", typeof(long) },
-            { "timestamp", typeof(DateTime) },
-            { "duration", typeof(Cassandra.Duration) },
+            { "time", typeof(LocalTime) },
+            { "date", typeof(LocalDate)},
+            { "duration", typeof(Duration) },
             { "protocol", typeof(string) },
             { "flag", typeof(string) },
             { "typeOfService", typeof(int) },
@@ -203,7 +205,7 @@ public class NetflowScheduler
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to insert data");
+                _logger.LogError($"Failed to insert data: " + ex.Message);
             }
         }
     }

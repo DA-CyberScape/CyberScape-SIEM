@@ -62,11 +62,13 @@ public class ScyllaDatabaseManager : IDatabaseManager
             { typeof(double), "DOUBLE" },
             { typeof(bool), "BOOLEAN" },
             { typeof(string), "TEXT" },
-            { typeof(DateTime), "TIMESTAMP" },
-            { typeof(Cassandra.Duration), "DURATION"},
+            { typeof(DateTimeOffset), "TIMESTAMP" },
+            { typeof(Duration), "DURATION"},
             { typeof(Guid), "UUID" },
             { typeof(byte[]), "BLOB" },
-            { typeof(IPAddress), "INET" }
+            { typeof(IPAddress), "INET" },
+            { typeof(LocalDate), "DATE"},
+            { typeof(LocalTime), "TIME"}
         };
 
 

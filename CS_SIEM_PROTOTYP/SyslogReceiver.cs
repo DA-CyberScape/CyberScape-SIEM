@@ -4,6 +4,7 @@ using System.Text;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using Cassandra;
 using CS_DatabaseManager;
 using Microsoft.Extensions.Logging;
 
@@ -19,18 +20,19 @@ namespace CS_SIEM_PROTOTYP
         private IDatabaseManager _db;
         private int _port;
         private ILogger _logger;
+
         public void ReceiveData()
         {
             throw new NotImplementedException();
         }
 
-        public SyslogReceiver(IDatabaseManager db, int port, ILogger logger,int delay = 10)
+        public SyslogReceiver(IDatabaseManager db, int port, ILogger logger, int delay = 10)
         {
             _db = db;
             _delay = delay;
             _port = port;
-            _db.CreateTable("Syslog", GetSyslogColumnTypes(), "UUID, timestamp"); 
-            _db.CreateTable("WinEvents", GetSyslogColumnTypes(), "UUID, timestamp");
+            _db.CreateTable("Syslog", GetSyslogColumnTypes(), "date, UUID, time");
+            _db.CreateTable("WinEvents", GetSyslogColumnTypes(), "date, UUID, time");
             _logger = logger;
         }
 
@@ -131,24 +133,19 @@ namespace CS_SIEM_PROTOTYP
             // {
             //     Console.WriteLine(value);
             // }
-            
+
             try
             {
                 // Console.WriteLine(data["message"].ToString().StartsWith("MSWinEventLog"));
                 // Console.WriteLine("CHICKENLEGPIECE");
                 if (data["message"].ToString().StartsWith("MSWinEventLog"))
                 {
-                    
-                    await _db.InsertData("WinEvents",columns, data);
-                    
+                    await _db.InsertData("WinEvents", columns, data);
                 }
                 else
                 {
                     await _db.InsertData(table, columns, data);
-                    
                 }
-
-                
             }
             catch (Exception ex)
             {
@@ -161,7 +158,8 @@ namespace CS_SIEM_PROTOTYP
             return new Dictionary<string, Type>
             {
                 { "srcIP", typeof(string) },
-                { "timestamp", typeof(DateTime) },
+                { "time", typeof(LocalTime) },
+                { "date", typeof(LocalDate) },
                 { "facility", typeof(int) },
                 { "severity", typeof(int) },
                 { "rawMessage", typeof(string) },
@@ -176,7 +174,8 @@ namespace CS_SIEM_PROTOTYP
             return new Dictionary<string, object>
             {
                 { "srcIP", syslogAnswer.SourceIP },
-                { "timestamp", syslogAnswer.Timestamp },
+                { "time", syslogAnswer.Time },
+                { "date", syslogAnswer.Date },
                 { "facility", syslogAnswer.Facility },
                 { "severity", syslogAnswer.Severity },
                 { "rawMessage", syslogAnswer.RawMessage },
@@ -188,10 +187,11 @@ namespace CS_SIEM_PROTOTYP
 
         public void StopReceiver()
         {
-            _logger.LogInformation($"[INFO] Syslog Receiver shutdown initiated... {_cancellationTokenSource.IsCancellationRequested}");
+            _logger.LogInformation(
+                $"[INFO] Syslog Receiver shutdown initiated... {_cancellationTokenSource.IsCancellationRequested}");
 
             _cancellationTokenSource.Cancel();
-            
+
             _logger.LogInformation("[INFO] Syslog Receiver shutdown initiated...");
             _udpClient?.Close();
         }
@@ -215,37 +215,56 @@ namespace CS_SIEM_PROTOTYP
 
                         string afterPriority = syslogMessage.Substring(priorityEnd + 1);
                         string[] parts = afterPriority.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
                         if (parts.Length > 1 && int.TryParse(parts[0], out int version))
                         {
-                            syslogAnswer.Timestamp = DateTime.Parse(parts[1]);
+                            DateTime Timestamp = DateTime.Parse(parts[1]);
+                            syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
+                            syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, 0);
                             syslogAnswer.Hostname = parts[2];
                             syslogAnswer.Message = string.Join(" ", parts.Skip(6));
                         }
                         else
                         {
                             string timestampString = afterPriority.Substring(0, 15);
-                            syslogAnswer.Timestamp = DateTime.ParseExact(timestampString, "MMM dd HH:mm:ss", null);
+                            DateTime Timestamp = DateTime.ParseExact(timestampString, "MMM dd HH:mm:ss", null);
+                            syslogAnswer.Date = new LocalDate(DateTime.Now.Year, Timestamp.Month, Timestamp.Day);
+                            syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, 0);
+                            
+                            
+                            
                             string[] rfc3164Parts = afterPriority.Substring(16).Trim().Split(' ', 2);
                             syslogAnswer.Hostname = rfc3164Parts[0];
                             syslogAnswer.Message = rfc3164Parts.Length > 1 ? rfc3164Parts[1] : "";
+                            // MEHMET WENN DU DAS JAHR BEI SO WELCHEN NACHRICHTEN AUCH HINZUFUEGEN WILLST
+                            // var year = DateTime.Now.Year;
+                            // DateTime timestampWithYear = new DateTime(year, parsedTimestamp.Month, parsedTimestamp.Day, parsedTimestamp.Hour, parsedTimestamp.Minute, parsedTimestamp.Second);
+                            // wenn man das Jahr auch braucht
                         }
                     }
                 }
                 else
                 {
-                    syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
+                    // syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
+                    syslogAnswer.Date = new LocalDate(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                    syslogAnswer.Time = new LocalTime(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second, 0);
+                    Console.WriteLine(DateTime.Now.Hour+ ":SLDKFJS:DLKFJS:DLKFJS:DLKFJSD:LKFJSD:LKFJSD");
                     syslogAnswer.Hostname = sourceIP;
                     syslogAnswer.Message = syslogMessage;
                 }
             }
             catch
             {
-                syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
+                // syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
+                syslogAnswer.Date = new LocalDate(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                syslogAnswer.Time = new LocalTime(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second, 0);
                 syslogAnswer.Hostname = sourceIP;
                 syslogAnswer.Message = syslogMessage;
             }
 
+            // Console.WriteLine(syslogAnswer);
+            // Console.WriteLine("------------");
+            // Console.WriteLine(syslogAnswer.Message);
+            // Console.WriteLine(syslogAnswer.Timestamp);
 
             return syslogAnswer;
         }
@@ -288,7 +307,8 @@ namespace CS_SIEM_PROTOTYP
 
     public class SyslogAnswer
     {
-        public DateTime Timestamp { get; set; }
+        public LocalDate Date { get; set; }
+        public LocalTime Time { get; set; }
         public string Hostname { get; set; }
         public string Message { get; set; }
         public int Facility { get; set; }
@@ -299,7 +319,7 @@ namespace CS_SIEM_PROTOTYP
         public override string ToString()
         {
             return
-                $"[{Timestamp}] {Hostname} (Facility: {Facility}, Severity: {Severity}, Source: {SourceIP}): {Message}";
+                $"[{Date} {Time}] {Hostname} (Facility: {Facility}, Severity: {Severity}, Source: {SourceIP}): {Message} ";
         }
     }
 }

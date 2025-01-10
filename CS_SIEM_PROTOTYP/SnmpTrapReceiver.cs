@@ -20,14 +20,16 @@ public class SnmpTrapReceiver
     private IDatabaseManager _db;
     private int _port;
     private ILogger _logger;
+    private Dictionary<string, (string ObjectName, string Description)> _oidDictionary;
     
-    public SnmpTrapReceiver(IDatabaseManager db, ILogger logger, int port = 162, int delay = 10)
+    public SnmpTrapReceiver(IDatabaseManager db, ILogger logger,Dictionary<string, (string ObjectName, string Description)> oidDictionary, int port = 162, int delay = 10)
     {
         
         _db = db;
         _delay = delay;
         _port = port;
         _logger = logger;
+        _oidDictionary = oidDictionary;
     }
 
 

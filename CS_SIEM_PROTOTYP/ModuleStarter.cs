@@ -68,6 +68,7 @@ public class ModuleStarter
         _logger.LogInformation("Current Directory: " + Environment.CurrentDirectory);
         
         _logger.LogInformation("Turning CSV of OIDs into a Dictionary ");
+        // Diese Dictionary enthaelt folgenden Daten fuer alle OIDS: IDENTIFIER, NAMEN UND DESCRIPTION
         var oidDetailsDictionary = new Dictionary<string, (string ObjectName, string Description)>();
         oidDetailsDictionary = PrepareSnmpOidDictionary("OID_CSV");
         _logger.LogInformation("Successfully turned CSV of OIDs into a Dictionary ");
@@ -81,7 +82,7 @@ public class ModuleStarter
         _logger.LogInformation("Starting the SIEM");
         if (snmpTrapList.Count > 0)
         {
-            _snmpTrapScheduler = new SnmpTrapScheduler(snmpTrapList, _db, _loggerFactory.CreateLogger("Snmp Trap"), _delay);
+            _snmpTrapScheduler = new SnmpTrapScheduler(snmpTrapList, _db, _loggerFactory.CreateLogger("Snmp Trap"),oidDetailsDictionary, _delay);
             _snmpTrapScheduler.StartAnalyzingAsync();
         }
         if (syslogList.Count > 0)

@@ -3,6 +3,7 @@ using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Cassandra;
 
 namespace CS_SIEM_PROTOTYP;
 
@@ -126,21 +127,21 @@ public class NetflowReceiver : IDataReceiver
         if (match.Success)
         {
             return new NetFlowData
-            {
-                timestamp = DateTime.Parse(match.Groups["timestamp"].Value),
-                duration = new Cassandra.Duration(0, 0, parseDurationtoNano(match.Groups["duration"].Value)),
-                protocol = match.Groups["protocol"].Value,
-                srcIP = match.Groups["srcIP"].Value,
-                srcPort = int.Parse(match.Groups["srcPort"].Value),
-                dstIP = match.Groups["dstIP"].Value,
-                dstPort = 0,
-                bytes = long.Parse(match.Groups["bytes"].Value),
-                packets = int.Parse(match.Groups["packets"].Value),
-                flows = int.Parse(match.Groups["flows"].Value),
-                typeOfService = int.Parse(match.Groups["typeOfService"].Value.Trim()),
-                icmpType = Double.Parse(match.Groups["icmpType"].Value),
-                flag = match.Groups["flag"].Value
-            };
+            (
+                DateTime.Parse(match.Groups["timestamp"].Value),
+                new Cassandra.Duration(0, 0, parseDurationtoNano(match.Groups["duration"].Value)),
+                match.Groups["protocol"].Value,
+                match.Groups["srcIP"].Value,
+                int.Parse(match.Groups["srcPort"].Value),
+                match.Groups["dstIP"].Value,
+                0,
+                long.Parse(match.Groups["bytes"].Value),
+                int.Parse(match.Groups["packets"].Value),
+                int.Parse(match.Groups["flows"].Value),
+                int.Parse(match.Groups["typeOfService"].Value.Trim()),
+                Double.Parse(match.Groups["icmpType"].Value),
+                match.Groups["flag"].Value
+            );
         }
         else
         {
@@ -150,21 +151,21 @@ public class NetflowReceiver : IDataReceiver
             if (m.Success)
             {
                 return new NetFlowData
-                {
-                    timestamp = DateTime.Parse(m.Groups["timestamp"].Value),
-                    duration = new Cassandra.Duration(0, 0, parseDurationtoNano(m.Groups["duration"].Value)),
-                    protocol = m.Groups["protocol"].Value,
-                    srcIP = m.Groups["srcIP"].Value,
-                    srcPort = int.Parse(m.Groups["srcPort"].Value),
-                    dstIP = m.Groups["dstIP"].Value,
-                    dstPort = 0,
-                    bytes = long.Parse(m.Groups["bytes"].Value),
-                    packets = int.Parse(m.Groups["packets"].Value),
-                    flows = int.Parse(m.Groups["flows"].Value),
-                    typeOfService = int.Parse(m.Groups["typeOfService"].Value.Trim()),
-                    icmpType = Double.Parse(m.Groups["icmpType"].Value),
-                    flag = m.Groups["flag"].Value
-                };
+                (
+                    DateTime.Parse(m.Groups["timestamp"].Value),
+                    new Cassandra.Duration(0, 0, parseDurationtoNano(m.Groups["duration"].Value)),
+                    m.Groups["protocol"].Value,
+                    m.Groups["srcIP"].Value,
+                    int.Parse(m.Groups["srcPort"].Value),
+                    m.Groups["dstIP"].Value,
+                    0,
+                    long.Parse(m.Groups["bytes"].Value),
+                    int.Parse(m.Groups["packets"].Value),
+                    int.Parse(m.Groups["flows"].Value),
+                    int.Parse(m.Groups["typeOfService"].Value.Trim()),
+                    Double.Parse(m.Groups["icmpType"].Value),
+                    m.Groups["flag"].Value
+                );
             }
         }
 
@@ -183,20 +184,20 @@ public class NetflowReceiver : IDataReceiver
         if (match.Success)
         {
             return new NetFlowData
-            {
-                timestamp = DateTime.Parse(match.Groups["timestamp"].Value),
-                duration = new Cassandra.Duration(0, 0, parseDurationtoNano(match.Groups["duration"].Value)),
-                protocol = match.Groups["protocol"].Value,
-                srcIP = match.Groups["srcIP"].Value,
-                srcPort = int.Parse(match.Groups["srcPort"].Value),
-                dstIP = match.Groups["dstIP"].Value,
-                dstPort = int.Parse(match.Groups["dstPort"].Value),
-                bytes = long.Parse(match.Groups["bytes"].Value),
-                packets = int.Parse(match.Groups["packets"].Value),
-                flows = int.Parse(match.Groups["flows"].Value),
-                typeOfService = int.Parse(match.Groups["typeOfService"].Value.Trim()),
-                flag = match.Groups["flag"].Value
-            };
+            (
+                DateTime.Parse(match.Groups["timestamp"].Value),
+                new Duration(0, 0, parseDurationtoNano(match.Groups["duration"].Value)),
+                match.Groups["protocol"].Value,
+                match.Groups["srcIP"].Value,
+                int.Parse(match.Groups["srcPort"].Value),
+                match.Groups["dstIP"].Value,
+                int.Parse(match.Groups["dstPort"].Value),
+                long.Parse(match.Groups["bytes"].Value),
+                int.Parse(match.Groups["packets"].Value),
+                int.Parse(match.Groups["flows"].Value),
+                int.Parse(match.Groups["typeOfService"].Value.Trim()),
+                match.Groups["flag"].Value
+            );
         }
         else
         {
@@ -206,20 +207,20 @@ public class NetflowReceiver : IDataReceiver
             if (m.Success)
             {
                 return new NetFlowData
-                {
-                    timestamp = DateTime.Parse(m.Groups["timestamp"].Value),
-                    duration = new Cassandra.Duration(0, 0, parseDurationtoNano(match.Groups["duration"].Value)),
-                    protocol = m.Groups["protocol"].Value,
-                    srcIP = m.Groups["srcIP"].Value,
-                    srcPort = int.Parse(m.Groups["srcPort"].Value),
-                    dstIP = m.Groups["dstIP"].Value,
-                    dstPort = int.Parse(m.Groups["dstPort"].Value),
-                    bytes = long.Parse(m.Groups["bytes"].Value),
-                    packets = int.Parse(m.Groups["packets"].Value),
-                    flows = int.Parse(m.Groups["flows"].Value),
-                    typeOfService = int.Parse(m.Groups["typeOfService"].Value.Trim()),
-                    flag = m.Groups["flag"].Value
-                };
+                (
+                    DateTime.Parse(m.Groups["timestamp"].Value),
+                    new Duration(0, 0, parseDurationtoNano(match.Groups["duration"].Value)),
+                    m.Groups["protocol"].Value,
+                    m.Groups["srcIP"].Value,
+                    int.Parse(m.Groups["srcPort"].Value),
+                    m.Groups["dstIP"].Value,
+                    int.Parse(m.Groups["dstPort"].Value),
+                    long.Parse(m.Groups["bytes"].Value),
+                    int.Parse(m.Groups["packets"].Value),
+                    int.Parse(m.Groups["flows"].Value),
+                    int.Parse(m.Groups["typeOfService"].Value.Trim()),
+                    m.Groups["flag"].Value
+                );
             }
         }
 
@@ -235,7 +236,7 @@ public class NetflowReceiver : IDataReceiver
         if (strarr.Length == 1)
         {
             var secondsAndMilliseconds = float.Parse(strarr[0]);
-            nano += (long) Math.Round(secondsAndMilliseconds * 1_000_000);
+            nano += (long)Math.Round(secondsAndMilliseconds * 1_000_000);
         }
         else
         {
@@ -244,7 +245,7 @@ public class NetflowReceiver : IDataReceiver
             var secondsAndMilliseconds = float.Parse(strarr[2]);
             nano += hours * 60L * 60 * 1_000_000_000;
             nano += minutes * 60L * 1_000_000_000;
-            nano += (long) Math.Round(secondsAndMilliseconds * 1_000_000);
+            nano += (long)Math.Round(secondsAndMilliseconds * 1_000_000);
         }
 
         //returns as nanoseconds
@@ -257,13 +258,51 @@ public class NetflowReceiver : IDataReceiver
 // Class to store NetFlow data
 public class NetFlowData
 {
+    public NetFlowData(DateTime timestamp, Duration drtn, string prot, string sIp, int sPort, string dIp,
+        int dPort, long b, int pckts, int f, int tos, double icmpT, string flg)
+    {
+        time = new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second, timestamp.Nanosecond * 100000);
+        date = new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day);
+        duration = drtn;
+        protocol = prot;
+        srcIP = sIp;
+        srcPort = sPort;
+        dstIP = dIp;
+        dstPort = dPort;
+        bytes = b;
+        packets = pckts;
+        flows = f;
+        typeOfService = tos;
+        icmpType = icmpT;
+        flag = flg;
+    }
+
+    public NetFlowData(DateTime timestamp, Duration drtn, string prot, string sIp, int sPort, string dIp,
+        int dPort, long b, int pckts, int f, int tos, string flg)
+    {
+        time = new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second, timestamp.Nanosecond * 100000);
+        date = new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day);
+        duration = drtn;
+        protocol = prot;
+        srcIP = sIp;
+        srcPort = sPort;
+        dstIP = dIp;
+        dstPort = dPort;
+        bytes = b;
+        packets = pckts;
+        flows = f;
+        typeOfService = tos;
+        flag = flg;
+    }
+
     public string srcIP { get; set; }
     public string dstIP { get; set; }
     public int srcPort { get; set; }
     public int dstPort { get; set; }
     public long bytes { get; set; }
-    public DateTime timestamp { get; set; }
-    public Cassandra.Duration duration { get; set; }
+    public LocalDate date { get; set; }
+    public LocalTime time { get; set; }
+    public Duration duration { get; set; }
     public string protocol { get; set; }
     public string flag { get; set; }
     public int typeOfService { get; set; }
@@ -275,7 +314,7 @@ public class NetFlowData
     public override string ToString()
     {
         return $"Source IP: {srcIP}, Destination IP: {dstIP}, Source Port: {srcPort}, Destination Port: {dstPort}, " +
-               $"Bytes: {bytes}, Timestamp: {timestamp}, Duration: {duration}, Protocol: {protocol}, " +
+               $"Bytes: {bytes}, Date: {date}, Time: {time}, Duration: {duration}, Protocol: {protocol}, " +
                $"Flag: {flag}, Type of Service: {typeOfService}, Packets: {packets}, Flows: {flows}, ICMPType: {icmpType}";
     }
 }

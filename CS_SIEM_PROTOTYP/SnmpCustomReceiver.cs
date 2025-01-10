@@ -1,3 +1,5 @@
+using Cassandra;
+
 namespace CS_SIEM_PROTOTYP;
 
 using CS_DatabaseManager;
@@ -142,8 +144,11 @@ public class SnmpCustomReceiver : IDataReceiver
                 {
                     // string name = "temp";
                     string oid = value.Oid.ToString();
+                    var timestamp = DateTime.Now;
                     SnmpPoll snmpPoll = new SnmpPoll(ipAddress, oid, value.Value.ToString(),
-                        hostname, DateTime.UtcNow.AddHours(1), oidDict[oid]);
+                        hostname, new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second,
+                            timestamp.Nanosecond * 100),
+                        new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), oidDict[oid]);
                     answerSnmpPolls.Add(snmpPoll);
                 }
 
@@ -156,6 +161,8 @@ public class SnmpCustomReceiver : IDataReceiver
             return null;
         }
     }
+
+    // DIE WICHTIGSTE METHODE
     public static List<SnmpPoll> PollSnmpV3(Dictionary<string, string> oidDict, string ipAddress, string user,
         string authPass, string privPass, AuthenticationDigests authenticationDigests,
         PrivacyProtocols privacyProtocols, int port, string hostname)
@@ -165,25 +172,25 @@ public class SnmpCustomReceiver : IDataReceiver
             // Set up the SNMP target with port 161 and a timeout
             UdpTarget target = new UdpTarget((System.Net.IPAddress)new IpAddress(ipAddress), port, 2000, 1);
             SecureAgentParameters param = new SecureAgentParameters();
-    
+
             if (!target.Discovery(param))
             {
                 Console.WriteLine("Discovery failed. Unable to continue...");
                 target.Close();
                 return null;
             }
-    
+
             // Prepare the secure parameters for SNMPv3
             param.authPriv(user, authenticationDigests, authPass, privacyProtocols, privPass);
-    
+
             List<SnmpPoll> answerSnmpPolls = new List<SnmpPoll>();
-    
+
             // Process each OID in the dictionary
             foreach (var entry in oidDict)
             {
                 string baseOid = entry.Key;
                 string baseName = entry.Value;
-    
+
                 // Check if the OID does not end with ".0"
                 if (!baseOid.EndsWith(".0"))
                 {
@@ -192,14 +199,14 @@ public class SnmpCustomReceiver : IDataReceiver
                     {
                         string modifiedOid = $"{baseOid}.{x}";
                         string modifiedName = $"{baseName}.{x}";
-    
+
                         // Prepare PDU for the modified OID
                         Pdu pdu = new Pdu(PduType.Get);
                         pdu.VbList.Add(modifiedOid);
-    
+
                         // Execute the SNMP request
                         SnmpV3Packet result = (SnmpV3Packet)target.Request(pdu, param);
-    
+
                         // Check for valid response
                         if (result != null && result.Pdu.ErrorStatus == 0)
                         {
@@ -208,14 +215,15 @@ public class SnmpCustomReceiver : IDataReceiver
                             {
                                 string value_string = value.Value.ToString();
                                 if (!value_string.Equals("SNMP No-Such-Instance"))
-                                {  
-                                    
+                                {
+                                    var timestamp = DateTime.Now;
                                     SnmpPoll snmpPoll = new SnmpPoll(ipAddress, value.Oid.ToString(),
-                                                                        value_string, hostname, DateTime.UtcNow.AddHours(1), modifiedName);
-                                                                    answerSnmpPolls.Add(snmpPoll);
+                                        value_string, hostname, new LocalTime(timestamp.Hour, timestamp.Minute,
+                                            timestamp.Second,
+                                            timestamp.Nanosecond * 100),
+                                        new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), modifiedName);
+                                    answerSnmpPolls.Add(snmpPoll);
                                 }
-
-                                
                             }
                         }
                         else
@@ -230,10 +238,10 @@ public class SnmpCustomReceiver : IDataReceiver
                     // Directly add non-.1 OIDs
                     Pdu pdu = new Pdu(PduType.Get);
                     pdu.VbList.Add(baseOid);
-    
+
                     // Execute the SNMP request
                     SnmpV3Packet result = (SnmpV3Packet)target.Request(pdu, param);
-    
+
                     if (result != null && result.Pdu.ErrorStatus == 0)
                     {
                         // Add to list if no error and valid response
@@ -242,23 +250,24 @@ public class SnmpCustomReceiver : IDataReceiver
                             string value_string = value.Value.ToString();
                             if (!value_string.Equals("SNMP No-Such-Instance"))
                             {
+                                var timestamp = DateTime.Now;
                                 SnmpPoll snmpPoll = new SnmpPoll(ipAddress, value.Oid.ToString(),
-                                    value_string, hostname, DateTime.UtcNow.AddHours(1), baseName);
+                                    value_string, hostname,
+                                    new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second,
+                                        timestamp.Nanosecond * 100),
+                                    new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), baseName);
                                 answerSnmpPolls.Add(snmpPoll);
                             }
-
-                            
-                            
-                            
                         }
                     }
+                    
                     else
                     {
                         Console.WriteLine($"OID {baseOid} not found or instance doesn't exist.");
                     }
                 }
             }
-    
+
             target.Close();
             return answerSnmpPolls;
         }
@@ -268,7 +277,6 @@ public class SnmpCustomReceiver : IDataReceiver
             return null;
         }
     }
-
 }
 
 public class SnmpPollRequest
@@ -331,16 +339,20 @@ public class SnmpPoll
 
     public string Hostname { get; set; }
     public string Name { get; set; }
-    public DateTime Timestamp { get; set; }
+    public LocalTime Time { get; set; }
+
+    public LocalDate Date { get; set; }
 
 
-    public SnmpPoll(string ipAddress, string oid, string oidValue, string hostname, DateTime timestamp, string name)
+    public SnmpPoll(string ipAddress, string oid, string oidValue, string hostname, LocalTime time, LocalDate date,
+        string name)
     {
         IpAddress = ipAddress;
         Oid = oid;
         OidValue = oidValue;
         Hostname = hostname;
-        Timestamp = timestamp;
+        Time = time;
+        Date = date;
         Name = name;
     }
 
@@ -348,7 +360,7 @@ public class SnmpPoll
     public override string ToString()
     {
         return $"SNMP Poll [IP Address: {IpAddress}, OID: {Oid}, OID Value: {OidValue}, " +
-               $"Hostname: {Hostname}, Timestamp: {Timestamp}, Name: {Name}]";
+               $"Hostname: {Hostname}, Time: {Time}, Date: {Date}, Name: {Name}]";
     }
 }
 
@@ -384,4 +396,3 @@ public class SnmpDevice
     public string Name { get; set; }
     public int Id { get; set; }
 }
-
