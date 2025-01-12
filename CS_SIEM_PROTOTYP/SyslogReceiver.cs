@@ -31,8 +31,8 @@ namespace CS_SIEM_PROTOTYP
             _db = db;
             _delay = delay;
             _port = port;
-            _db.CreateTable("Syslog", GetSyslogColumnTypes(), "date, UUID, time");
-            _db.CreateTable("WinEvents", GetSyslogColumnTypes(), "date, UUID, time");
+            _db.CreateTable("Syslog", GetSyslogColumnTypes(), "date, time, UUID");
+            _db.CreateTable("WinEvents", GetSyslogColumnTypes(), "date, time, UUID");
             _logger = logger;
         }
 
@@ -219,7 +219,8 @@ namespace CS_SIEM_PROTOTYP
                         {
                             DateTime Timestamp = DateTime.Parse(parts[1]);
                             syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
-                            syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, 0);
+                            syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second,
+                                Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
                             syslogAnswer.Hostname = parts[2];
                             syslogAnswer.Message = string.Join(" ", parts.Skip(6));
                         }
@@ -227,11 +228,11 @@ namespace CS_SIEM_PROTOTYP
                         {
                             string timestampString = afterPriority.Substring(0, 15);
                             DateTime Timestamp = DateTime.ParseExact(timestampString, "MMM dd HH:mm:ss", null);
-                            syslogAnswer.Date = new LocalDate(DateTime.Now.Year, Timestamp.Month, Timestamp.Day);
-                            syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, 0);
-                            
-                            
-                            
+                            // Possible Edge-Case: If a message is sent on 31st of December 2024 at 11:59:59.XX it would put it in as 31st of December 2025 
+                            syslogAnswer.Date = new LocalDate(0, Timestamp.Month, Timestamp.Day);
+                            syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
+
+
                             string[] rfc3164Parts = afterPriority.Substring(16).Trim().Split(' ', 2);
                             syslogAnswer.Hostname = rfc3164Parts[0];
                             syslogAnswer.Message = rfc3164Parts.Length > 1 ? rfc3164Parts[1] : "";
@@ -245,9 +246,10 @@ namespace CS_SIEM_PROTOTYP
                 else
                 {
                     // syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
-                    syslogAnswer.Date = new LocalDate(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-                    syslogAnswer.Time = new LocalTime(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second, 0);
-                    Console.WriteLine(DateTime.Now.Hour+ ":SLDKFJS:DLKFJS:DLKFJS:DLKFJSD:LKFJSD:LKFJSD");
+                    DateTime Timestamp = DateTime.Now;
+                    syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
+                    syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
+                    Console.WriteLine(DateTime.Now.Hour + ":SLDKFJS:DLKFJS:DLKFJS:DLKFJSD:LKFJSD:LKFJSD");
                     syslogAnswer.Hostname = sourceIP;
                     syslogAnswer.Message = syslogMessage;
                 }
@@ -255,8 +257,9 @@ namespace CS_SIEM_PROTOTYP
             catch
             {
                 // syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
-                syslogAnswer.Date = new LocalDate(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-                syslogAnswer.Time = new LocalTime(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second, 0);
+                DateTime Timestamp = DateTime.Now;
+                syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
+                syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
                 syslogAnswer.Hostname = sourceIP;
                 syslogAnswer.Message = syslogMessage;
             }

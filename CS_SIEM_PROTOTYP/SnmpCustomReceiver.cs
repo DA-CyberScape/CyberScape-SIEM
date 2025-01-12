@@ -147,7 +147,7 @@ public class SnmpCustomReceiver : IDataReceiver
                     var timestamp = DateTime.Now;
                     SnmpPoll snmpPoll = new SnmpPoll(ipAddress, oid, value.Value.ToString(),
                         hostname, new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second,
-                            timestamp.Nanosecond * 100),
+                            timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
                         new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), oidDict[oid]);
                     answerSnmpPolls.Add(snmpPoll);
                 }
@@ -220,7 +220,7 @@ public class SnmpCustomReceiver : IDataReceiver
                                     SnmpPoll snmpPoll = new SnmpPoll(ipAddress, value.Oid.ToString(),
                                         value_string, hostname, new LocalTime(timestamp.Hour, timestamp.Minute,
                                             timestamp.Second,
-                                            timestamp.Nanosecond * 100),
+                                            timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
                                         new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), modifiedName);
                                     answerSnmpPolls.Add(snmpPoll);
                                 }
@@ -254,7 +254,7 @@ public class SnmpCustomReceiver : IDataReceiver
                                 SnmpPoll snmpPoll = new SnmpPoll(ipAddress, value.Oid.ToString(),
                                     value_string, hostname,
                                     new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second,
-                                        timestamp.Nanosecond * 100),
+                                        timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
                                     new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), baseName);
                                 answerSnmpPolls.Add(snmpPoll);
                             }

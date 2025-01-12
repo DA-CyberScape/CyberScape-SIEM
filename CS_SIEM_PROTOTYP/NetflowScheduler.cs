@@ -20,7 +20,7 @@ public class NetflowScheduler
         _delay = delayInSeconds;
         _databaseManager = databaseManager;
         _cancellationTokenSource = new CancellationTokenSource();
-        _databaseManager.CreateTable("Netflow", GetNetflowColumnTypes(), "date, UUID, time");
+        _databaseManager.CreateTable("Netflow", GetNetflowColumnTypes(), "date, time, UUID");
         _logger = logger;
     }
 

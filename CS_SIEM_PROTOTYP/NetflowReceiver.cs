@@ -261,7 +261,7 @@ public class NetFlowData
     public NetFlowData(DateTime timestamp, Duration drtn, string prot, string sIp, int sPort, string dIp,
         int dPort, long b, int pckts, int f, int tos, double icmpT, string flg)
     {
-        time = new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second, timestamp.Nanosecond * 100000);
+        time = new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second, timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000);
         date = new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day);
         duration = drtn;
         protocol = prot;
@@ -280,7 +280,7 @@ public class NetFlowData
     public NetFlowData(DateTime timestamp, Duration drtn, string prot, string sIp, int sPort, string dIp,
         int dPort, long b, int pckts, int f, int tos, string flg)
     {
-        time = new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second, timestamp.Nanosecond * 100000);
+        time = new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second, timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000);
         date = new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day);
         duration = drtn;
         protocol = prot;

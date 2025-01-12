@@ -74,7 +74,7 @@ public class ModuleStarter
         _logger.LogInformation("Successfully turned CSV of OIDs into a Dictionary ");
         foreach (var item in oidDetailsDictionary)
         {
-            _logger.LogInformation($"OID: {item.Key}, Name: {item.Value.ObjectName}, Description: {item.Value.Description}");
+            _logger.LogDebug($"OID: {item.Key}, Name: {item.Value.ObjectName}, Description: {item.Value.Description}");
         }
 
 

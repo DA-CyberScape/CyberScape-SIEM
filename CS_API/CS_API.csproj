@@ -9,10 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Configurations_Example" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\CS_SIEM_PROTOTYP\CS_SIEM_PROTOTYP.csproj" />
     </ItemGroup>
 

@@ -23,7 +23,7 @@ namespace CS_SIEM_PROTOTYP
             _delay = delayInSeconds;
             _databaseManager = databaseManager;
             _cancellationTokenSource = new CancellationTokenSource();
-            _databaseManager.CreateTable("SNMP", GetSnmpPollColumn(), "date, UUID, time");
+            _databaseManager.CreateTable("SNMP", GetSnmpPollColumn(), "date, time, UUID");
             _logger = logger;
         }
 
