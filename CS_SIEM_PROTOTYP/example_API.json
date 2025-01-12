@@ -54,19 +54,19 @@
         "hostname": "Switch-SNMP",
         "oids": [
           {
-            "oid": ".1.3.6.1.2.1.1.5",
+            "oid": "1.3.6.1.2.1.1.5",
             "name": "HOSTNAME"
           },
           {
-            "oid": ".1.3.6.1.4.1.9.2.1.57",
+            "oid": "1.3.6.1.4.1.9.2.1.57",
             "name": "CPU LOAD"
           },
           {
-            "oid": ".1.3.6.1.4.1.9.2.1.9",
+            "oid": "1.3.6.1.4.1.9.2.1.9",
             "name": "MEMORY USAGE"
           },
           {
-            "oid": ".1.3.6.1.4.1.9.2.1.73",
+            "oid": "1.3.6.1.4.1.9.2.1.73",
             "name": "VERSION"
           },
           {
@@ -74,15 +74,19 @@
             "name": "UPTIME"
           },
           {
-            "oid": ".1.3.6.1.2.1.2.2.1.2",
-            "name": "INTERFACES"
+            "oid": "1.3.6.1.2.1.2.2.1.1",
+            "name": "INTERFACES_INDEX"
           },
           {
-            "oid": ".1.3.6.1.2.1.2.2.1.16",
+            "oid": "1.3.6.1.2.1.2.2.1.2",
+            "name": "INTERFACES_DESCRIPTION"
+          },
+          {
+            "oid": "1.3.6.1.2.1.2.2.1.16",
             "name": "OUTBOUND TRAFFIC INTERFACES"
           },
           {
-            "oid": ".1.3.6.1.2.1.2.2.1.10",
+            "oid": "1.3.6.1.2.1.2.2.1.10",
             "name": "INBOUND TRAFFIC INTERFACES"
           }
         ],

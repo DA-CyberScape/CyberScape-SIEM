@@ -198,11 +198,10 @@ public class SnmpCustomReceiver : IDataReceiver
                     for (int x = -1; x <= 30; x++)
                     {
                         string modifiedOid = $"{baseOid}.{x}";
-                        string modifiedName = $"{baseName}.{x}";
                         if (x < 0)
                         {
                             modifiedOid = baseOid;
-                            modifiedName = baseName;
+                            
                         }
                         
 
@@ -224,8 +223,35 @@ public class SnmpCustomReceiver : IDataReceiver
                                 string value_string = value.Value.ToString();
                                 if (!value_string.Equals("SNMP No-Such-Instance"))
                                 {
+                                    string oidValue = value.Oid.ToString();
+                                    string modifiedName = "";
+                                    if (oidDictionary.TryGetValue(oidValue, out var wert1))
+                                    {
+                                        modifiedName = wert1.ObjectName;
+                                        
+                                        Console.WriteLine($"1ObjectName: {modifiedName} OID: {oidValue}");
+                                    }else if (oidDictionary.TryGetValue(RemoveLastTwoIfEndsWithZero(oidValue), out var wert2))
+                                    {
+                                        modifiedName = wert2.ObjectName;
+                                        
+                                        Console.WriteLine($"2ObjectName: {modifiedName} OID: {oidValue}");
+                                        
+                                    }else if (oidDictionary.TryGetValue(RemoveLastTwoIfEndsWithZero(baseOid), out var wert3))
+                                    {
+                                         modifiedName = wert3.ObjectName;
+
+                                         Console.WriteLine($"3ObjectName: {modifiedName} OID: {oidValue}");
+                                    }
+                                    else
+                                    {
+                                        modifiedName = $"{baseName}.{x}"; 
+                                        Console.WriteLine($"4ObjectName: {modifiedName} OID: {oidValue}");
+
+                                    }
+
+
                                     var timestamp = DateTime.Now;
-                                    SnmpPoll snmpPoll = new SnmpPoll(ipAddress, value.Oid.ToString(),
+                                    SnmpPoll snmpPoll = new SnmpPoll(ipAddress, oidValue,
                                         value_string, hostname, new LocalTime(timestamp.Hour, timestamp.Minute,
                                             timestamp.Second,
                                             timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
@@ -244,9 +270,9 @@ public class SnmpCustomReceiver : IDataReceiver
                         }
                     }
                 }
-                else
+                else // eigentlich unnoetig
                 {
-                    // Directly add non-.1 OIDs
+                   
                     Pdu pdu = new Pdu(PduType.Get);
                     pdu.VbList.Add(baseOid);
 
@@ -288,6 +314,17 @@ public class SnmpCustomReceiver : IDataReceiver
             return null;
         }
     }
+    public static string RemoveLastTwoIfEndsWithZero(string input)
+    {
+        if (input.EndsWith("0") && input.Length >= 2)
+        {
+            return input.Substring(0, input.Length - 2);
+        }
+        return input; 
+    }
+    
+   
+
 }
 
 public class SnmpPollRequest

@@ -52,8 +52,21 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.TypeInfoResolver = AppJsonSerializerContext.Default;
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", b =>
+    {
+        b.AllowAnyOrigin()
+            .AllowAnyMethod() // alle methode erlauben get, post ...
+            .AllowAnyHeader(); // Alle Header erlauebn
+    });
+});
+builder.Services.AddControllers();
 
 var app = builder.Build();
+app.UseCors("AllowAll"); 
+app.MapControllers();
+
 var ps = new ProcessStarter();
 
 // Diese Variable hat den CancellationTokenSource damit das Program gescheiht gestoppt werden kann
