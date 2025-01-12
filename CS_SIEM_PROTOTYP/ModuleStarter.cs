@@ -100,7 +100,7 @@ public class ModuleStarter
 
         if (snmpPollList.Count > 0)
         {
-            _snmpPollScheduler = new SnmpPollScheduler(snmpPollList, _db, _loggerFactory.CreateLogger("Snmp Poll"), _delay);
+            _snmpPollScheduler = new SnmpPollScheduler(snmpPollList, _db, _loggerFactory.CreateLogger("Snmp Poll"),oidDetailsDictionary, _delay);
             _snmpPollScheduler.StartPollingAsync();
         }
 

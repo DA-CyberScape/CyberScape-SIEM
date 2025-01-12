@@ -15,8 +15,9 @@ namespace CS_SIEM_PROTOTYP
         private readonly IDatabaseManager _databaseManager;
         private CancellationTokenSource _cancellationTokenSource;
         private ILogger _logger;
+        private Dictionary<string, (string ObjectName, string Description)> _oidDictionary;
 
-        public SnmpPollScheduler(List<SnmpPollRequest> snmpRequests, IDatabaseManager databaseManager, ILogger logger,
+        public SnmpPollScheduler(List<SnmpPollRequest> snmpRequests, IDatabaseManager databaseManager, ILogger logger,Dictionary<string, (string ObjectName, string Description)> oidDictionary,
             int delayInSeconds = 10)
         {
             _snmpRequests = snmpRequests;
@@ -25,6 +26,7 @@ namespace CS_SIEM_PROTOTYP
             _cancellationTokenSource = new CancellationTokenSource();
             _databaseManager.CreateTable("SNMP", GetSnmpPollColumn(), "date, time, UUID");
             _logger = logger;
+            _oidDictionary = oidDictionary;
         }
 
         public async Task StartPollingAsync()
@@ -41,7 +43,7 @@ namespace CS_SIEM_PROTOTYP
                     _logger.LogInformation(
                         $"[INFO] Polling SNMP data for device IP: {snmpRequest.IpAddress} on Port: {snmpRequest.Port}");
 
-                    List<SnmpPoll> snmpPolls = SnmpCustomReceiver.PollSnmpV3(snmpRequest);
+                    List<SnmpPoll> snmpPolls = SnmpCustomReceiver.PollSnmpV3(snmpRequest, _oidDictionary);
                     // Console.WriteLine(snmpRequest);
 
                     if (snmpPolls != null && snmpPolls.Count > 0)

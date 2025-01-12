@@ -2,22 +2,42 @@
   {
     "snmpPolls": [
       {
-        "name": "SwitchSNMP",
-        "id": 2345234523452345234,
-        "ip": "192.168.10.20",
-        "hostname": "Switch-1",
+        "name": "FG-SNMP",
+        "id": 123123,
+        "ip": "10.0.1.254",
+        "hostname": "FG-SNMP",
         "oids": [
           {
-            "oid": "1.3.6.1.4.1.9.2.1.56.0",
+            "oid": "1.3.6.1.4.1.12356.101.4.1.3",
             "name": "CPU LOAD"
           },
           {
-            "oid": "1.3.6.1.4.1.9.2.1.8.0",
-            "name": "Memory Usage"
+            "oid": "1.3.6.1.2.1.47.1.2.1.1.2",
+            "name": "Device"
           },
           {
-            "oid": "1.3.6.1.2.1.1.3.0",
-            "name": "Uptime"
+            "oid": "1.3.6.1.4.1.12356.101.4.1.4",
+            "name": "MEMORY USAGE"
+          },
+          {
+            "oid": "1.3.6.1.2.1.1.3",
+            "name": "UPTIME"
+          },
+          {
+            "oid": "1.3.6.1.4.1.12356.101.4.1.1",
+            "name": "VERSION"
+          },
+          {
+            "oid": "1.3.6.1.4.1.12356.101.7.2.2.1.1",
+            "name": "VLANS"
+          },
+          {
+            "oid": "1.3.6.1.4.1.12356.101.3.2.1.1.7.1",
+            "name": "SESSION COUNT"
+          },
+          {
+            "oid": "1.3.6.1.2.1.47.1.1.1.1.14",
+            "name": "INTERFACES"
           }
         ],
         "user": "MY-USER",
@@ -51,9 +71,12 @@
     ]
   },
   {
-    "ScyllaDB": {
-      "port": 123,
-      "ipaddresses": 12312
-    }
+    "snmpTrapReceiver": [
+      {
+        "name": "SNMP-Trap-Receiver",
+        "id": 123123,
+        "port": 162
+      }
+    ]
   }
 ]

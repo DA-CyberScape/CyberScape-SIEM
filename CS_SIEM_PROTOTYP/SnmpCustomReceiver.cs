@@ -74,11 +74,11 @@ public class SnmpCustomReceiver : IDataReceiver
         return results;
     }
 
-    public static List<SnmpPoll> PollSnmpV3(SnmpPollRequest snmpRequest)
+    public static List<SnmpPoll> PollSnmpV3(SnmpPollRequest snmpRequest, Dictionary<string, (string ObjectName, string Description)> oidDictionary)
     {
         return PollSnmpV3(snmpRequest.Oids, snmpRequest.IpAddress, snmpRequest.User, snmpRequest.AuthPass,
             snmpRequest.PrivPass, snmpRequest.AuthDigest, snmpRequest.PrivProtocol, snmpRequest.Port,
-            snmpRequest.Hostname);
+            snmpRequest.Hostname, oidDictionary);
     }
 
     public static List<SnmpPoll> PollSnmpV3Temp(Dictionary<string, string> oidDict, string ipAddress, string user,
@@ -165,7 +165,7 @@ public class SnmpCustomReceiver : IDataReceiver
     // DIE WICHTIGSTE METHODE
     public static List<SnmpPoll> PollSnmpV3(Dictionary<string, string> oidDict, string ipAddress, string user,
         string authPass, string privPass, AuthenticationDigests authenticationDigests,
-        PrivacyProtocols privacyProtocols, int port, string hostname)
+        PrivacyProtocols privacyProtocols, int port, string hostname, Dictionary<string, (string ObjectName, string Description)> oidDictionary)
     {
         try
         {
@@ -194,11 +194,19 @@ public class SnmpCustomReceiver : IDataReceiver
                 // Check if the OID does not end with ".0"
                 if (!baseOid.EndsWith(".0"))
                 {
-                    // Loop to append ".x" to the base OID where x ranges from 0 to 100
-                    for (int x = 0; x <= 100; x++)
+                    // Loop to append ".x" to the base OID where x ranges from 0 to 30, -1 being the normal oid
+                    for (int x = -1; x <= 30; x++)
                     {
                         string modifiedOid = $"{baseOid}.{x}";
                         string modifiedName = $"{baseName}.{x}";
+                        if (x < 0)
+                        {
+                            modifiedOid = baseOid;
+                            modifiedName = baseName;
+                        }
+                        
+
+                        
 
                         // Prepare PDU for the modified OID
                         Pdu pdu = new Pdu(PduType.Get);
@@ -222,6 +230,9 @@ public class SnmpCustomReceiver : IDataReceiver
                                             timestamp.Second,
                                             timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
                                         new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), modifiedName);
+                                    
+                                    Console.WriteLine("I AM HERE IN SNMP POLLING METHOD");
+                                    Console.WriteLine(snmpPoll);
                                     answerSnmpPolls.Add(snmpPoll);
                                 }
                             }
