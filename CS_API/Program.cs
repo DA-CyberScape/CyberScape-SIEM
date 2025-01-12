@@ -4,6 +4,9 @@ using System.Text.Json.Serialization;
 using CS_API;
 using CS_SIEM_PROTOTYP;
 using CS_DatabaseManager;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 
 //----------------------------------------------------------------------
 string apiConfigurationFile = "apiConfiguration.json";
@@ -108,6 +111,32 @@ app.MapPost("/host_assignment", async (HttpRequest request) =>
 {
     using var reader = new StreamReader(request.Body);
     var jsonContent = await reader.ReadToEndAsync();
+    var schema = JSchema.Parse(@"
+    {
+        'type': 'object',
+        'properties': {
+            'assignments': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'hostname': { 'type': 'string' },
+                        'ipAddress': { 
+                            'type': 'string',
+                            'pattern': '^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$'
+                        }
+                    },
+                    'required': ['hostname', 'ipAddress']
+                }
+            }
+        },
+        'required': ['assignments']
+    }");
+    
+    if (!IsJsonValid(jsonContent, schema, out string validationErrors))
+        {
+            return Results.BadRequest($"Invalid JSON: {validationErrors}");
+        }
     var newHostAssignmentFile = Path.Combine(assignmentDirectory, hostAssignmentFile);
 
     Console.WriteLine("Updating host assignment:");
@@ -124,6 +153,24 @@ app.MapPost("/host_assignment", async (HttpRequest request) =>
         "hostAssignmentDirectory.json");
     return Results.Ok(response);
 });
+
+bool IsJsonValid(string jsonContent, JSchema schema, out string validationErrors)
+{
+    try
+    {
+        var jsonObject = JObject.Parse(jsonContent);
+
+        // Validate JSON against the schema
+        var isValid = jsonObject.IsValid(schema, out IList<string> errors);
+        validationErrors = string.Join("; ", errors);
+        return isValid;
+    }
+    catch (JsonReaderException)
+    {
+        validationErrors = "Invalid JSON structure.";
+        return false;
+    }
+}
 
 
 

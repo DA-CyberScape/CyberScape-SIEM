@@ -114,3 +114,35 @@ Content-Type: application/json
     ]
   }
 ]
+### POST A NEW Host Assignment (TEST OF RESTARTING (SYSLOG TRAP ONLY))
+POST {{CS_API_HostAddress}}/host_assignment/
+Content-Type: application/json
+
+{
+  "assignments": [
+    {
+      "hostname": "webserver-1",
+      "ipAddress": "192.168.1.10"
+    },
+    {
+      "hostname": "database-1",
+      "ipAddress": "192.168.1.20"
+    },
+    {
+      "hostname": "chicken-server",
+      "ipAddress": "192.168.1.5"
+    },
+    {
+      "hostname": "cache-server",
+      "ipAddress": "192.168.1.15"
+    },
+    {
+      "hostname": "backup-server",
+      "ipAddress": "192.168.1.25"
+    },
+    {
+      "hostname": "localhost",
+      "ipAddress": "127.0.0.1"
+    }
+  ]
+}
