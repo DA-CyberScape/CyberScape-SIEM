@@ -103,12 +103,21 @@ public class SnmpTrapReceiver
                     Source = source.Address.ToString(),
                     Community = v2Trap.Community.ToString(),
                     TrapOid = v2Trap.Pdu.TrapObjectID.ToString(),
-                    Variables = new Dictionary<string, string>()
+                    Variables = new Dictionary<string, (string OidName, string OidValue)>()
                 };
 
                 foreach (Vb variable in v2Trap.Pdu.VbList)
                 {
-                    trapData.Variables[variable.Oid.ToString()] = variable.Value.ToString();
+                    string oidName = "unknown";
+                    string oidId = variable.Oid.ToString();
+                    string oidValue = variable.Value.ToString();
+                    if (_oidDictionary.TryGetValue(RemoveLastTwoIfEndsWithZero(oidId), out var wert1))
+                    {
+                        oidName = wert1.ObjectName;
+                        
+                        Console.WriteLine($"OID NAME: {oidName} OID ID: {oidId} OID VALUE: {oidValue}");
+                    }
+                    trapData.Variables[oidId] = (oidName, oidValue);
                 }
                 
                 _snmpTraps.Enqueue(trapData);
@@ -125,6 +134,14 @@ public class SnmpTrapReceiver
         {
             _logger.LogError($"Error processing trap: {ex.Message}");
         }
+    }
+    public static string RemoveLastTwoIfEndsWithZero(string input)
+    {
+        if (input.EndsWith("0") && input.Length >= 2)
+        {
+            return input.Substring(0, input.Length - 2);
+        }
+        return input; 
     }
     
     private async Task StartPeriodicDatabaseInsert(int delay, CancellationToken token)
@@ -177,7 +194,7 @@ public class SnmpTrapData
     public string Source { get; set; }
     public string Community { get; set; }
     public string TrapOid { get; set; }
-    public Dictionary<string, string> Variables { get; set; }
+    public Dictionary<string, (string OidName, string OidValue)> Variables { get; set; }
 }
 
 

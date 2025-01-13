@@ -1,7 +1,7 @@
 {
   "assignments": [
     {
-      "hostname": "webserver-1",
+      "hostname": "Fortigate",
       "ipAddress": "192.168.1.10"
     },
     {
