@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Cassandra;
 using CS_DatabaseManager;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 
 namespace CS_SIEM_PROTOTYP
 {
@@ -32,7 +33,7 @@ namespace CS_SIEM_PROTOTYP
             _delay = delay;
             _port = port;
             _db.CreateTable("Syslog", GetSyslogColumnTypes(), "date, time, UUID");
-            _db.CreateTable("WinEvents", GetSyslogColumnTypes(), "date, time, UUID");
+            _db.CreateTable("WinEvents", GetWinEventColumnTypes(), "date, time, UUID");
             _logger = logger;
         }
 
@@ -110,6 +111,9 @@ namespace CS_SIEM_PROTOTYP
                     if (syslogMessage.Message.Length > 0)
                     {
                         _logger.LogInformation($"[INFO] Inserted message from {syslogMessage.Hostname} into database.");
+                        _logger.LogInformation($"[INFO] Inserted message {syslogMessage.Message}");
+                        _logger.LogInformation($"[INFO] Service: {syslogMessage.Service}");
+
                         // Console.WriteLine(syslogMessage.Facility + " Facility");
                         // Console.WriteLine(syslogMessage.Severity + " Severity");
                         // Console.WriteLine(syslogMessage.Hostname + " Hostname");
@@ -117,34 +121,31 @@ namespace CS_SIEM_PROTOTYP
                         // Console.WriteLine(syslogMessage.Message + " Message");
 
                         // TODO: MEHMET DB LOGIK
-                        await InsertSyslogDataAsync(syslogMessage, "Syslog", GetSyslogColumnTypes());
+                        await InsertSyslogDataAsync(syslogMessage, GetSyslogColumnTypes());
                     }
                 }
             }
         }
 
         //TODO MEHMET austesten DB
-        public async Task InsertSyslogDataAsync(SyslogAnswer syslogAnswer, string table,
+        public async Task InsertSyslogDataAsync(SyslogAnswer syslogAnswer,
             Dictionary<string, Type> columns)
         {
             var data = MapSyslogDataToData(syslogAnswer);
 
-            // foreach (var value in data)
-            // {
-            //     Console.WriteLine(value);
-            // }
-
+       
             try
             {
-                // Console.WriteLine(data["message"].ToString().StartsWith("MSWinEventLog"));
-                // Console.WriteLine("CHICKENLEGPIECE");
+         
                 if (data["message"].ToString().StartsWith("MSWinEventLog"))
                 {
-                    await _db.InsertData("WinEvents", columns, data);
+                    var winEventData = MapWinEventDataToData(syslogAnswer);
+                    var winEventColumns = GetWinEventColumnTypes();
+                    await _db.InsertData("WinEvents", winEventColumns, winEventData);
                 }
                 else
                 {
-                    await _db.InsertData(table, columns, data);
+                    await _db.InsertData("Syslog", columns, data);
                 }
             }
             catch (Exception ex)
@@ -162,9 +163,9 @@ namespace CS_SIEM_PROTOTYP
                 { "date", typeof(LocalDate) },
                 { "facility", typeof(int) },
                 { "severity", typeof(int) },
-                { "rawMessage", typeof(string) },
                 { "message", typeof(string) },
                 { "hostname", typeof(string) },
+                { "service", typeof(string) },
                 { "UUID", typeof(Guid) }
             };
         }
@@ -173,14 +174,46 @@ namespace CS_SIEM_PROTOTYP
         {
             return new Dictionary<string, object>
             {
-                { "srcIP", syslogAnswer.SourceIP },
+                { "srcIP", syslogAnswer.sourceIp },
                 { "time", syslogAnswer.Time },
                 { "date", syslogAnswer.Date },
                 { "facility", syslogAnswer.Facility },
                 { "severity", syslogAnswer.Severity },
-                { "rawMessage", syslogAnswer.RawMessage },
+                { "message", syslogAnswer.Message },
+                { "hostname", syslogAnswer.Hostname},
+                { "service", syslogAnswer.Service },
+                { "UUID", Guid.NewGuid() }
+            };
+        }
+        
+        public Dictionary<string, Type> GetWinEventColumnTypes()
+        {
+            return new Dictionary<string, Type>
+            {
+                { "srcIP", typeof(string) },
+                { "time", typeof(LocalTime) },
+                { "date", typeof(LocalDate) },
+                { "facility", typeof(int) },
+                { "severity", typeof(int) },
+                { "message", typeof(string) },
+                { "hostname", typeof(string) },
+                { "eventId", typeof(string) },
+                { "UUID", typeof(Guid) }
+            };
+        }
+        
+        public Dictionary<string, object> MapWinEventDataToData(SyslogAnswer syslogAnswer)
+        {
+            return new Dictionary<string, object>
+            {
+                { "srcIP", syslogAnswer.sourceIp },
+                { "time", syslogAnswer.Time },
+                { "date", syslogAnswer.Date },
+                { "facility", syslogAnswer.Facility },
+                { "severity", syslogAnswer.Severity },
                 { "message", syslogAnswer.Message },
                 { "hostname", syslogAnswer.Hostname },
+                { "eventId", syslogAnswer.EventId },
                 { "UUID", Guid.NewGuid() }
             };
         }
@@ -196,13 +229,19 @@ namespace CS_SIEM_PROTOTYP
             _udpClient?.Close();
         }
 
-        private static SyslogAnswer ProcessSyslogMessage(string syslogMessage, string sourceIP)
+        private static SyslogAnswer ProcessSyslogMessage(string syslogMessage, string sourceIp)
         {
             SyslogAnswer syslogAnswer = new SyslogAnswer
             {
                 RawMessage = syslogMessage,
-                SourceIP = sourceIP
+                sourceIp = sourceIp,
+                Service = ExtractValue("service", syslogMessage)
             };
+            if (syslogMessage.StartsWith("MSWinEventLog"))
+            {
+                syslogAnswer.EventId = ExtractEventId(syslogMessage);
+            }
+
             try
             {
                 if (syslogMessage.StartsWith("<"))
@@ -250,7 +289,7 @@ namespace CS_SIEM_PROTOTYP
                     syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
                     syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
                     Console.WriteLine(DateTime.Now.Hour + ":SLDKFJS:DLKFJS:DLKFJS:DLKFJSD:LKFJSD:LKFJSD");
-                    syslogAnswer.Hostname = sourceIP;
+                    syslogAnswer.Hostname = sourceIp;
                     syslogAnswer.Message = syslogMessage;
                 }
             }
@@ -260,7 +299,7 @@ namespace CS_SIEM_PROTOTYP
                 DateTime Timestamp = DateTime.Now;
                 syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
                 syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
-                syslogAnswer.Hostname = sourceIP;
+                syslogAnswer.Hostname = sourceIp;
                 syslogAnswer.Message = syslogMessage;
             }
 
@@ -268,13 +307,46 @@ namespace CS_SIEM_PROTOTYP
             // Console.WriteLine("------------");
             // Console.WriteLine(syslogAnswer.Message);
             // Console.WriteLine(syslogAnswer.Timestamp);
-
             return syslogAnswer;
+        }
+        // returns the value associated with a key for example in a syslog message service=chicken
+        // it will return chicken if the inputed key is service
+        public static string? ExtractValue(string key, string syslogMessage)
+        {
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(syslogMessage))
+            {
+                throw new ArgumentException("Key and syslog message cannot be null or empty.");
+            }
+    
+            
+            string pattern = $@"{key}=(?<value>\S+)";
+            Match match = Regex.Match(syslogMessage, pattern);
+    
+            if (match.Success)
+            {
+                return match.Groups["value"].Value;
+            }
+    
+            return null; 
+        }
+        public static string? ExtractEventId(string message)
+        {
+            
+            string pattern = @"(?<eventid>\d+)\s[A-Za-z]{3} [A-Za-z]{3} \d{2} \d{2}:\d{2}:\d{2} \d{4}";
+    
+      
+            Match match = Regex.Match(message, pattern);
+    
+            if (match.Success)
+            {
+                return match.Groups["eventid"].Value;
+            }
+            return null;
         }
 
         public static void TestProcessSyslogMessage()
         {
-            List<(string Message, string SourceIP)> testData = new List<(string, string)>
+            List<(string Message, string sourceIp)> testData = new List<(string, string)>
             {
                 ("<34>Oct 18 14:32:16 myhost su: 'su root' failed for user on /dev/pts/2", "192.168.1.50"),
                 ("<165>1 2024-10-18T14:33:44.003Z myapp.example.com MyApp 1234 ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"] User login attempt failed",
@@ -286,10 +358,10 @@ namespace CS_SIEM_PROTOTYP
                 ("This is a raw syslog message without any standard format.", "192.168.0.10")
             };
 
-            foreach (var (message, sourceIP) in testData)
+            foreach (var (message, sourceIp) in testData)
             {
                 Console.WriteLine("[TEST] Processing Syslog Message:");
-                SyslogAnswer result = ProcessSyslogMessage(message, sourceIP);
+                SyslogAnswer result = ProcessSyslogMessage(message, sourceIp);
                 Console.WriteLine(result);
                 Console.WriteLine(new string('-', 50));
             }
@@ -310,19 +382,22 @@ namespace CS_SIEM_PROTOTYP
 
     public class SyslogAnswer
     {
-        public LocalDate Date { get; set; }
-        public LocalTime Time { get; set; }
-        public string Hostname { get; set; }
-        public string Message { get; set; }
+        public LocalDate? Date { get; set; }
+        public LocalTime? Time { get; set; }
+        public string? Hostname { get; set; }
+        public string? Message { get; set; }
         public int Facility { get; set; }
         public int Severity { get; set; }
-        public string SourceIP { get; set; }
-        public string RawMessage { get; set; }
+        public string? sourceIp { get; set; }
+        public string? RawMessage{ get; set; }
+
+        public string? Service{ get; set; }
+        public string? EventId{ get; set; }
 
         public override string ToString()
         {
             return
-                $"[{Date} {Time}] {Hostname} (Facility: {Facility}, Severity: {Severity}, Source: {SourceIP}): {Message} ";
+                $"[{Date} {Time}] {Hostname} (Facility: {Facility}, Severity: {Severity}, Source: {sourceIp}): {Message} ";
         }
     }
 }
