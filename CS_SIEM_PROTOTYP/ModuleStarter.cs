@@ -59,7 +59,7 @@ public class ModuleStarter
         _logger.LogInformation("Processing data");
         ProcessData(PathToJsonConfiguration);
         _logger.LogInformation("Finished processing data");
-        List<SnmpPollRequest> snmpPollList = Converter.convertJsontoSNMPPollRequest(snmpPollsDict);
+        List<SnmpPollRequest> snmpPollList = Converter.ConvertJsontoSnmpPollRequest(snmpPollsDict);
         List<NfConfig> netflowList = Converter.convertJsontoNetflowDict(netflowReceiverDict);
         List<PrtgConfig> prtgList = Converter.convertJsontoPRTG(prtgReceiverDict);
         List<SnmpTrapConfig> snmpTrapList = Converter.convertJsontoSNMPTrap(snmpTrapReceiverDict);

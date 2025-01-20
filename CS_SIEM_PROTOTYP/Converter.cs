@@ -7,10 +7,10 @@ using Newtonsoft.Json.Linq;
 
 public class Converter
 {
-    public static List<SnmpPollRequest> convertJsontoSNMPPollRequest(List<Dictionary<string, object>> dictSNMP)
+    public static List<SnmpPollRequest> ConvertJsontoSnmpPollRequest(List<Dictionary<string, object>> dictSnmp)
     {
-        var jsonSNMP = JsonConvert.SerializeObject(dictSNMP);
-        List<SnmpDevice> devices = JsonConvert.DeserializeObject<List<SnmpDevice>>(jsonSNMP);
+        var jsonSnmp = JsonConvert.SerializeObject(dictSnmp);
+        List<SnmpDevice> devices = JsonConvert.DeserializeObject<List<SnmpDevice>>(jsonSnmp);
         List<SnmpPollRequest> pollRequests = new List<SnmpPollRequest>();
 
         foreach (var device in devices)
@@ -25,9 +25,11 @@ public class Converter
                 PrivPass = device.privpass,
                 Port = device.port,
                 AuthDigest = (device.authentication == "SHA1") ? AuthenticationDigests.SHA1 : AuthenticationDigests.MD5,
-                PrivProtocol = (device.encryption == "aes 128") ? PrivacyProtocols.AES128 : PrivacyProtocols.DES,
+                PrivProtocol = (device.encryption.ToLower() == "aes 128") ? PrivacyProtocols.AES128 : PrivacyProtocols.DES,
                 Name = device.Name,
-                Id = device.Id
+                Id = device.Id,
+                Authentication = device.authentication,
+                Encryption = device.encryption
             };
 
             // convert oids

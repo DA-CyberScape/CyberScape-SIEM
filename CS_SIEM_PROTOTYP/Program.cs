@@ -19,7 +19,7 @@ using PacketDotNet.Utils;
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Security;
-
+using static CS_SIEM_PROTOTYP.SnmpPollWalkReceiver;
 namespace CS_SIEM_PROTOTYP;
 
 public static class Program
@@ -29,50 +29,11 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
-        string ipAddress = "10.0.1.254";
-        int port = 161;
-        string securityName = "MY-USER";
-        string authPassword = "MyAuthPass";
-        string privPassword = "MyPrivPass";
-        var authProtocol = Levels.Authentication | Levels.Privacy;
+        WalkSnmpV3("1.3.6.1.2.1.4.20.1.1", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
+            "SHA1", "AES", null);
 
-        var user = new OctetString(securityName);
-        var auth = new SHA1AuthenticationProvider(new OctetString(authPassword));
-        var priv = new AESPrivacyProvider(new OctetString(privPassword), auth);
-        var target = new IPEndPoint(IPAddress.Parse(ipAddress), port);
-        var rootOid = new ObjectIdentifier("1.3.6.1.2.1.4.20.1.1");
 
-        Discovery discovery = Messenger.GetNextDiscovery(SnmpType.GetBulkRequestPdu);
-        ReportMessage report = discovery.GetResponse(60000, target);
 
-        try
-        {
-            Console.WriteLine("Starting SNMPv3 Walk...");
-
-            var answer = new List<Variable>();
-            Messenger.BulkWalk(VersionCode.V3,
-                target,
-                user,
-                OctetString.Empty, 
-                rootOid,
-                answer,
-                60000,
-                10,
-                WalkMode.WithinSubtree,
-                priv,
-                report);
-
-            foreach (var variable in answer)
-            {
-                Console.WriteLine($"{variable.Id}: {variable.Data}");
-            }
-
-            Console.WriteLine("SNMPv3 Walk Completed.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error during SNMPv3 Walk: {ex.Message}");
-        }
 
 
         // SnmpV3TrapReceiver.StartReceiver();

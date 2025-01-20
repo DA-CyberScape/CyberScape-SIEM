@@ -7,13 +7,8 @@ using System;
 using SnmpSharpNet;
 
 //https://github.com/rqx110/SnmpSharpNet/wiki
-public class SnmpCustomReceiver : IDataReceiver
+public class SnmpPollGetReceiver
 {
-    public void ReceiveData()
-    {
-        throw new NotImplementedException();
-    }
-
     
     public static List<SnmpPoll> PollSnmpV3(SnmpPollRequest snmpRequest, Dictionary<string, (string ObjectName, string Description)> oidDictionary)
     {
@@ -200,6 +195,8 @@ public class SnmpPollRequest
     public PrivacyProtocols PrivProtocol { get; set; }
     public string Name { get; set; }
     public int Id { get; set; }
+    public string Authentication { get; set; }
+    public string Encryption { get; set; }
 
 
     public SnmpPollRequest(Dictionary<string, string> oids, string ipAddress, string user, string authPass,
