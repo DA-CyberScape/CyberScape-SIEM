@@ -1,11 +1,12 @@
 using System.Net;
+using Cassandra;
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Security;
-using Cassandra;
+
 namespace CS_SIEM_PROTOTYP;
 
-public class SnmpPollWalkReceiver
+public class SnmpPoller
 {
     public static List<SnmpPoll> WalkSnmpV3(string oid, string ipAddress, string user,
         string authPass, string privPass, int port, string hostname, string authentication, string encryption,
@@ -55,6 +56,59 @@ public class SnmpPollWalkReceiver
 
         return answerSnmpPolls;
     }
+
+    public static List<SnmpPoll> PollSnmpV3(string oid, string ipAddress, string user,
+        string authPass, string privPass, int port, string hostname, string authentication, string encryption,
+        Dictionary<string, (string ObjectName, string Description)> oidDictionary)
+    {
+        var userOctetString = new OctetString(user);
+        var auth = GetAuthenticationProvider(authentication, authPass);
+        var priv = GetPrivacyProvider(encryption, privPass, auth);
+        var target = new IPEndPoint(IPAddress.Parse(ipAddress), port);
+        var rootOid = new ObjectIdentifier(oid);
+        var discovery = Messenger.GetNextDiscovery(SnmpType.GetRequestPdu);
+        var report = discovery.GetResponse(10000, target);
+        var oidsList = new List<Variable> { new(new ObjectIdentifier(oid)) };
+
+        var answerSnmpPolls = new List<SnmpPoll>();
+        try
+        {
+            var request = new GetRequestMessage(
+                VersionCode.V3,
+                Messenger.NextMessageId,
+                Messenger.NextRequestId,
+                userOctetString,
+                oidsList,
+                priv,
+                Messenger.MaxMessageSize,
+                report);
+
+            var response = request.GetResponse(
+                10000,
+                target);
+
+            foreach (var variable in response.Pdu().Variables)
+            {
+                var queriedOid = variable.Id.ToString();
+                var queriedValue = variable.Data.ToString();
+                var timestamp = DateTime.Now;
+                var snmpPoll = new SnmpPoll(ipAddress, queriedOid, queriedValue, hostname, new LocalTime(timestamp.Hour,
+                        timestamp.Minute,
+                        timestamp.Second,
+                        timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
+                    new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), "testing chicken");
+                answerSnmpPolls.Add(snmpPoll);
+                Console.WriteLine(snmpPoll);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during SNMPv3 Walk: {ex.Message}");
+        }
+
+        return answerSnmpPolls;
+    }
+
 
     private static IAuthenticationProvider GetAuthenticationProvider(string authentication, string authPass)
     {

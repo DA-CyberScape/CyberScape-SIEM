@@ -19,7 +19,7 @@ using PacketDotNet.Utils;
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Security;
-using static CS_SIEM_PROTOTYP.SnmpPollWalkReceiver;
+using static CS_SIEM_PROTOTYP.SnmpPoller;
 namespace CS_SIEM_PROTOTYP;
 
 public static class Program
@@ -29,9 +29,12 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
-        WalkSnmpV3("1.3.6.1.2.1.4.20.1.1", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
-            "SHA1", "AES", null);
+        // WalkSnmpV3("1.3.6.1.2.1.4.20.1.1", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
+        //     "SHA1", "AES", null);
 
+
+        PollSnmpV3("1.3.6.1.4.1.12356.101.4.1.3.0", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
+            "SHA1", "AES", null);
 
 
 
