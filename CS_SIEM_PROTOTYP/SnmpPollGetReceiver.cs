@@ -83,23 +83,23 @@ public class SnmpPollGetReceiver
                                     {
                                         modifiedName = wert1.ObjectName;
                                         
-                                        Console.WriteLine($"1ObjectName: {modifiedName} OID: {oidValue}");
+                                        // Console.WriteLine($"1ObjectName: {modifiedName} OID: {oidValue}");
                                     }else if (oidDictionary.TryGetValue(RemoveLastTwoIfEndsWithZero(oidValue), out var wert2))
                                     {
                                         modifiedName = wert2.ObjectName;
                                         
-                                        Console.WriteLine($"2ObjectName: {modifiedName} OID: {oidValue}");
+                                        // Console.WriteLine($"2ObjectName: {modifiedName} OID: {oidValue}");
                                         
                                     }else if (oidDictionary.TryGetValue(RemoveLastTwoIfEndsWithZero(baseOid), out var wert3))
                                     {
                                          modifiedName = wert3.ObjectName;
 
-                                         Console.WriteLine($"3ObjectName: {modifiedName} OID: {oidValue}");
+                                         // Console.WriteLine($"3ObjectName: {modifiedName} OID: {oidValue}");
                                     }
                                     else
                                     {
                                         modifiedName = $"{baseName}.{x}"; 
-                                        Console.WriteLine($"4ObjectName: {modifiedName} OID: {oidValue}");
+                                        // Console.WriteLine($"4ObjectName: {modifiedName} OID: {oidValue}");
 
                                     }
 
@@ -110,9 +110,6 @@ public class SnmpPollGetReceiver
                                             timestamp.Second,
                                             timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
                                         new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), modifiedName);
-                                    
-                                    Console.WriteLine("I AM HERE IN SNMP POLLING METHOD");
-                                    Console.WriteLine(snmpPoll);
                                     answerSnmpPolls.Add(snmpPoll);
                                 }
                             }

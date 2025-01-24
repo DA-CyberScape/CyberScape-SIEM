@@ -58,7 +58,7 @@ namespace CS_SIEM_PROTOTYP
                     {
                         byte[] receivedBytes = _udpClient.Receive(ref remoteEndPoint);
                         string syslogMessage = Encoding.UTF8.GetString(receivedBytes);
-                        // Console.WriteLine(syslogMessage + " I AM HERE MAN");
+                        
 
 
                         SyslogAnswer syslogAnswer =
@@ -136,8 +136,9 @@ namespace CS_SIEM_PROTOTYP
        
             try
             {
+                Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&");
          
-                if (data["message"].ToString().StartsWith("MSWinEventLog"))
+                if (data["message"].ToString().Contains("MSWinEventLog"))
                 {
                     var winEventData = MapWinEventDataToData(syslogAnswer);
                     var winEventColumns = GetWinEventColumnTypes();
@@ -147,6 +148,7 @@ namespace CS_SIEM_PROTOTYP
                 {
                     await _db.InsertData("Syslog", columns, data);
                 }
+                Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&");
             }
             catch (Exception ex)
             {
@@ -237,8 +239,11 @@ namespace CS_SIEM_PROTOTYP
                 sourceIp = sourceIp,
                 Service = ExtractValue("service", syslogMessage)
             };
-            if (syslogMessage.StartsWith("MSWinEventLog"))
+
+
+            if (syslogMessage.Contains("MSWinEventLog"))
             {
+                
                 syslogAnswer.EventId = ExtractEventId(syslogMessage);
             }
 
@@ -268,7 +273,7 @@ namespace CS_SIEM_PROTOTYP
                             string timestampString = afterPriority.Substring(0, 15);
                             DateTime Timestamp = DateTime.ParseExact(timestampString, "MMM dd HH:mm:ss", null);
                             // Possible Edge-Case: If a message is sent on 31st of December 2024 at 11:59:59.XX it would put it in as 31st of December 2025 
-                            syslogAnswer.Date = new LocalDate(0, Timestamp.Month, Timestamp.Day);
+                            syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
                             syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
 
 
@@ -284,6 +289,7 @@ namespace CS_SIEM_PROTOTYP
                 }
                 else
                 {
+               
                     // syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
                     DateTime Timestamp = DateTime.Now;
                     syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
@@ -296,6 +302,8 @@ namespace CS_SIEM_PROTOTYP
             catch
             {
                 // syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
+       
+
                 DateTime Timestamp = DateTime.Now;
                 syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
                 syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
