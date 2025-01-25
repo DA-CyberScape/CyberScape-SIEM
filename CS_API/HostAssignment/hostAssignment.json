@@ -24,5 +24,9 @@
       "hostname": "localhost",
       "ipAddress": "127.0.0.1"
     }
+    {
+      "hostname": "WindowsClient1",
+      "ipAddress": "10.40.21.155"
+    }
   ]
 }
