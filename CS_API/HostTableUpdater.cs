@@ -28,6 +28,13 @@ public class HostTableUpdater
         }
 
     }
+    public async static void CreateTable()
+    {
+        var dbHost = new DbHostProvider();
+        IDatabaseManager db = new ScyllaDatabaseManager(dbHost);
+        await db.CreateTable("Hosts", GetHostsColumnTypes(), "ip");
+
+    }
 
     public List<Host> ExtractNameIpList()
     {
@@ -51,7 +58,7 @@ public class HostTableUpdater
         }
         return hostnameIpList;
     }
-    public Dictionary<string, Type> GetHostsColumnTypes()
+    public static Dictionary<string, Type> GetHostsColumnTypes()
     {
         return new Dictionary<string, Type>
         {
