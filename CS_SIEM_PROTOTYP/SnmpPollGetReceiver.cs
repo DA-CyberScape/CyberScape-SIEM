@@ -40,10 +40,13 @@ public class SnmpPollGetReceiver
             List<SnmpPoll> answerSnmpPolls = new List<SnmpPoll>();
 
             // Process each OID in the dictionary
+            var listOfgetRequests = new List<(string, string)>();
             foreach (var entry in oidDict)
             {
+                
                 string baseOid = entry.Key;
                 string baseName = entry.Value;
+                listOfgetRequests.Add((baseOid, baseName));
 
                 // Check if the OID does not end with ".0"
                 if (!baseOid.EndsWith(".0"))

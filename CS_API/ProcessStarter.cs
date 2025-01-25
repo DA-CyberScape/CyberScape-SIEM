@@ -29,6 +29,7 @@ public class ProcessStarter
             
             DbHostProvider dbHost = new DbHostProvider();
             IDatabaseManager db = new ScyllaDatabaseManager(dbHost);
+            
             _moduleStarter = new ModuleStarter(db, 10);
             var siemTask =
                 _moduleStarter.StartSIEM(

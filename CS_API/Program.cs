@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 
+
 //----------------------------------------------------------------------
 string apiConfigurationFile = "apiConfiguration.json";
 string hostAssignmentFile = "hostAssignment.json";
@@ -57,8 +58,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", b =>
     {
         b.AllowAnyOrigin()
-            .AllowAnyMethod() // alle methode erlauben get, post ...
-            .AllowAnyHeader(); // Alle Header erlauebn
+            .AllowAnyMethod() 
+            .AllowAnyHeader(); 
     });
 });
 builder.Services.AddControllers();
@@ -122,6 +123,7 @@ app.MapGet("/host_assignment", () =>
 
 app.MapPost("/host_assignment", async (HttpRequest request) =>
 {
+    
     using var reader = new StreamReader(request.Body);
     var jsonContent = await reader.ReadToEndAsync();
     var schema = JSchema.Parse(@"
@@ -147,22 +149,19 @@ app.MapPost("/host_assignment", async (HttpRequest request) =>
     }");
     
     if (!IsJsonValid(jsonContent, schema, out string validationErrors))
-        {
-            return Results.BadRequest($"Invalid JSON: {validationErrors}");
-        }
+    {
+        return Results.BadRequest($"Invalid JSON: {validationErrors}");
+    }
     var newHostAssignmentFile = Path.Combine(assignmentDirectory, hostAssignmentFile);
+    await File.WriteAllTextAsync(newHostAssignmentFile, jsonContent);
 
+    HostTableUpdater htu = new HostTableUpdater(jsonContent);
+    htu.UpdateHostTable();
+    
+    
     Console.WriteLine("Updating host assignment:");
     Console.WriteLine(jsonContent);
-    
-    /*
-    ps.StopProcess();
-    await File.WriteAllTextAsync(newHostAssignmentFile, jsonContent);
-    
-    cts = new CancellationTokenSource();
-    await Task.Run(() => ps.StartProcessAsync(newHostAssignmentFile, cts.Token));*/
-
-    var response = new SaveResponse("Host assignment updated successfully. Restarting SIEM with new host assignment.",
+    var response = new SaveResponse("Host assignment updated successfully.",
         "hostAssignmentDirectory.json");
     return Results.Ok(response);
 });

@@ -5,21 +5,13 @@
 
 using System.Diagnostics;
 using System.Net;
-using Microsoft.Extensions.DependencyInjection;
-using System.Security.Principal;
-using System.Text.Json.Nodes;
 using CS_DatabaseManager;
-using DotNetEnv;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using PacketDotNet.Utils;
+using static CS_SIEM_PROTOTYP.SnmpPoller;
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Security;
-using static CS_SIEM_PROTOTYP.SnmpPoller;
+using Cassandra;
+
 namespace CS_SIEM_PROTOTYP;
 
 public static class Program
@@ -29,14 +21,19 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
-        // WalkSnmpV3("1.3.6.1.2.1.4.20.1.1", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
+        var oidDictionary = new Dictionary<string, (string ObjectName, string Description)>
+        {
+            { "1.3.6.1.2.1.4.20.1.4", ("SUBNETMASKS", "A description of the entity") },
+            { "1.3.6.1.2.1.1.2", ("sysObjectID", "The vendor's authoritative identification of the network management subsystem") },
+            { "1.3.6.1.2.1.4.20.1.3.10.40.21.151", ("SPECIFIC NAME", "The time since the network management portion of the system was last re-initialized") }
+        };
+        
+        WalkSnmpV3("1.3.6.1.2.1.4.20.1.3", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
+            "SHA1", "AES", "SNETMASK", oidDictionary);
+
+
+        // PollSnmpV3("1.3.6.1.4.1.12356.101.4.1.3.0", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
         //     "SHA1", "AES", null);
-
-
-        PollSnmpV3("1.3.6.1.4.1.12356.101.4.1.3.0", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
-            "SHA1", "AES", null);
-
-
 
 
         // SnmpV3TrapReceiver.StartReceiver();
@@ -333,7 +330,7 @@ public static class Program
         {
             { "IPv4", typeof(IPAddress) },
             { "Name", typeof(string) },
-            { "Timestamp", typeof(DateTime) },
+            { "Timestamp", typeof(DateTime) }
         };
 
         var dataBatch = new List<Dictionary<string, object>>();
@@ -365,7 +362,7 @@ public static class Program
     {
         try
         {
-            Process process = new Process();
+            var process = new Process();
             process.StartInfo.FileName = "systemctl";
             process.StartInfo.Arguments = $"is-active {serviceName}";
             process.StartInfo.RedirectStandardOutput = true;

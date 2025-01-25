@@ -12,4 +12,10 @@
       <PackageReference Include="YamlDotNet" Version="16.1.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="IDGenerator.cs">
+        <DependentUpon>ScyllaDatabaseManager.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
 </Project>
