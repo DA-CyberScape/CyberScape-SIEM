@@ -1,0 +1,97 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "oneOf": [
+      {
+        "properties": {
+          "snmpPolls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "id": { "type": "integer" },
+                "ip": { "type": "string", "format": "ipv4" },
+                "hostname": { "type": "string" },
+                "oids": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "oid": { "type": "string" },
+                      "name": { "type": "string" }
+                    },
+                    "required": ["oid", "name"]
+                  }
+                },
+                "user": { "type": "string" },
+                "authentication": { "type": "string" },
+                "encryption": { "type": "string" },
+                "authpass": { "type": "string" },
+                "privpass": { "type": "string" },
+                "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+              },
+              "required": ["name", "id", "ip", "hostname", "oids", "user", "authentication", "encryption", "authpass", "privpass", "port"]
+            }
+          }
+        },
+        "required": ["snmpPolls"]
+      },
+      {
+        "properties": {
+          "netflowReceiver": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "id": { "type": "integer" },
+                "folderLocation": { "type": "string" },
+                "nfdumpBinaryLocation": { "type": "string" },
+                "nfcapdBinaryLocation": { "type": "string" },
+                "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+              },
+              "required": ["name", "id", "folderLocation", "nfdumpBinaryLocation", "nfcapdBinaryLocation", "port"]
+            }
+          }
+        },
+        "required": ["netflowReceiver"]
+      },
+      {
+        "properties": {
+          "Syslog": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "id": { "type": "integer" },
+                "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+              },
+              "required": ["name", "id", "port"]
+            }
+          }
+        },
+        "required": ["Syslog"]
+      },
+      {
+        "properties": {
+          "snmpTrapReceiver": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "id": { "type": "integer" },
+                "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+              },
+              "required": ["name", "id", "port"]
+            }
+          }
+        },
+        "required": ["snmpTrapReceiver"]
+      }
+    ]
+  }
+}

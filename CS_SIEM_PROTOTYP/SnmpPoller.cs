@@ -29,20 +29,14 @@ public class SnmpPoller
                 // suche nach rootName
                 rootName = wert1.ObjectName;
             }
-                
-
             else if (oidDictionary.TryGetValue(RemoveLastTwoIfEndsWithZero(baseOid), out var wert2))
             {
                 // suche nach rootName ohne .0 am Ende
                 rootName = wert2.ObjectName;
             }
-
             
         }
-
-
         
-
         try
         {
             Console.WriteLine("Starting SNMPv3 Walk...");
@@ -53,7 +47,7 @@ public class SnmpPoller
                 OctetString.Empty,
                 rootOid,
                 answer,
-                10000,
+                1000,
                 10,
                 WalkMode.WithinSubtree,
                 priv,
@@ -86,10 +80,6 @@ public class SnmpPoller
                     // wenn er keinen spezifischen Namen finden kann fuer seine specific oid
                     modifiedName = rootName + GetDifference(queriedOid, baseOid);
                 }
-
-                
-
-
                 var snmpPoll = new SnmpPoll(ipAddress, queriedOid, queriedValue, hostname, new LocalTime(timestamp.Hour,
                         timestamp.Minute,
                         timestamp.Second,

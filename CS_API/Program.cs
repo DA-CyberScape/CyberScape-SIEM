@@ -17,7 +17,10 @@ var defaultConfigurationPath = Path.Combine(configDirectory, apiConfigurationFil
 
 var assignmentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/HostAssignment");
 var defaultAssignmentPath = Path.Combine(assignmentDirectory, hostAssignmentFile);
-
+// DIE TABELLE HOSTS MUSS NOCH ERSTELLT WERDEN HIER DEN CODE DAFUER SCHREIBEN
+//
+// CODE IT BITCH
+//
 if (!Directory.Exists(configDirectory))
 {
     Directory.CreateDirectory(configDirectory);

@@ -1,0 +1,82 @@
+[
+  {
+    "snmpPolls": [
+      {
+        "name": "FG-SNMP",
+        "id": 123123,
+        "ip": "10.0.1.254",
+        "hostname": "FG-SNMP",
+        "oids": [
+          {
+            "oid": "1.3.6.1.4.1.12356.101.4.1.3",
+            "name": "CPU LOAD"
+          },
+          {
+            "oid": "1.3.6.1.2.1.47.1.2.1.1.2",
+            "name": "Device"
+          },
+          {
+            "oid": "1.3.6.1.4.1.12356.101.4.1.4",
+            "name": "MEMORY USAGE"
+          },
+          {
+            "oid": "1.3.6.1.2.1.1.3",
+            "name": "UPTIME"
+          },
+          {
+            "oid": "1.3.6.1.4.1.12356.101.4.1.1",
+            "name": "VERSION"
+          },
+          {
+            "oid": "1.3.6.1.4.1.12356.101.7.2.2.1.1",
+            "name": "VLANS"
+          },
+          {
+            "oid": "1.3.6.1.4.1.12356.101.3.2.1.1.7",
+            "name": "SESSION COUNT"
+          },
+          {
+            "oid": "1.3.6.1.2.1.47.1.1.1.1.14",
+            "name": "INTERFACES"
+          }
+        ],
+        "user": "MY-USER",
+        "authentication": "SHA1",
+        "encryption": "aes 128",
+        "authpass": "MyAuthPass",
+        "privpass": "MyPrivPass",
+        "port": 161
+      }
+    ]
+  },
+  {
+    "netflowReceiver": [
+      {
+        "name": "Netflow1",
+        "id": 12312,
+        "folderLocation": "/home/cyberscape_admin/Netflow_example_files",
+        "nfdumpBinaryLocation": "/usr/bin/nfdump",
+        "nfcapdBinaryLocation": "/usr/bin/nfcapd",
+        "port": 2055
+      }
+    ]
+  },
+  {
+    "Syslog": [
+      {
+        "name": "Sys1",
+        "id": 56756,
+        "port": 514
+      }
+    ]
+  },
+  {
+    "snmpTrapReceiver": [
+      {
+        "name": "SNMP-Trap-Receiver",
+        "id": 123123,
+        "port": 162
+      }
+    ]
+  }
+]

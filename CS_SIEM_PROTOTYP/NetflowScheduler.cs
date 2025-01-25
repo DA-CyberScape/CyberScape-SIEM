@@ -32,29 +32,31 @@ public class NetflowScheduler
         int i = 1;
         while (!cancellationToken.IsCancellationRequested)
         {
+            Console.WriteLine("I AM STILL STANDING AFTER ALL THIS  1");
             // Console.WriteLine($"RUN {i}");
             _logger.LogInformation("[INFO] Polling cycle started.");
 
 
             foreach (var config in _nfConfigs)
             {
+                Console.WriteLine("I AM STILL STANDING AFTER ALL THIS TIME 2");
                 _logger.LogInformation(
                     $"[INFO] Polling Netflow data for configuration ID: {config.Id}, Name: {config.Name}, Port: {config.Port}, Location: {config.FolderLocation}");
 
                 try
                 {
                     string[] netflowPaths = NetflowReceiver.GetFilePaths(config.FolderLocation);
-                    // Console.WriteLine(netflowPaths.Length);
+                    
                     foreach (string nfpath in netflowPaths)
                     {
-                        // Console.WriteLine(nfpath);
+                        Console.WriteLine(nfpath);
                         // Console.WriteLine($"Hello {i}");
                         List<string> lines = NetflowReceiver.ProcessCapturedFile(nfpath, config.NfdumpBinaryLocation);
                         _allNetFlowData.AddRange(NetflowReceiver.ParseNetFlowData(lines));
                     }
                     
                     //TODO: reenable the code below later when the log generator is fully functional
-                    // MoveFilesToOldDirectory(config.FolderLocation, netflowPaths);
+                    MoveFilesToOldDirectory(config.FolderLocation, netflowPaths);
 
                     if (_allNetFlowData.Count > 0)
                     {
@@ -67,6 +69,7 @@ public class NetflowScheduler
                     _logger.LogError(
                         $"[ERROR] Error while polling data for configuration ID: {config.Id}: {ex.Message}");
                 }
+                Console.WriteLine("I AM STILL STANDING AFTER ALL THIS TIME 3");
             }
 
 
@@ -79,21 +82,23 @@ public class NetflowScheduler
             {
                 _logger.LogInformation("[INFO] Inserting Netflow data into the database...");
                 await InsertNfDataAsync(_allNetFlowData, "Netflow", GetNetflowColumnTypes());
+                Console.WriteLine("I AM STILL STANDING AFTER ALL THIS TIME 4");
                 _allNetFlowData = new List<NetFlowData>();
-                _logger.LogInformation($"[INFO] Data from configurations has been inserted into the database.");
+                _logger.LogInformation($"[INFO] Netflow Data from configurations has been inserted into the database.");
             }
+            Console.WriteLine("I AM STILL STANDING AFTER ALL THIS TIME 5");
 
 
-            _logger.LogInformation("[INFO] Polling cycle completed. Waiting for the next interval...");
+            _logger.LogInformation("[INFO] Netflow Polling cycle completed. Waiting for the next interval...");
             try
             {
-                _logger.LogInformation($"[INFO] Waiting for {_delay} seconds");
+                _logger.LogInformation($"[INFO] Netflow Waiting for {_delay} seconds");
                 await Task.Delay(_delay * 1000, cancellationToken);
-                _logger.LogInformation("[INFO] Delay completed, resuming polling cycle...");
+                _logger.LogInformation("[INFO] Netflow Delay completed, resuming polling cycle...");
             }
             catch (TaskCanceledException)
             {
-                _logger.LogInformation("[INFO] Polling has been canceled.");
+                _logger.LogInformation("[INFO] Netflow Polling has been canceled.");
                 break;
             }
         }
@@ -188,8 +193,18 @@ public class NetflowScheduler
     {
         foreach (var nfData in nfDatas)
         {
-            var data = MapnfDataToData(nfData);
-            
+            var data = new Dictionary<string, object>();
+            try
+            {
+                data = MapnfDataToData(nfData);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+
+
             // _logger.LogDebug("Begin Row");
             // // _logger.LogDebug(nfData.duration.ToString());
             // //
@@ -199,14 +214,21 @@ public class NetflowScheduler
             // }
             // Console.WriteLine();
             // _logger.LogDebug("End Row");
+            Console.WriteLine("TESTING 1");
             try
             {
+                foreach (var d in data)
+                {
+                    Console.WriteLine(d.Key + " " + d.Value);
+                }
                 await _databaseManager.InsertData(table, columns, data);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Failed to insert data: " + ex.Message);
             }
+            Console.WriteLine("TESTING 2");
         }
+        Console.WriteLine("INSERTION DONE");
     }
 }

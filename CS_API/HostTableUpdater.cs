@@ -19,6 +19,7 @@ public class HostTableUpdater
         List<Host> data = ExtractNameIpList();
         var dbHost = new DbHostProvider();
         IDatabaseManager db = new ScyllaDatabaseManager(dbHost);
+        // db.DeleteTable("Hosts");
         await db.CreateTable("Hosts", GetHostsColumnTypes(), "ip");
 
         foreach (var element in data)

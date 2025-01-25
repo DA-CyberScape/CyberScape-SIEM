@@ -1,32 +1,28 @@
 {
   "assignments": [
     {
-      "hostname": "webserver-1",
-      "ipAddress": "192.168.1.112"
-    },
-    {
-      "hostname": "database-1",
-      "ipAddress": "192.168.1.20"
-    },
-    {
-      "hostname": "chicken-server",
-      "ipAddress": "192.168.1.5"
-    },
-    {
-      "hostname": "cache-server",
-      "ipAddress": "192.168.1.15"
-    },
-    {
-      "hostname": "backup-server",
-      "ipAddress": "192.168.1.25"
-    },
-    {
       "hostname": "localhost",
       "ipAddress": "127.0.0.1"
-    }
+    },
     {
       "hostname": "WindowsClient1",
       "ipAddress": "10.40.21.155"
+    },
+    {
+      "hostname": "Fortinet Fortigate",
+      "ipAddress": "10.0.1.254"
+    },
+    {
+      "hostname": "SIEM",
+      "ipAddress": "10.0.1.10"
+    },
+    {
+      "hostname": "LOG GENERATOR",
+      "ipAddress": "192.168.30.30"
+    },
+    {
+      "hostname": "WINDOWS NOCH EIN HOST",
+      "ipAddress": "192.168.10.1"
     }
   ]
 }

@@ -23,27 +23,9 @@ public class NetflowReceiver : IDataReceiver
         _databaseManager = databaseManager;
     }
 
-    public static void StartCapturingNetFlowData(string nfcapdPath, string captureDir)
-    {
-        bool isProcessRunning = Process.GetProcessesByName("nfcapd").Any();
+    
 
-        if (isProcessRunning)
-        {
-            //Console.WriteLine("NetFlow capturing is already running.");
-            return;
-        }
-
-        Process nfcapdProcess = new Process();
-        nfcapdProcess.StartInfo.FileName = nfcapdPath;
-        nfcapdProcess.StartInfo.Arguments = $"-l {captureDir} -w -D -p 2055";
-        nfcapdProcess.StartInfo.RedirectStandardOutput = true;
-        nfcapdProcess.StartInfo.UseShellExecute = false;
-        nfcapdProcess.Start();
-
-        //Console.WriteLine("Started capturing NetFlow data...");
-    }
-
-    public static string[] GetFilePaths(string folderPath)
+    public static string[]? GetFilePaths(string folderPath)
     {
         if (!Directory.Exists(folderPath))
         {
