@@ -49,7 +49,7 @@ public class NetflowScheduler
                     
                     foreach (string nfpath in netflowPaths)
                     {
-                        Console.WriteLine(nfpath);
+                        // Console.WriteLine(nfpath);
                         // Console.WriteLine($"Hello {i}");
                         List<string> lines = NetflowReceiver.ProcessCapturedFile(nfpath, config.NfdumpBinaryLocation);
                         _allNetFlowData.AddRange(NetflowReceiver.ParseNetFlowData(lines));
@@ -69,7 +69,7 @@ public class NetflowScheduler
                     _logger.LogError(
                         $"[ERROR] Error while polling data for configuration ID: {config.Id}: {ex.Message}");
                 }
-                Console.WriteLine("I AM STILL STANDING AFTER ALL THIS TIME 3");
+                // Console.WriteLine("I AM STILL STANDING AFTER ALL THIS TIME 3");
             }
 
 
@@ -82,11 +82,12 @@ public class NetflowScheduler
             {
                 _logger.LogInformation("[INFO] Inserting Netflow data into the database...");
                 await InsertNfDataAsync(_allNetFlowData, "Netflow", GetNetflowColumnTypes());
-                Console.WriteLine("I AM STILL STANDING AFTER ALL THIS TIME 4");
+                //
+                // Console.WriteLine("I AM STILL STANDING AFTER ALL THIS TIME 4");
                 _allNetFlowData = new List<NetFlowData>();
                 _logger.LogInformation($"[INFO] Netflow Data from configurations has been inserted into the database.");
             }
-            Console.WriteLine("I AM STILL STANDING AFTER ALL THIS TIME 5");
+            // Console.WriteLine("I AM STILL STANDING AFTER ALL THIS TIME 5");
 
 
             _logger.LogInformation("[INFO] Netflow Polling cycle completed. Waiting for the next interval...");
@@ -214,20 +215,20 @@ public class NetflowScheduler
             // }
             // Console.WriteLine();
             // _logger.LogDebug("End Row");
-            Console.WriteLine("TESTING 1");
+            // Console.WriteLine("TESTING 1");
             try
             {
-                foreach (var d in data)
-                {
-                    Console.WriteLine(d.Key + " " + d.Value);
-                }
+                // foreach (var d in data)
+                // {
+                //     Console.WriteLine(d.Key + " " + d.Value);
+                // }
                 await _databaseManager.InsertData(table, columns, data);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Failed to insert data: " + ex.Message);
             }
-            Console.WriteLine("TESTING 2");
+            // Console.WriteLine("TESTING 2");
         }
         Console.WriteLine("INSERTION DONE");
     }

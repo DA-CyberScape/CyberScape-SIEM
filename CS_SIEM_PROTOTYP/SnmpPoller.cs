@@ -97,7 +97,7 @@ public class SnmpPoller
         return answerSnmpPolls;
     }
 
-    public static List<SnmpPoll> PollSnmpV3(string oid, string ipAddress, string user,
+    public static List<SnmpPoll> GetSnmpV3(string baseOid, string ipAddress, string user,
         string authPass, string privPass, int port, string hostname, string authentication, string encryption,
         string baseName,
         Dictionary<string, (string ObjectName, string Description)> oidDictionary)
@@ -106,11 +106,30 @@ public class SnmpPoller
         var auth = GetAuthenticationProvider(authentication, authPass);
         var priv = GetPrivacyProvider(encryption, privPass, auth);
         var target = new IPEndPoint(IPAddress.Parse(ipAddress), port);
-        var rootOid = new ObjectIdentifier(oid);
+        var rootOid = new ObjectIdentifier(baseOid);
         var discovery = Messenger.GetNextDiscovery(SnmpType.GetRequestPdu);
         var report = discovery.GetResponse(10000, target);
-        var oidsList = new List<Variable> { new(new ObjectIdentifier(oid)) };
+        var oidsList = new List<Variable> { new(new ObjectIdentifier(baseOid)) };
+        var rootName = "";
 
+        {
+            // neuer scope damit wert1 und wert2 nicht spaeter nerven
+            if (oidDictionary.TryGetValue(baseOid, out var wert1))
+            {
+                // suche nach rootName
+                rootName = wert1.ObjectName;
+            }
+            else if (oidDictionary.TryGetValue(RemoveLastTwoIfEndsWithZero(baseOid), out var wert2))
+            {
+                // suche nach rootName ohne .0 am Ende
+                rootName = wert2.ObjectName;
+            }
+            else
+            {
+                rootName = baseName;
+            }
+
+        }
         var answerSnmpPolls = new List<SnmpPoll>();
         try
         {
@@ -132,14 +151,8 @@ public class SnmpPoller
             {
                 var queriedOid = variable.Id.ToString();
                 var queriedValue = variable.Data.ToString();
-                var oidName = "";
-                var x = "test";
-                if (oidDictionary.TryGetValue(queriedOid, out var wert1))
-                    oidName = wert1.ObjectName;
-                else if (oidDictionary.TryGetValue(RemoveLastTwoIfEndsWithZero(queriedOid), out var wert2))
-                    oidName = wert2.ObjectName;
-                else
-                    oidName = $"{baseName}.{x}";
+                
+              
                 // Console.WriteLine($"4ObjectName: {modifiedName} OID: {oidValue}");
 
                 var timestamp = DateTime.Now;
@@ -147,7 +160,7 @@ public class SnmpPoller
                         timestamp.Minute,
                         timestamp.Second,
                         timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
-                    new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), "testing chicken");
+                    new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), rootName);
                 answerSnmpPolls.Add(snmpPoll);
                 Console.WriteLine(snmpPoll);
             }

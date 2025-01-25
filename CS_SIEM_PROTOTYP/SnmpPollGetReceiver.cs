@@ -5,19 +5,58 @@ namespace CS_SIEM_PROTOTYP;
 using CS_DatabaseManager;
 using System;
 using SnmpSharpNet;
+using static CS_SIEM_PROTOTYP.SnmpPoller;
 
 //https://github.com/rqx110/SnmpSharpNet/wiki
 public class SnmpPollGetReceiver
 {
-    
-    public static List<SnmpPoll> PollSnmpV3(SnmpPollRequest snmpRequest, Dictionary<string, (string ObjectName, string Description)> oidDictionary)
+
+    public static List<SnmpPoll> PollSnmpV3(SnmpPollRequest snmpRequest,
+        Dictionary<string, (string ObjectName, string Description)> oidDictionary)
     {
-        return PollSnmpV3(snmpRequest.Oids, snmpRequest.IpAddress, snmpRequest.User, snmpRequest.AuthPass,
+        List<SnmpPoll> answerSnmpPolls = new List<SnmpPoll>();
+        try
+        {
+            foreach (var entry in snmpRequest.Oids)
+            {
+                string baseOid = entry.Key;
+                string baseName = entry.Value;
+                if (baseOid.EndsWith(".x"))
+                {
+                    baseOid = baseOid.Substring(0, baseOid.Length - 2);
+                    var answerSnmpElement = WalkSnmpV3(baseOid, snmpRequest.IpAddress, snmpRequest.User, snmpRequest.AuthPass,
+                        snmpRequest.PrivPass, snmpRequest.Port, snmpRequest.Hostname, snmpRequest.Authentication,
+                        snmpRequest.Encryption, snmpRequest.Name, oidDictionary);
+                    answerSnmpPolls.AddRange(answerSnmpElement);
+                }
+                else
+                {
+                    var answerSnmpElement = GetSnmpV3(baseOid, snmpRequest.IpAddress, snmpRequest.User, snmpRequest.AuthPass,
+                                            snmpRequest.PrivPass, snmpRequest.Port, snmpRequest.Hostname, snmpRequest.Authentication,
+                                            snmpRequest.Encryption, snmpRequest.Name, oidDictionary);
+                    answerSnmpPolls.AddRange(answerSnmpElement);
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception: " + ex.Message);
+            
+        }
+
+        return answerSnmpPolls;
+    }
+
+
+    public static List<SnmpPoll> DepicatedPollSnmpV3(SnmpPollRequest snmpRequest, Dictionary<string, (string ObjectName, string Description)> oidDictionary)
+    {
+        return DepicatedPollSnmpV3(snmpRequest.Oids, snmpRequest.IpAddress, snmpRequest.User, snmpRequest.AuthPass,
             snmpRequest.PrivPass, snmpRequest.AuthDigest, snmpRequest.PrivProtocol, snmpRequest.Port,
             snmpRequest.Hostname, oidDictionary);
     }
 
-    public static List<SnmpPoll> PollSnmpV3(Dictionary<string, string> oidDict, string ipAddress, string user,
+    public static List<SnmpPoll> DepicatedPollSnmpV3(Dictionary<string, string> oidDict, string ipAddress, string user,
         string authPass, string privPass, AuthenticationDigests authenticationDigests,
         PrivacyProtocols privacyProtocols, int port, string hostname, Dictionary<string, (string ObjectName, string Description)> oidDictionary)
     {

@@ -23,17 +23,16 @@ public static class Program
     {
         var oidDictionary = new Dictionary<string, (string ObjectName, string Description)>
         {
-            { "1.3.6.1.2.1.4.20.1.4", ("SUBNETMASKS", "A description of the entity") },
-            { "1.3.6.1.2.1.1.2", ("sysObjectID", "The vendor's authoritative identification of the network management subsystem") },
+            { "1.3.6.1.2.1.4.20.1.3", ("SUBNETMASKS", "A description of the entity") },
+            { "1.3.6.1.4.1.12356.101.4.1.4", ("CPU FORTIG", "The vendor's authoritative identification of the network management subsystem") },
             { "1.3.6.1.2.1.4.20.1.3.10.40.21.151", ("SPECIFIC NAME", "The time since the network management portion of the system was last re-initialized") }
         };
         
-        WalkSnmpV3("1.3.6.1", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
-            "SHA1", "AES", "SNETMASK", oidDictionary);
+        WalkSnmpV3("1.3.6.1.4.1.12356.101.4.1.4", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate", "SHA1", "AES", "SNETMASK", oidDictionary);
 
 
-        // PollSnmpV3("1.3.6.1.4.1.12356.101.4.1.3.0", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
-        //     "SHA1", "AES", oidDictionary);
+        GetSnmpV3("	1.3.6.1.4.1.12356.101.4.1.4.123", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
+            "SHA1", "AES","FORTICPU" , oidDictionary);
 
 
         // SnmpV3TrapReceiver.StartReceiver();
