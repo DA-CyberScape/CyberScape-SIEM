@@ -12,13 +12,17 @@ using Newtonsoft.Json.Schema;
 //----------------------------------------------------------------------
 string apiConfigurationFile = "apiConfiguration.json";
 string hostAssignmentFile = "hostAssignment.json";
+string alertsFile = "alerts.json";
 var configDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/Configurations_Example");
 var defaultConfigurationPath = Path.Combine(configDirectory, apiConfigurationFile);
 
 var assignmentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/HostAssignment");
 var defaultAssignmentPath = Path.Combine(assignmentDirectory, hostAssignmentFile);
-// DIE TABELLE HOSTS MUSS NOCH ERSTELLT WERDEN HIER DEN CODE DAFUER SCHREIBEN
+
+var alertsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/Alerts");
+var defaultAlertsPath = Path.Combine(alertsDirectory, alertsFile);
 HostTableUpdater.CreateTable();
+
 if (!Directory.Exists(configDirectory))
 {
     Directory.CreateDirectory(configDirectory);
@@ -165,6 +169,37 @@ app.MapPost("/host_assignment", async (HttpRequest request) =>
     var response = new SaveResponse("Host assignment updated successfully.",
         "hostAssignmentDirectory.json");
     return Results.Ok(response);
+});
+
+app.MapGet("/alerts", () =>
+{
+    var alertsPath = Path.Combine(alertsDirectory, alertsFile);
+    if (!File.Exists(alertsPath))
+    {
+        return Results.NotFound("Alerts file not found.");
+    }
+    var jsonContent = File.ReadAllText(alertsPath);
+    return Results.Content(jsonContent, "application/json");
+});
+
+app.MapPost("/alerts/{id}", (int id) =>
+{
+    if (id <= 0)
+    {
+        return Results.BadRequest("ID must be a positive integer.");
+    }
+   
+    return Results.Ok("application/json");
+});
+
+app.MapDelete("/alerts/{id}", (int id) =>
+{
+    if (id <= 0)
+    {
+        return Results.BadRequest("ID must be a positive integer.");
+    }
+   
+    return Results.Ok("application/json");
 });
 
 bool IsJsonValid(string jsonContent, JSchema schema, out string validationErrors)

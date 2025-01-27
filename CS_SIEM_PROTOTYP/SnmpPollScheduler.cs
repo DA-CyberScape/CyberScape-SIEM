@@ -17,14 +17,15 @@ namespace CS_SIEM_PROTOTYP
         private readonly ILogger _logger;
         private readonly Dictionary<string, (string ObjectName, string Description)> _oidDictionary;
 
-        public SnmpPollScheduler(List<SnmpPollRequest> snmpRequests, IDatabaseManager databaseManager, ILogger logger,Dictionary<string, (string ObjectName, string Description)> oidDictionary,
+        public SnmpPollScheduler(List<SnmpPollRequest> snmpRequests, IDatabaseManager databaseManager, ILogger logger,
+            Dictionary<string, (string ObjectName, string Description)> oidDictionary,
             int delayInSeconds = 10)
         {
             _snmpRequests = snmpRequests;
             _delay = delayInSeconds;
             _databaseManager = databaseManager;
             _cancellationTokenSource = new CancellationTokenSource();
-            _databaseManager.CreateTable("SNMP", GetSnmpPollColumn(), "date, time, UUID");
+            _databaseManager.CreateTable("SNMP", GetSnmpPollColumn(), "date, time, UUID", "time DESC, UUID ASC");
             _logger = logger;
             _oidDictionary = oidDictionary;
         }
@@ -50,7 +51,7 @@ namespace CS_SIEM_PROTOTYP
                     {
                         _logger.LogInformation(
                             $"[INFO] Received {snmpPolls.Count} SNMP poll results for device IP: {snmpRequest.IpAddress}");
-                        
+
                         await InsertSnmpPollDataAsync(snmpPolls, "SNMP", GetSnmpPollColumn());
                     }
                     else
@@ -126,10 +127,11 @@ namespace CS_SIEM_PROTOTYP
                 { "oid", snmp.Oid },
                 { "oidValue", snmp.OidValue },
                 { "time", snmp.Time },
-                { "date", snmp.Date},
+                { "date", snmp.Date },
                 { "UUID", Guid.NewGuid() }
             };
         }
+
         public Dictionary<string, Type> GetSnmpPollColumn()
         {
             return new Dictionary<string, Type>
@@ -141,7 +143,7 @@ namespace CS_SIEM_PROTOTYP
                 { "oidValue", typeof(string) },
                 { "time", typeof(LocalTime) },
                 { "UUID", typeof(Guid) },
-                { "date", typeof(LocalDate)}
+                { "date", typeof(LocalDate) }
             };
         }
     }

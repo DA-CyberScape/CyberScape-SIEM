@@ -52,7 +52,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
     }
 
 
-    public async Task CreateTable(string tableName, Dictionary<string, Type> columns, string primaryKey = "UUID")
+    public async Task CreateTable(string tableName, Dictionary<string, Type> columns, string primaryKey = "UUID", string? clusteringOrder = null)
     {
         var typeMapping = new Dictionary<Type, string>
         {
@@ -92,6 +92,11 @@ public class ScyllaDatabaseManager : IDatabaseManager
                 {columnDefinitions}
                 PRIMARY KEY ({primaryKey})
             )";
+
+        if (clusteringOrder != null)
+        {
+            createTableCql += $@" WITH CLUSTERING ORDER BY {clusteringOrder}";
+        }
 
         Console.WriteLine("Creating Table: \n" + createTableCql);
 

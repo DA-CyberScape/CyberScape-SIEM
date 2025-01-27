@@ -3,7 +3,8 @@ namespace CS_DatabaseManager;
 public interface IDatabaseManager
 {
     Task<List<Dictionary<string, object>>> SelectData(string table, string condition, string order);
-    Task CreateTable(string tableName, Dictionary<string /*Column names*/, Type /*Column types*/> columns, string primaryKey);
+    Task CreateTable(string tableName, Dictionary<string /*Column names*/, Type /*Column types*/> columns, string primaryKey, 
+        string? clusteringOrder);
     void DeleteTable(string tableName);
     void SetKeySpace(string keySpaceName);
     Task InsertData(string table, Dictionary<string, Type> columns, Dictionary<string, object> data);

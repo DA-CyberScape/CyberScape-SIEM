@@ -230,22 +230,22 @@ public class ModuleStarter
 
     public static async void StartPrtg(IDatabaseManager db, ServiceProvider serviceProvider, string url)
     {
-        var prtg = serviceProvider.GetService<PrtgReceiver>()!;
-        var apiKey = "5462TDSFODTTNUP36QXMQIWIQJUED5RWNC5SSVPUZQ======";
-
-
-        // creating and insert data into the database
-
-        var snmpColumns = prtg.GetSensorColumnTypes();
-        string primaryKey = "UUID";
-        await db.CreateTable("SNMP", snmpColumns, primaryKey);
-
-        // ------------------------LOOP---------------------------------
-        List<Device> devices = prtg.FetchDeviceWithSensors(url, apiKey).GetAwaiter().GetResult();
-        foreach (var device in devices)
-        {
-            await prtg.InsertSensorsAsync(device, "SNMP", snmpColumns);
-        }
-        // ------------------------LOOP---------------------------------
+        // var prtg = serviceProvider.GetService<PrtgReceiver>()!;
+        // var apiKey = "5462TDSFODTTNUP36QXMQIWIQJUED5RWNC5SSVPUZQ======";
+        //
+        //
+        // // creating and insert data into the database
+        //
+        // var snmpColumns = prtg.GetSensorColumnTypes();
+        // string primaryKey = "UUID";
+        // await db.CreateTable("SNMP", snmpColumns, primaryKey);
+        //
+        // // ------------------------LOOP---------------------------------
+        // List<Device> devices = prtg.FetchDeviceWithSensors(url, apiKey).GetAwaiter().GetResult();
+        // foreach (var device in devices)
+        // {
+        //     await prtg.InsertSensorsAsync(device, "SNMP", snmpColumns);
+        // }
+        // // ------------------------LOOP---------------------------------
     }
 }

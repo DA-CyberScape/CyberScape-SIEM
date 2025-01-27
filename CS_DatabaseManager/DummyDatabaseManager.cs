@@ -12,7 +12,7 @@ public class DummyDatabaseManager : IDatabaseManager
         throw new NotImplementedException();
     }
 
-    public Task CreateTable(string tableName, Dictionary<string, Type> columns, string primaryKey = "UUID")
+    public Task CreateTable(string tableName, Dictionary<string, Type> columns, string primaryKey = "UUID", string? clusteringOrder = null)
     {
         var typeMapping = new Dictionary<Type, string>
         {

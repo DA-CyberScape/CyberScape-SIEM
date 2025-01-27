@@ -20,7 +20,7 @@ public class HostTableUpdater
         var dbHost = new DbHostProvider();
         IDatabaseManager db = new ScyllaDatabaseManager(dbHost);
         // db.DeleteTable("Hosts");
-        await db.CreateTable("Hosts", GetHostsColumnTypes(), "ip");
+        await db.CreateTable("Hosts", GetHostsColumnTypes(), "ip", null);
 
         foreach (var element in data)
         {
@@ -32,7 +32,7 @@ public class HostTableUpdater
     {
         var dbHost = new DbHostProvider();
         IDatabaseManager db = new ScyllaDatabaseManager(dbHost);
-        await db.CreateTable("Hosts", GetHostsColumnTypes(), "ip");
+        await db.CreateTable("Hosts", GetHostsColumnTypes(), "ip", null);
 
     }
 

@@ -1,4 +1,5 @@
-﻿using Cassandra;
+﻿using System.CodeDom;
+using Cassandra;
 using CS_DatabaseManager;
 using Microsoft.Extensions.Logging;
 
@@ -20,7 +21,7 @@ public class NetflowScheduler
         _delay = delayInSeconds;
         _databaseManager = databaseManager;
         _cancellationTokenSource = new CancellationTokenSource();
-        _databaseManager.CreateTable("Netflow", GetNetflowColumnTypes(), "date, time, UUID");
+        _databaseManager.CreateTable("Netflow", GetNetflowColumnTypes(), "date, time, UUID","time DESC, UUID ASC");
         _logger = logger;
     }
 

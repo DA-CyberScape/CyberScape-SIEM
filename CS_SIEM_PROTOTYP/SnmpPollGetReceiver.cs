@@ -26,14 +26,14 @@ public class SnmpPollGetReceiver
                     baseOid = baseOid.Substring(0, baseOid.Length - 2);
                     var answerSnmpElement = WalkSnmpV3(baseOid, snmpRequest.IpAddress, snmpRequest.User, snmpRequest.AuthPass,
                         snmpRequest.PrivPass, snmpRequest.Port, snmpRequest.Hostname, snmpRequest.Authentication,
-                        snmpRequest.Encryption, snmpRequest.Name, oidDictionary);
+                        snmpRequest.Encryption, baseName, oidDictionary);
                     answerSnmpPolls.AddRange(answerSnmpElement);
                 }
                 else
                 {
                     var answerSnmpElement = GetSnmpV3(baseOid, snmpRequest.IpAddress, snmpRequest.User, snmpRequest.AuthPass,
                                             snmpRequest.PrivPass, snmpRequest.Port, snmpRequest.Hostname, snmpRequest.Authentication,
-                                            snmpRequest.Encryption, snmpRequest.Name, oidDictionary);
+                                            snmpRequest.Encryption, baseName, oidDictionary);
                     answerSnmpPolls.AddRange(answerSnmpElement);
                 }
 

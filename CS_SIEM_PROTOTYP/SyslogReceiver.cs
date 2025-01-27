@@ -32,8 +32,8 @@ namespace CS_SIEM_PROTOTYP
             _db = db;
             _delay = delay;
             _port = port;
-            _db.CreateTable("Syslog", GetSyslogColumnTypes(), "date, time, UUID");
-            _db.CreateTable("WinEvents", GetWinEventColumnTypes(), "date, time, UUID");
+            _db.CreateTable("Syslog", GetSyslogColumnTypes(), "date, time, UUID","time DESC, UUID ASC");
+            _db.CreateTable("WinEvents", GetWinEventColumnTypes(), "date, time, UUID", "time DESC, UUID ASC");
             _logger = logger;
         }
 
@@ -58,7 +58,6 @@ namespace CS_SIEM_PROTOTYP
                     {
                         byte[] receivedBytes = _udpClient.Receive(ref remoteEndPoint);
                         string syslogMessage = Encoding.UTF8.GetString(receivedBytes);
-                        
 
 
                         SyslogAnswer syslogAnswer =
@@ -133,11 +132,11 @@ namespace CS_SIEM_PROTOTYP
         {
             var data = MapSyslogDataToData(syslogAnswer);
 
-       
+
             try
             {
                 Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&");
-         
+
                 if (data["message"].ToString().Contains("MSWinEventLog"))
                 {
                     var winEventData = MapWinEventDataToData(syslogAnswer);
@@ -148,6 +147,7 @@ namespace CS_SIEM_PROTOTYP
                 {
                     await _db.InsertData("Syslog", columns, data);
                 }
+
                 Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&");
             }
             catch (Exception ex)
@@ -182,12 +182,12 @@ namespace CS_SIEM_PROTOTYP
                 { "facility", syslogAnswer.Facility },
                 { "severity", syslogAnswer.Severity },
                 { "message", syslogAnswer.Message },
-                { "hostname", syslogAnswer.Hostname},
+                { "hostname", syslogAnswer.Hostname },
                 { "service", syslogAnswer.Service },
                 { "UUID", Guid.NewGuid() }
             };
         }
-        
+
         public Dictionary<string, Type> GetWinEventColumnTypes()
         {
             return new Dictionary<string, Type>
@@ -203,7 +203,7 @@ namespace CS_SIEM_PROTOTYP
                 { "UUID", typeof(Guid) }
             };
         }
-        
+
         public Dictionary<string, object> MapWinEventDataToData(SyslogAnswer syslogAnswer)
         {
             return new Dictionary<string, object>
@@ -243,7 +243,6 @@ namespace CS_SIEM_PROTOTYP
 
             if (syslogMessage.Contains("MSWinEventLog"))
             {
-                
                 syslogAnswer.EventId = ExtractEventId(syslogMessage);
             }
 
@@ -274,7 +273,8 @@ namespace CS_SIEM_PROTOTYP
                             DateTime Timestamp = DateTime.ParseExact(timestampString, "MMM dd HH:mm:ss", null);
                             // Possible Edge-Case: If a message is sent on 31st of December 2024 at 11:59:59.XX it would put it in as 31st of December 2025 
                             syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
-                            syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
+                            syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second,
+                                Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
 
 
                             string[] rfc3164Parts = afterPriority.Substring(16).Trim().Split(' ', 2);
@@ -289,11 +289,11 @@ namespace CS_SIEM_PROTOTYP
                 }
                 else
                 {
-               
                     // syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
                     DateTime Timestamp = DateTime.Now;
                     syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
-                    syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
+                    syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second,
+                        Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
                     Console.WriteLine(DateTime.Now.Hour + ":SLDKFJS:DLKFJS:DLKFJS:DLKFJSD:LKFJSD:LKFJSD");
                     syslogAnswer.Hostname = sourceIp;
                     syslogAnswer.Message = syslogMessage;
@@ -302,11 +302,12 @@ namespace CS_SIEM_PROTOTYP
             catch
             {
                 // syslogAnswer.Timestamp = DateTime.UtcNow.AddHours(1);
-       
+
 
                 DateTime Timestamp = DateTime.Now;
                 syslogAnswer.Date = new LocalDate(Timestamp.Year, Timestamp.Month, Timestamp.Day);
-                syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
+                syslogAnswer.Time = new LocalTime(Timestamp.Hour, Timestamp.Minute, Timestamp.Second,
+                    Timestamp.Millisecond * 1000000 + Timestamp.Microsecond * 1000);
                 syslogAnswer.Hostname = sourceIp;
                 syslogAnswer.Message = syslogMessage;
             }
@@ -317,6 +318,7 @@ namespace CS_SIEM_PROTOTYP
             // Console.WriteLine(syslogAnswer.Timestamp);
             return syslogAnswer;
         }
+
         // returns the value associated with a key for example in a syslog message service=chicken
         // it will return chicken if the inputed key is service
         public static string? ExtractValue(string key, string syslogMessage)
@@ -325,30 +327,31 @@ namespace CS_SIEM_PROTOTYP
             {
                 throw new ArgumentException("Key and syslog message cannot be null or empty.");
             }
-    
-            
+
+
             string pattern = $@"{key}=(?<value>\S+)";
             Match match = Regex.Match(syslogMessage, pattern);
-    
+
             if (match.Success)
             {
                 return match.Groups["value"].Value;
             }
-    
-            return null; 
+
+            return null;
         }
+
         public static string? ExtractEventId(string message)
         {
-            
             string pattern = @"(?<eventid>\d+)\s[A-Za-z]{3} [A-Za-z]{3} \d{2} \d{2}:\d{2}:\d{2} \d{4}";
-    
-      
+
+
             Match match = Regex.Match(message, pattern);
-    
+
             if (match.Success)
             {
                 return match.Groups["eventid"].Value;
             }
+
             return null;
         }
 
@@ -397,10 +400,10 @@ namespace CS_SIEM_PROTOTYP
         public int Facility { get; set; }
         public int Severity { get; set; }
         public string? sourceIp { get; set; }
-        public string? RawMessage{ get; set; }
+        public string? RawMessage { get; set; }
 
-        public string? Service{ get; set; }
-        public string? EventId{ get; set; }
+        public string? Service { get; set; }
+        public string? EventId { get; set; }
 
         public override string ToString()
         {
