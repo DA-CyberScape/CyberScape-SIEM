@@ -13,6 +13,7 @@ public class SnmpPoller
         string baseName,
         Dictionary<string, (string ObjectName, string Description)> oidDictionary)
     {
+        
         var userOctetString = new OctetString(user);
         var auth = GetAuthenticationProvider(authentication, authPass);
         var priv = GetPrivacyProvider(encryption, privPass, auth);

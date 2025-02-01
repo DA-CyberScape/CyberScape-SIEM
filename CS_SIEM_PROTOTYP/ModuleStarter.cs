@@ -56,14 +56,27 @@ public class ModuleStarter
 
     public async Task StartSIEM(string PathToJsonConfiguration)
     {
-        _logger.LogInformation("Processing data");
-        ProcessData(PathToJsonConfiguration);
-        _logger.LogInformation("Finished processing data");
-        List<SnmpPollRequest> snmpPollList = Converter.ConvertJsontoSnmpPollRequest(snmpPollsDict);
-        List<NfConfig> netflowList = Converter.convertJsontoNetflowDict(netflowReceiverDict);
-        List<PrtgConfig> prtgList = Converter.convertJsontoPRTG(prtgReceiverDict);
-        List<SnmpTrapConfig> snmpTrapList = Converter.convertJsontoSNMPTrap(snmpTrapReceiverDict);
-        List<SyslogConfig> syslogList = Converter.ConvertJsontoSyslogConfigs(syslogDict);
+        List<SnmpPollRequest> snmpPollList = new List<SnmpPollRequest>();
+        List<NfConfig> netflowList = new List<NfConfig>();
+        List<PrtgConfig> prtgList = new List<PrtgConfig>();
+        List<SnmpTrapConfig> snmpTrapList = new List<SnmpTrapConfig>();
+        List<SyslogConfig> syslogList = new List<SyslogConfig>();
+        try
+        {
+            _logger.LogInformation("Processing data");
+            ProcessData(PathToJsonConfiguration);
+            _logger.LogInformation("Finished processing data");
+            snmpPollList = Converter.ConvertJsontoSnmpPollRequest(snmpPollsDict);
+            netflowList = Converter.convertJsontoNetflowDict(netflowReceiverDict);
+            prtgList = Converter.convertJsontoPRTG(prtgReceiverDict);
+            snmpTrapList = Converter.convertJsontoSNMPTrap(snmpTrapReceiverDict);
+            syslogList = Converter.ConvertJsontoSyslogConfigs(syslogDict);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("SUM TING WONG" + ex);
+        }
+
         _logger.LogInformation("Converted everything correctly");
         _logger.LogInformation("Current Directory: " + Environment.CurrentDirectory);
         

@@ -35,9 +35,11 @@ public class Converter
             // convert oids
             foreach (var oid in device.oids)
             {
-                pollRequest.Oids.Add(oid.oid, oid.name);
+                if (!pollRequest.Oids.ContainsKey(oid.oid))
+                {
+                    pollRequest.Oids.Add(oid.oid, oid.name);
+                }
             }
-
             pollRequests.Add(pollRequest);
         }
 
