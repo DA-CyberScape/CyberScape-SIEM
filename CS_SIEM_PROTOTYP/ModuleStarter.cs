@@ -172,9 +172,7 @@ public class ModuleStarter
                     continue;
                 }
                 
-                Console.WriteLine(1);
                 var records = csv.GetRecords<OidCsv>();
-                Console.WriteLine(2);
                 
                 foreach (var record in records)
                 {

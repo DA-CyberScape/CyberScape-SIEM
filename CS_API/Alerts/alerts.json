@@ -1,14 +1,5 @@
 [
   {
-    "id": 1,
-    "name": "NAME1",
-    "tabelle": "SYSLOG",
-    "condition": "severity=1",
-    "email_adresse": "email@htl.rennewg.at",
-    "custom_message": "Test Nachricht",
-    "timestamp": "WIRD IM BACKEND HINZUGEFUEGT"
-  },
-  {
     "id": 2,
     "name": "NAME2",
     "tabelle": "SNMP",
@@ -16,5 +7,22 @@
     "email_adresse": "email@htl.rennewg.at",
     "custom_message": "Test Nachricht 2",
     "timestamp": "WIRD IM BACKEND HINZUGEFUEGT"
+  },
+  {
+    "id": 123,
+    "name": "NAME2",
+    "tabelle": "SNMP",
+    "condition": "1.2.45.56 = 1",
+    "email_adresse": "email@htl.rennewg.at",
+    "custom_message": "Test Nachricht 2",
+    "timestamp": "WIRD IM BACKEND HINZUGEFUEGT"
+  },
+  {
+    "id": 123,
+    "name": "NAME2",
+    "tabelle": "SNMP",
+    "condition": "1.2.45.56 = 1",
+    "email_adresse": "email@htl.rennewg.at",
+    "custom_message": "Test Nachricht 2"
   }
 ]

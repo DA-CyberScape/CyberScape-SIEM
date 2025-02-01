@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "tabelle": {
+      "type": "string"
+    },
+    "condition": {
+      "type": "string"
+    },
+    "email_adresse": {
+      "type": "string",
+      "format": "email"
+    },
+    "custom_message": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "LEER LASSEN"
+    }
+  },
+  "required": ["id", "name", "tabelle", "condition", "email_adresse", "custom_message"]
+}

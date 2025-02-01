@@ -7,12 +7,14 @@ using CS_DatabaseManager;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
-
+// https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-9.0#use-the-certificate-apis
 
 //----------------------------------------------------------------------
 string apiConfigurationFile = "apiConfiguration.json";
 string hostAssignmentFile = "hostAssignment.json";
 string alertsFile = "alerts.json";
+string alertsPostSchemaFile = "alertsPostSchema.json";
+
 var configDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/Configurations_Example");
 var defaultConfigurationPath = Path.Combine(configDirectory, apiConfigurationFile);
 
@@ -21,6 +23,7 @@ var defaultAssignmentPath = Path.Combine(assignmentDirectory, hostAssignmentFile
 
 var alertsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/Alerts");
 var defaultAlertsPath = Path.Combine(alertsDirectory, alertsFile);
+var alertsPostSchemaPath = Path.Combine(alertsDirectory, alertsPostSchemaFile);
 HostTableUpdater.CreateTable();
 
 if (!Directory.Exists(configDirectory))
@@ -48,11 +51,32 @@ if (!File.Exists(defaultAssignmentPath))
     Console.WriteLine("Please create the File: " + hostAssignmentFile + " in the Folder: "+assignmentDirectory);
     return;
 }
+if (!Directory.Exists(alertsDirectory))
+{
+    Directory.CreateDirectory(assignmentDirectory);
+    Console.WriteLine("Please create the File: " + alertsDirectory + " in the Folder: "+alertsDirectory);
+    return;
+}
+
+if (!File.Exists(defaultAlertsPath))
+{
+    Console.WriteLine("Please create the File: " + defaultAlertsPath + " in the Folder: "+alertsDirectory);
+    return;
+}
+if (!File.Exists(alertsPostSchemaPath))
+{
+    Console.WriteLine("Please create the File: " + alertsPostSchemaPath + " in the Folder: "+alertsDirectory);
+    return;
+}
+
+string currentAlertsJson = File.ReadAllText(defaultAlertsPath);
+// alertsDictionary
+List<Dictionary<string, object>> alertsListDictionary = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(currentAlertsJson);
 
 //----------------------------------------------------------------------
 
 var builder = WebApplication.CreateSlimBuilder(args);
-
+builder.WebHost.UseUrls("http://0.0.0.0:5073");
 // sagt dem Programm dass ein custom serialization context genutzt wird
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -182,24 +206,86 @@ app.MapGet("/alerts", () =>
     return Results.Content(jsonContent, "application/json");
 });
 
-app.MapPost("/alerts/{id}", (int id) =>
+app.MapPost("/alerts", async (HttpRequest request) =>
 {
-    if (id <= 0)
+    //json vom body bekommen
+    using var reader = new StreamReader(request.Body);
+    var jsonContent = await reader.ReadToEndAsync();
+    // schema vom file bekommen
+    string schemaJson = File.ReadAllText(alertsPostSchemaPath);
+    JSchema schema = JSchema.Parse(schemaJson);
+    if (!IsJsonValid(jsonContent, schema, out string validationErrors))
     {
-        return Results.BadRequest("ID must be a positive integer.");
+        return Results.BadRequest($"Invalid JSON: {validationErrors}");
     }
-   
-    return Results.Ok("application/json");
+    var newAlertsFilePath = Path.Combine(alertsDirectory, alertsFile);
+    // neues alert wird in das dictionary hinzugefuegt
+    Dictionary<string, object> newAlertsElement = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent);
+    alertsListDictionary.Add(newAlertsElement);
+    // TODO hier muss der AlertsChecker Prozess mit der neuen Konfiguration neugestarted werden
+    
+    // die ganze liste an alerts wird in ein JSON umgewandelt und in das Alert File reingeschrieben
+    string newAlertsJson = JsonConvert.SerializeObject(alertsListDictionary, Formatting.Indented);
+    await File.WriteAllTextAsync(newAlertsFilePath, newAlertsJson);
+    
+    
+    
+    // -------------DEBUGGING ZEUG------------- 
+    Console.WriteLine("Updating Alerts Table");
+    Console.WriteLine(jsonContent);
+    Console.WriteLine("All Alerts: ");
+    
+    foreach (var item in alertsListDictionary)
+    {
+        Console.WriteLine("---- New Entry ----");
+        foreach (var keyValue in item)
+        {
+            Console.WriteLine($"{keyValue.Key}: {keyValue.Value}");
+        }
+    }
+    // -------------DEBUGGING ZEUG------------- 
+    var response = new SaveResponse("Alerts Table updated successfully.",
+        "alerts.json");
+    return Results.Ok(response);
 });
 
-app.MapDelete("/alerts/{id}", (int id) =>
+app.MapDelete("/alerts/{id:long}", async (long id) =>
 {
     if (id <= 0)
     {
         return Results.BadRequest("ID must be a positive integer.");
     }
+  
+    // Alle Elemente mit der ID id werden geloescht
+    List<Dictionary<string, object>> listToRemove = new List<Dictionary<string, object>>();
+    foreach (var element in alertsListDictionary)
+    {
+        if (element["id"].ToString() == id.ToString())
+        {
+            listToRemove.Add(element);
+        }
+    }
+    alertsListDictionary.RemoveAll(item => listToRemove.Contains(item));
+    
+    string newAlertsJson = JsonConvert.SerializeObject(alertsListDictionary, Formatting.Indented);
+    var newAlertsFilePath = Path.Combine(alertsDirectory, alertsFile);
+    await File.WriteAllTextAsync(newAlertsFilePath, newAlertsJson);
+    // TODO hier muss der AlertsChecker Prozess mit der neuen Konfiguration neugestarted werden
    
-    return Results.Ok("application/json");
+    // -------------DEBUGGING ZEUG------------- 
+    Console.WriteLine("Updating Alerts Table:");
+    foreach (var item in alertsListDictionary)
+    {
+        Console.WriteLine("---- New Entry ----");
+        foreach (var keyValue in item)
+        {
+            Console.WriteLine($"{keyValue.Key}: {keyValue.Value}");
+        }
+    }
+    // -------------DEBUGGING ZEUG------------- 
+    var response = new SaveResponse($"Deleted all Alerts with the ID {id}.",
+            "alerts.json");
+    return Results.Ok(response);
 });
 
 bool IsJsonValid(string jsonContent, JSchema schema, out string validationErrors)

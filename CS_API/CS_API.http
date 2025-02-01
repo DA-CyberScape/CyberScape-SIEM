@@ -147,3 +147,39 @@ Content-Type: application/json
   ]
 }
 
+
+### GET ALERTS
+GET {{CS_API_HostAddress}}/alerts/
+Accept: application/json
+
+### POST A NEW ALERT
+POST {{CS_API_HostAddress}}/alerts/
+Content-Type: application/json
+
+{
+    "id": 1234123412341234123412,
+    "name": "NAME2",
+    "tabelle": "SNMP",
+    "condition": "1.2.45.56 = 1",
+    "email_adresse": "email@htl.rennewg.at",
+    "custom_message": "Test Nachricht 2",
+    "timestamp": "WIRD IM BACKEND HINZUGEFUEGT"
+  }
+
+
+### POST A WRONG NEW ALERT
+POST {{CS_API_HostAddress}}/alerts/
+Content-Type: application/json
+
+{
+  "id": 12341234123,
+  "name": "NAME2",
+  "tabelle": "SNMP",
+  "condition": "1.2.45.56 = 1",
+  "email_adresse": "email@htl.rennewg.at",
+  "custom_message": "Test Nachricht 2"
+  
+}
+
+### DELETE AN ALERT
+DELETE {{CS_API_HostAddress}}/alerts/12341234123
