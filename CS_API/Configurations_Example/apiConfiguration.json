@@ -62,7 +62,23 @@
                {
                   "oid":"1.3.6.1.2.1.4.20.1.2.x",
                   "name":"All_Interface_IPs"
-               }
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.1.x",
+                  "name":"Polcy-IDs"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.3.x",
+                  "name":"Bytes pro Policy"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.3.x",
+                  "name":"Matches pro Policy"
+               },
+                {
+                  "oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.4.x",
+                  "name":"Latest Match of Policy"
+               },
             ],
             "user":"MY-USER",
             "authentication":"SHA1",
