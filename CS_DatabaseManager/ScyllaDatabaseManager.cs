@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using Cassandra;
 using Microsoft.Extensions.Logging;
 
@@ -8,25 +9,25 @@ namespace CS_DatabaseManager;
 public class ScyllaDatabaseManager : IDatabaseManager
 {
     private readonly Cluster _cluster;
-    private readonly ISession _session;
+    public readonly ISession Session;
     private Dictionary<String, object> _tableCache = new();
     //private readonly ILogger _logger;
-    
-    
+
+
     public ScyllaDatabaseManager(DbHostProvider dbHostProvider)
     {
         // ILogger<ScyllaDatabaseManager> logger
         //TODO: cache a Map with table names and their column definitions from a file?
-        
+
         //_logger = null;
-        
+
         _cluster =
             Cluster.Builder()
                 .AddContactPoints(dbHostProvider.ProvideHosts()).WithExecutionProfiles(options =>
                     options.WithProfile("profile1", builder => builder.WithConsistencyLevel(ConsistencyLevel.Quorum)))
                 .Build();
 
-        _session =
+        Session =
             _cluster.Connect();
         //_logger.LogInformation("Successfully Connected with the Database.");
         Console.WriteLine("[INFO] Successfully Connected with the Database.");
@@ -42,17 +43,71 @@ public class ScyllaDatabaseManager : IDatabaseManager
 
         // Collects Metadata and caches it locally
         // Console.WriteLine("Collecting Metadata on Startup");
-        //     var tables = _cluster.Metadata.GetTables(_session.Keyspace);
+        //     var tables = _cluster.Metadata.GetTables(Session.Keyspace);
         //     foreach (var tableName in tables)
         //     {
         //         Console.WriteLine("______________");
         //         Console.WriteLine(tableName);
-        //         UpdateCache(_session.Keyspace, tableName);
+        //         UpdateCache(Session.Keyspace, tableName);
         //     }
     }
 
+    public async Task<Dictionary<string, Dictionary<string, List<string>>>> GetSchema()
+    {
+        var keyspaces = _cluster.Metadata.GetKeyspaces();
+        var r = new Dictionary<string, Dictionary<string, List<string>>>();
+        foreach (var ks in keyspaces)
+        {
+            if (!ks.StartsWith("system"))
+            {
+                r.Add(ks, new Dictionary<string, List<string>>());
+                var tables = _cluster.Metadata.GetTables(ks);
+                foreach (var t in tables)
+                {
+                    r[ks].Add(t, new List<string>());
+                    var st = new SimpleStatement($@"DESCRIBE ""{ks}"".""{t}""");
+                    var rowSet = await Session.ExecuteAsync(st);
+                    foreach (var row in rowSet)
+                    {
+                        if ((string)row[1] == "table")
+                        {
+                            string pattern = @"\s*(\w+)\s+(\w+),";
+                            Regex regex = new Regex(pattern);
+                            MatchCollection matches = regex.Matches(row[3].ToString());
+                            List<string> columns = new List<string>();
 
-    public async Task CreateTable(string tableName, Dictionary<string, Type> columns, string primaryKey = "UUID", string? clusteringOrder = null)
+                            foreach (Match match in matches)
+                            {
+                                string columnName = match.Groups[1].Value;
+                                string columnType = match.Groups[2].Value;
+
+                                columns.Add($"{columnName} {columnType}");
+                            }
+
+                            // Output formatted columns as a string
+                            string result = string.Join(", ", columns);
+
+                            r[ks][t].Add(result);
+                        }
+                        else
+                        {
+                            var view = (string)row[2];
+                            if (!r[ks].ContainsKey(view))
+                            {
+                                r[ks].Add(view, new List<string>());
+                            }
+                            r[ks][view].Add((string) row[3]);
+                        }
+                    }
+                }
+            }
+        }
+
+        return r;
+    }
+
+    public async Task CreateTable(string tableName, Dictionary<string, Type> columns, string primaryKey = "UUID",
+        string? clusteringOrder = null)
     {
         var typeMapping = new Dictionary<Type, string>
         {
@@ -63,12 +118,12 @@ public class ScyllaDatabaseManager : IDatabaseManager
             { typeof(bool), "BOOLEAN" },
             { typeof(string), "TEXT" },
             { typeof(DateTimeOffset), "TIMESTAMP" },
-            { typeof(Duration), "DURATION"},
+            { typeof(Duration), "DURATION" },
             { typeof(Guid), "UUID" },
             { typeof(byte[]), "BLOB" },
             { typeof(IPAddress), "INET" },
-            { typeof(LocalDate), "DATE"},
-            { typeof(LocalTime), "TIME"}
+            { typeof(LocalDate), "DATE" },
+            { typeof(LocalTime), "TIME" }
         };
 
 
@@ -88,20 +143,20 @@ public class ScyllaDatabaseManager : IDatabaseManager
 //        columnDefinitions.Append($"{primaryKey} UUID");
 
         var createTableCql = $@"
-            CREATE TABLE IF NOT EXISTS ""{_session.Keyspace}"".""{tableName}"" (
+            CREATE TABLE IF NOT EXISTS ""{Session.Keyspace}"".""{tableName}"" (
                 {columnDefinitions}
                 PRIMARY KEY ({primaryKey})
             )";
 
         if (clusteringOrder != null)
         {
-            createTableCql += $@" WITH CLUSTERING ORDER BY {clusteringOrder}";
+            createTableCql += $@" WITH CLUSTERING ORDER BY ({clusteringOrder})";
         }
 
         Console.WriteLine("Creating Table: \n" + createTableCql);
 
         var statement = new SimpleStatement(createTableCql);
-        await _session.ExecuteAsync(statement).ContinueWith(t =>
+        await Session.ExecuteAsync(statement).ContinueWith(t =>
         {
             if (t.IsFaulted)
             {
@@ -111,7 +166,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
             {
                 Console.WriteLine($"Table '{tableName}' created successfully.");
                 //TODO: cache the table name and column definitions in to a Map
-                ////UpdateCache(_session.Keyspace, tableName);
+                ////UpdateCache(Session.Keyspace, tableName);
             }
         });
         // await Task.Delay(5000);
@@ -142,12 +197,12 @@ public class ScyllaDatabaseManager : IDatabaseManager
     public void DeleteTable(string tableName)
     {
         // TODO: Delete Tables which are not defined in the "config" file? Maybe call this in CreateTable()
-        var dropTableCql = $@"DROP TABLE IF EXISTS ""{_session.Keyspace}"".""{tableName}""";
+        var dropTableCql = $@"DROP TABLE IF EXISTS ""{Session.Keyspace}"".""{tableName}""";
 
         Console.WriteLine("Dropping Table: \n" + dropTableCql);
 
         var statement = new SimpleStatement(dropTableCql);
-        _session.ExecuteAsync(statement).ContinueWith(t =>
+        Session.ExecuteAsync(statement).ContinueWith(t =>
         {
             Console.WriteLine(t.IsFaulted
                 ? $"Error dropping table: {t.Exception?.GetBaseException().Message}"
@@ -157,12 +212,12 @@ public class ScyllaDatabaseManager : IDatabaseManager
 
     public void SetKeySpace(string keySpaceName)
     {
-        var currentKeyspace = _session.Keyspace;
+        var currentKeyspace = Session.Keyspace;
         var availableKeyspace = _cluster.Metadata.GetKeyspaces();
 
         if (availableKeyspace.Contains(keySpaceName) && currentKeyspace != keySpaceName)
         {
-            _session.ChangeKeyspace(keySpaceName);
+            Session.ChangeKeyspace(keySpaceName);
 
             Console.WriteLine("Set Keyspace to " + keySpaceName);
         }
@@ -175,8 +230,8 @@ public class ScyllaDatabaseManager : IDatabaseManager
             };
             var replicationProperty =
                 ReplicationStrategies.CreateNetworkTopologyStrategyReplicationProperty(datacentersReplicationFactors);
-            _session.CreateKeyspaceIfNotExists(keySpaceName, replicationProperty);
-            _session.ChangeKeyspace(keySpaceName);
+            Session.CreateKeyspaceIfNotExists(keySpaceName, replicationProperty);
+            Session.ChangeKeyspace(keySpaceName);
         }
     }
 
@@ -185,17 +240,17 @@ public class ScyllaDatabaseManager : IDatabaseManager
         if (!columns.Keys.All(data.ContainsKey))
 
         {
-            Console.WriteLine("Data Dictionary: _____________________-");
-            foreach (var d in data)
-            {
-                Console.WriteLine(d.Key + ": " + d.Value);
-            }
+            //Console.WriteLine("Data Dictionary: _____________________-");
+            //foreach (var d in data)
+            //{
+            //   Console.WriteLine(d.Key + ": " + d.Value);
+            //}
 
-            Console.WriteLine("Column Dictionary: _____________________-");
-            foreach (var c in columns)
-            {
-                Console.WriteLine(c.Key + ": " + c.Value);
-            }
+            //Console.WriteLine("Column Dictionary: _____________________-");
+            //foreach (var c in columns)
+            //{
+            //    Console.WriteLine(c.Key + ": " + c.Value);
+            //}
 
             throw new ArgumentException("Data dictionary contains keys not present in columns dictionary.");
         }
@@ -206,7 +261,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
         var valuePlaceholders = string.Join(", ", Enumerable.Range(0, columns.Count).Select(_ => "?"));
 
         var insertCql = $@"
-            INSERT INTO ""{_session.Keyspace}"".""{table}"" ({columnNames})
+            INSERT INTO ""{Session.Keyspace}"".""{table}"" ({columnNames})
             VALUES ({valuePlaceholders})
         ";
         var values = columns.Keys.Select(column => data[column]).ToArray();
@@ -222,7 +277,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
         // Console.WriteLine();
         // }
 
-        await _session.ExecuteAsync(statement).ContinueWith(t =>
+        await Session.ExecuteAsync(statement).ContinueWith(t =>
         {
             if (t.IsFaulted) Console.WriteLine($"Error inserting data: {t.Exception?.Message}");
         });
@@ -250,7 +305,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
             var valuePlaceholders = string.Join(", ", Enumerable.Range(0, columns.Count).Select(i => "?"));
 
             var insertCql = $@"
-            INSERT INTO ""{_session.Keyspace}"".""{table}"" ({columnNames})
+            INSERT INTO ""{Session.Keyspace}"".""{table}"" ({columnNames})
             VALUES ({valuePlaceholders})
             ";
 
@@ -260,7 +315,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
             batch.Add(statement);
         }
 
-        await _session.ExecuteAsync(batch).ContinueWith(t =>
+        await Session.ExecuteAsync(batch).ContinueWith(t =>
         {
             Console.WriteLine(t.IsFaulted
                 ? $"Error executing batch: {t.Exception?.GetBaseException().Message}"
@@ -272,17 +327,17 @@ public class ScyllaDatabaseManager : IDatabaseManager
         string order = "")
     {
         //check if table exists in keyspace
-        var containsInTable = _cluster.Metadata.GetTables(_session.Keyspace).Contains(table);
+        var containsInTable = _cluster.Metadata.GetTables(Session.Keyspace).Contains(table);
 
         if (!containsInTable)
         {
-            // var containsInView = _cluster.Metadata.GetMaterializedView(_session.Keyspace, table);
+            // var containsInView = _cluster.Metadata.GetMaterializedView(Session.Keyspace, table);
             // Console.WriteLine("VIEW: " + containsInView);
-            // throw new ArgumentException($"Table '{table}' does not exist in keyspace '{_session.Keyspace}'.");
+            // throw new ArgumentException($"Table '{table}' does not exist in keyspace '{Session.Keyspace}'.");
         }
 
 
-        var selectCql = $@"SELECT * FROM ""{_session.Keyspace}"".""{table}""";
+        var selectCql = $@"SELECT * FROM ""{Session.Keyspace}"".""{table}""";
 
         if (!string.IsNullOrWhiteSpace(condition))
         {
@@ -303,7 +358,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
 
         try
         {
-            var rowSet = await _session.ExecuteAsync(statement);
+            var rowSet = await Session.ExecuteAsync(statement);
             var results = new List<Dictionary<string, object>>();
 
             // Iterate through each row in the result set
@@ -363,6 +418,6 @@ public class ScyllaDatabaseManager : IDatabaseManager
             Console.WriteLine(keyspace);
         }
 
-        Console.WriteLine("Current Keyspace: " + _session.Keyspace);
+        Console.WriteLine("Current Keyspace: " + Session.Keyspace);
     }
 }

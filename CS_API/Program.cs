@@ -7,9 +7,13 @@ using CS_DatabaseManager;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+using Microsoft.Extensions.Logging;
 // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-9.0#use-the-certificate-apis
 
 //----------------------------------------------------------------------
+
+
+
 string apiConfigurationFile = "apiConfiguration.json";
 string hostAssignmentFile = "hostAssignment.json";
 string alertsFile = "alerts.json";
@@ -72,7 +76,8 @@ if (!File.Exists(alertsPostSchemaPath))
 string currentAlertsJson = File.ReadAllText(defaultAlertsPath);
 // alertsDictionary
 List<Dictionary<string, object>> alertsListDictionary = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(currentAlertsJson);
-
+AlertChecker alertChecker = new AlertChecker(alertsListDictionary);
+alertChecker.StartAlertChecker();
 //----------------------------------------------------------------------
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -222,6 +227,10 @@ app.MapPost("/alerts", async (HttpRequest request) =>
     // neues alert wird in das dictionary hinzugefuegt
     Dictionary<string, object> newAlertsElement = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent);
     alertsListDictionary.Add(newAlertsElement);
+    
+    alertChecker.UpdateListOfDictionary(alertsListDictionary);
+    alertChecker.RestartAlertChecker();
+    
     // TODO hier muss der AlertsChecker Prozess mit der neuen Konfiguration neugestarted werden
     
     // die ganze liste an alerts wird in ein JSON umgewandelt und in das Alert File reingeschrieben
@@ -270,7 +279,9 @@ app.MapDelete("/alerts/{id:long}", async (long id) =>
     string newAlertsJson = JsonConvert.SerializeObject(alertsListDictionary, Formatting.Indented);
     var newAlertsFilePath = Path.Combine(alertsDirectory, alertsFile);
     await File.WriteAllTextAsync(newAlertsFilePath, newAlertsJson);
-    // TODO hier muss der AlertsChecker Prozess mit der neuen Konfiguration neugestarted werden
+    
+    alertChecker.UpdateListOfDictionary(alertsListDictionary);
+    alertChecker.RestartAlertChecker();
    
     // -------------DEBUGGING ZEUG------------- 
     Console.WriteLine("Updating Alerts Table:");
@@ -366,7 +377,7 @@ app.MapPost("/configurations/Database", async (HttpRequest request) =>
 {
     using var reader = new StreamReader(request.Body);
     var jsonContent = await reader.ReadToEndAsync();
-    var newFileName = Path.Combine("App_Configurations", "Database_IPs.yaml");
+    var newFileName = Path.Combine("../App_Configurations", "Database_IPs.yaml");
     Console.WriteLine(newFileName);
 
     await File.WriteAllTextAsync(newFileName, jsonContent);
@@ -379,6 +390,17 @@ app.MapPost("/configurations/Database", async (HttpRequest request) =>
     var response = new SaveResponse("Configuration saved successfully. Restarting SIEM with new Configuration",
         "apiConfiguration.json");
     return Results.Ok(response);
+});
+
+app.MapGet("/configurations/Database/schema", async () =>
+{
+    DbHostProvider dbHost = new DbHostProvider();
+    ScyllaDatabaseManager db = new ScyllaDatabaseManager(dbHost);
+
+    var schema = await db.GetSchema();
+    string json = JsonConvert.SerializeObject(schema, Formatting.Indented);
+    
+    return Results.Content(json, "application/json");
 });
 
 app.Run();

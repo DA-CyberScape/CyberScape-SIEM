@@ -1,0 +1,21 @@
+# active -> whether the cluster should be used or not. only one custer should be active
+# production -> whether the production keyspace should be used or not
+# this file is read at the start of the program.
+
+clusterlists:
+  - listname: "Local Cluster"
+    list: [ 10.0.1.12, 10.0.1.13, 10.0.1.14 ]
+    active: true
+    production: false
+  - listname: "Remote Cluster"
+    list: [ 192.168.0.110, 192.168.0.111, 192.168.0.112 ]
+    active: false
+    production: true
+  - listname: "Docker Cluster 1"
+    list: [ 172.17.0.2, 172.17.0.3, 172.17.0.4 ]
+    active: false
+    production: true
+  - listname: "Docker Cluster 2"
+    list: [ 172.18.0.2, 172.18.0.3, 172.18.0.4 ]
+    active: false
+    production: true

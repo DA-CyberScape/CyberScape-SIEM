@@ -135,8 +135,6 @@ namespace CS_SIEM_PROTOTYP
 
             try
             {
-                Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&");
-
                 if (data["message"].ToString().Contains("MSWinEventLog"))
                 {
                     var winEventData = MapWinEventDataToData(syslogAnswer);
@@ -147,8 +145,6 @@ namespace CS_SIEM_PROTOTYP
                 {
                     await _db.InsertData("Syslog", columns, data);
                 }
-
-                Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&");
             }
             catch (Exception ex)
             {
