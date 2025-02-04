@@ -226,15 +226,15 @@ app.MapPost("/alerts", async (HttpRequest request) =>
     var newAlertsFilePath = Path.Combine(alertsDirectory, alertsFile);
     // neues alert wird in das dictionary hinzugefuegt
     Dictionary<string, object> newAlertsElement = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent);
-    alertsListDictionary.Add(newAlertsElement);
+    alertChecker.ListOfAlerts.Add(newAlertsElement);
     
-    alertChecker.UpdateListOfDictionary(alertsListDictionary);
+    
     alertChecker.RestartAlertChecker();
     
     // TODO hier muss der AlertsChecker Prozess mit der neuen Konfiguration neugestarted werden
     
     // die ganze liste an alerts wird in ein JSON umgewandelt und in das Alert File reingeschrieben
-    string newAlertsJson = JsonConvert.SerializeObject(alertsListDictionary, Formatting.Indented);
+    string newAlertsJson = JsonConvert.SerializeObject(alertChecker.ListOfAlerts, Formatting.Indented);
     await File.WriteAllTextAsync(newAlertsFilePath, newAlertsJson);
     
     
@@ -244,7 +244,7 @@ app.MapPost("/alerts", async (HttpRequest request) =>
     Console.WriteLine(jsonContent);
     Console.WriteLine("All Alerts: ");
     
-    foreach (var item in alertsListDictionary)
+    foreach (var item in alertChecker.ListOfAlerts)
     {
         Console.WriteLine("---- New Entry ----");
         foreach (var keyValue in item)
@@ -267,25 +267,25 @@ app.MapDelete("/alerts/{id:long}", async (long id) =>
   
     // Alle Elemente mit der ID id werden geloescht
     List<Dictionary<string, object>> listToRemove = new List<Dictionary<string, object>>();
-    foreach (var element in alertsListDictionary)
+    foreach (var element in alertChecker.ListOfAlerts)
     {
         if (element["id"].ToString() == id.ToString())
         {
             listToRemove.Add(element);
         }
     }
-    alertsListDictionary.RemoveAll(item => listToRemove.Contains(item));
+    alertChecker.ListOfAlerts.RemoveAll(item => listToRemove.Contains(item));
     
-    string newAlertsJson = JsonConvert.SerializeObject(alertsListDictionary, Formatting.Indented);
+    string newAlertsJson = JsonConvert.SerializeObject(alertChecker.ListOfAlerts, Formatting.Indented);
     var newAlertsFilePath = Path.Combine(alertsDirectory, alertsFile);
     await File.WriteAllTextAsync(newAlertsFilePath, newAlertsJson);
     
-    alertChecker.UpdateListOfDictionary(alertsListDictionary);
+    
     alertChecker.RestartAlertChecker();
    
     // -------------DEBUGGING ZEUG------------- 
     Console.WriteLine("Updating Alerts Table:");
-    foreach (var item in alertsListDictionary)
+    foreach (var item in alertChecker.ListOfAlerts)
     {
         Console.WriteLine("---- New Entry ----");
         foreach (var keyValue in item)

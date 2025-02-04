@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "SYSLOG_SEVERITY_1",
+    "tabelle": "syslog",
+    "condition": "severity=1",
+    "email_adresse": "apexlegends373@gmail.com",
+    "custom_message": "CHICKENLEGPIECE WAS HERE",
+    "timestamp": "&sd=2025-2-3&st=14:1:12&et=23:59:59"
+  },
+  {
+    "id": 123,
+    "name": "NAME2",
+    "tabelle": "SNMP",
+    "condition": "1.2.45.56 = 1",
+    "email_adresse": "apexlegends373@gmail.com",
+    "custom_message": "Test Nachricht 2",
+    "timestamp": ""
+  }
+]

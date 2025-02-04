@@ -11,7 +11,7 @@ using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Security;
 using Cassandra;
-
+using Microsoft.Extensions.Logging;
 namespace CS_SIEM_PROTOTYP;
 
 public static class Program
@@ -21,19 +21,41 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
+        using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddConsole();
+        });
+        ILogger logger = loggerFactory.CreateLogger<CustomApiFetcher>();
+        List<CustomApiElement> apiElements = new()
+        {
+            new CustomApiElement("http://10.0.1.200:8000/database/syslog?sd=2025-01-19&st=13:00:00&et=23:59:59&ip=10.0.1.254&severity=6"),
+            new CustomApiElement("https://10.0.1.254/api/v2/monitor/wifi/managed_ap", "HNrmjsgr9z9Q44rf3N1pzh8zr9kgrr"),
+        };
+        DbHostProvider dbHost = new DbHostProvider();
+        IDatabaseManager db = new ScyllaDatabaseManager(dbHost);
+
+        CustomApiFetcher customApiFetcher = new CustomApiFetcher(apiElements, db, logger);
+        
+        
+        customApiFetcher.StartCustomApiFetcher();
+
+        await Task.Delay(60_000);
+        customApiFetcher.StopCustomApiFetcher();
+
+        /*
         var oidDictionary = new Dictionary<string, (string ObjectName, string Description)>
         {
             { "1.3.6.1.2.1.4.20.1.3", ("SUBNETMASKS", "A description of the entity") },
             { "1.3.6.1.4.1.12356.101.4.1.4", ("CPU FORTIG", "The vendor's authoritative identification of the network management subsystem") },
             { "1.3.6.1.2.1.4.20.1.3.10.40.21.151", ("SPECIFIC NAME", "The time since the network management portion of the system was last re-initialized") }
         };
-        
+
         WalkSnmpV3("1.3.6.1.4.1.12356.101.4.1.4", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate", "SHA1", "AES", "SNETMASK", oidDictionary);
 
 
         GetSnmpV3("	1.3.6.1.4.1.12356.101.4.1.4.123", "10.0.1.254", "MY-USER", "MyAuthPass", "MyPrivPass", 161, "Fortigate",
             "SHA1", "AES","FORTICPU" , oidDictionary);
-
+*/
 
         // SnmpV3TrapReceiver.StartReceiver();
         /*

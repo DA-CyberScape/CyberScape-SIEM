@@ -1,20 +1,2 @@
 [
-  {
-    "id": 2,
-    "name": "NAME2",
-    "tabelle": "SNMP",
-    "condition": "1.2.45.56 = 1",
-    "email_adresse": "email@htl.rennewg.at",
-    "custom_message": "Test Nachricht 2",
-    "timestamp": "WIRD IM BACKEND HINZUGEFUEGT"
-  },
-  {
-    "id": 1234123412341234123412,
-    "name": "NAME2",
-    "tabelle": "SNMP",
-    "condition": "1.2.45.56 = 1",
-    "email_adresse": "email@htl.rennewg.at",
-    "custom_message": "Test Nachricht 2",
-    "timestamp": "WIRD IM BACKEND HINZUGEFUEGT"
-  }
 ]

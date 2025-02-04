@@ -1,12 +1,13 @@
 using System;
 using System.Net;
 using System.Net.Mail;
+using System.Diagnostics;
 namespace CS_API;
 
 
 public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
 {
-    private List<Dictionary<string, object>> _listOfAlerts = listOfAlerts;
+    public List<Dictionary<string, object>> ListOfAlerts = listOfAlerts;
     private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     private readonly int _delay = 180;
 
@@ -17,21 +18,50 @@ public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
         
         while (!cancellationToken.IsCancellationRequested)
         {
-            foreach (var element in _listOfAlerts)
+            if (ListOfAlerts.Count > 0)
             {
-                foreach (var entry in element)
+                foreach (var element in ListOfAlerts)
                 {
-                    Console.WriteLine(entry.Key + ": " + entry.Value);
+                    foreach (var entry in element)
+                    {
+                        Console.WriteLine(entry.Key + ": " + entry.Value);
+                    }
+
+                    string currentStartTime = "";
+                    if (element["timestamp"].Equals(""))
+                    {
+                        Console.WriteLine("ADDING TIMESTAMP");
+                        DateTime currentStartTimeStamp = DateTime.Now;
+                        currentStartTime =
+                            $"&sd={currentStartTimeStamp.Year}-{currentStartTimeStamp.Month}-{currentStartTimeStamp.Day}&st={currentStartTimeStamp.Hour}:{currentStartTimeStamp.Minute}:{currentStartTimeStamp.Second}&et=23:59:59";
+                        element["timestamp"] = currentStartTimeStamp;
+                    }
+                    else
+                    {
+
+                        currentStartTime = element["timestamp"].ToString();
+                    }
+
+                    DateTime newStartTimeStamp = DateTime.Now;
+                    string nextStartTime =
+                        $"&sd={newStartTimeStamp.Year}-{newStartTimeStamp.Month}-{newStartTimeStamp.Day}&st={newStartTimeStamp.Hour}:{newStartTimeStamp.Minute}:{newStartTimeStamp.Second}&et=23:59:59";
+                    ;
+                    string ans = await SendApiRequest("http://10.0.1.200:8000/database/",
+                        "" + element["tabelle"].ToString(), "?" + element["condition"].ToString(), currentStartTime);
+
+                    if (!(ans.Equals("[]") || ans.Equals("")))
+                    {
+                        SendEmail(element["email_adresse"] + "", "ALERT " + element["name"], ans);
+                    }
+
+                    Console.WriteLine("UPDATING TIMESTAMP");
+                    element["timestamp"] = nextStartTime;
+
+
+
                 }
-
-                string ans = SendApiRequest("localhost", element["tabelle"].ToString(), element["condition"].ToString(), "current time");
-                // send email
-                // do some stuff with api
-                // check if string has a match
-                // send email if required
-
-
             }
+
             try
             {
                 
@@ -68,17 +98,39 @@ public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
 
     public void UpdateListOfDictionary(List<Dictionary<string, object>> newListOfAlerts)
     {
-        _listOfAlerts = newListOfAlerts;
+        ListOfAlerts = newListOfAlerts;
         // RestartAlertChecker()
     }
 
     
 
-    private string SendApiRequest(string url, string table, string condition, string starttime)
+    private async Task<string> SendApiRequest(string url, string table, string condition, string starttime)
     {
         // example startime format sd=2025-01-19&st=13:00:00
+        // http://10.0.1.200:8000/database/syslog?sd=2025-01-19&st=13:00:00&et=23:59:59&ip=10.0.1.254&severity=6 
+        // example api request
+        
         Console.WriteLine($"SENDING API REQUEST WITH THE FOLLOWING PARAMETERS:{url} {table} {condition} {starttime} ");
         string answer = "";
+        string apiEndpoint = url + table + condition + starttime;
+        using (HttpClient client = new HttpClient())
+        {
+            
+            try
+            {
+                Console.WriteLine(apiEndpoint);
+                HttpResponseMessage response = await client.GetAsync(apiEndpoint);
+                response.EnsureSuccessStatusCode(); 
+
+                answer = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(answer);
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine($"Request error: {e.Message}");
+            }
+        }
+        
 
         return answer;
     }
