@@ -15,12 +15,14 @@ using Microsoft.Extensions.Logging;
 
 
 string apiConfigurationFile = "apiConfiguration.json";
+string apiConfigurationSchemaFile = "apiConfigurationSchema.json";
 string hostAssignmentFile = "hostAssignment.json";
 string alertsFile = "alerts.json";
 string alertsPostSchemaFile = "alertsPostSchema.json";
 
 var configDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/Configurations_Example");
 var defaultConfigurationPath = Path.Combine(configDirectory, apiConfigurationFile);
+var apiConfigurationSchemaPath = Path.Combine(configDirectory, apiConfigurationSchemaFile);
 
 var assignmentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/HostAssignment");
 var defaultAssignmentPath = Path.Combine(assignmentDirectory, hostAssignmentFile);
@@ -77,6 +79,7 @@ string currentAlertsJson = File.ReadAllText(defaultAlertsPath);
 // alertsDictionary
 List<Dictionary<string, object>> alertsListDictionary = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(currentAlertsJson);
 AlertChecker alertChecker = new AlertChecker(alertsListDictionary);
+alertChecker.AlertsPath = defaultAlertsPath;
 alertChecker.StartAlertChecker();
 //----------------------------------------------------------------------
 
@@ -128,7 +131,17 @@ app.MapPost("/configurations", async (HttpRequest request) =>
 {
     using var reader = new StreamReader(request.Body);
     var jsonContent = await reader.ReadToEndAsync();
+    
+    string schemaJson = File.ReadAllText(apiConfigurationSchemaPath);
+    JSchema schema = JSchema.Parse(schemaJson);
+    if (!IsJsonArrayValid(jsonContent, schema, out string validationErrors))
+    {
+        return Results.BadRequest($"Invalid JSON: {validationErrors}");
+    }
+    
+    
     var newApiConfigurationFile = Path.Combine(configDirectory, apiConfigurationFile);
+    
     
     Console.WriteLine(newApiConfigurationFile);
     Console.WriteLine(jsonContent);
@@ -228,15 +241,15 @@ app.MapPost("/alerts", async (HttpRequest request) =>
     Dictionary<string, object> newAlertsElement = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent);
     alertChecker.ListOfAlerts.Add(newAlertsElement);
     
-    
     alertChecker.RestartAlertChecker();
+
     
-    // TODO hier muss der AlertsChecker Prozess mit der neuen Konfiguration neugestarted werden
-    
+
     // die ganze liste an alerts wird in ein JSON umgewandelt und in das Alert File reingeschrieben
     string newAlertsJson = JsonConvert.SerializeObject(alertChecker.ListOfAlerts, Formatting.Indented);
     await File.WriteAllTextAsync(newAlertsFilePath, newAlertsJson);
-    
+    Console.WriteLine("WORKIGN 5");
+
     
     
     // -------------DEBUGGING ZEUG------------- 
@@ -313,6 +326,24 @@ bool IsJsonValid(string jsonContent, JSchema schema, out string validationErrors
     catch (JsonReaderException)
     {
         validationErrors = "Invalid JSON structure.";
+        return false;
+    }
+}
+
+bool IsJsonArrayValid(string jsonContent, JSchema schema, out string validationErrors)
+{
+    try
+    {
+        var jsonArray = JArray.Parse(jsonContent);
+
+        // Validate JSON against the schema
+        var isValid = jsonArray.IsValid(schema, out IList<string> errors);
+        validationErrors = string.Join("; ", errors);
+        return isValid;
+    }
+    catch (JsonReaderException)
+    {
+        validationErrors = "Invalid JSON ARRAY structure.";
         return false;
     }
 }

@@ -80,15 +80,6 @@ Content-Type: application/json
 
 [
   {
-    "snmpTrapReceiver": [
-      {
-        "port": 162,
-        "name": "SNMP-Trap-Receiver",
-        "id": 456
-      }
-    ]
-  },
-  {
     "Syslog": [
       {
         "name": "Sys1",
@@ -387,34 +378,7 @@ Content-Type: application/json
 POST {{CS_API_HostAddress}}/host_assignment/
 Content-Type: application/json
 
-{
-  "assignments": [
-    {
-      "hostname": "localhost",
-      "ipAddress": "127.0.0.1"
-    },
-    {
-      "hostname": "WindowsClient1",
-      "ipAddress": "10.40.21.155"
-    },
-    {
-      "hostname": "Fortinet Fortigate",
-      "ipAddress": "10.0.1.254"
-    },
-    {
-      "hostname": "SIEM",
-      "ipAddress": "10.0.1.10"
-    },
-    {
-      "hostname": "LOG GENERATOR",
-      "ipAddress": "192.168.30.30"
-    },
-    {
-      "hostname": "WINDOWS NOCH EIN HOST",
-      "ipAddress": "192.168.10.1"
-    }
-  ]
-}
+{"assignments":[{"hostname":"localhost","ipAddress":"127.0.0.1"},{"hostname":"WindowsClient1","ipAddress":"10.40.21.155"},{"hostname":"Fortinet Fortigate","ipAddress":"10.0.1.254"},{"hostname":"SIEM","ipAddress":"10.0.1.10"},{"hostname":"LOG GENERATOR","ipAddress":"192.168.30.30"},{"hostname":"WebGui","ipAddress":"10.0.1.150"}]}
 
 
 ### GET ALERTS
@@ -432,6 +396,20 @@ Content-Type: application/json
     "condition": "severity=7",
     "email_adresse": "0148@htl.rennewg.at",
     "custom_message": "OH WEH OH WEH ES GIBT EINEN SYSLOG MIT LEVEL7"
+    "timestamp": ""
+}
+### POST A NEW ALERT
+POST {{CS_API_HostAddress}}/alerts/
+Content-Type: application/json
+
+{
+    "id": 2,
+    "name": "SYSLOG_SEVERITY_1",
+    "tabelle": "syslog",
+    "condition": "severity=1",
+    "email_adresse": "0148@htl.rennewg.at",
+    "custom_message": "OH WEH OH WEH ES GIBT EINEN SYSLOG MIT LEVEL 1",
+    "timestamp": ""
 }
 
 
@@ -470,6 +448,20 @@ Authorization: Bearer HNrmjsgr9z9Q44rf3N1pzh8zr9kgrr
 ### QUERY AP TEST
 GET {{CS_API_HostAddress}}/host_assignment/
 Accept: application/json
+
+### WRONG HOST ASSIGNMENT
+POST {{CS_API_HostAddress}}/host_assignment/
+Content-Type: application/json
+
+{
+  "assignments": [
+    {
+      "hostname": "localhost",
+      "ipAddress": "127.0.0.1"
+    }
+    
+  ]
+}
 
 
 

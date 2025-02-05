@@ -25,5 +25,5 @@
       "description": "LEER LASSEN"
     }
   },
-  "required": ["id", "name", "tabelle", "condition", "email_adresse", "custom_message"]
+  "required": ["id", "name", "tabelle", "condition", "email_adresse", "custom_message","timestamp" ]
 }

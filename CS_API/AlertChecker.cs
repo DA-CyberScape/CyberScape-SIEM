@@ -2,14 +2,18 @@ using System;
 using System.Net;
 using System.Net.Mail;
 using System.Diagnostics;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 namespace CS_API;
 
 
 public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
 {
     public List<Dictionary<string, object>> ListOfAlerts = listOfAlerts;
-    private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-    private readonly int _delay = 180;
+    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private readonly int _delay = 10;
+    public string AlertsPath = "";
 
     public async void StartAlertChecker()
     {
@@ -18,6 +22,7 @@ public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
         
         while (!cancellationToken.IsCancellationRequested)
         {
+            
             if (ListOfAlerts.Count > 0)
             {
                 foreach (var element in ListOfAlerts)
@@ -65,6 +70,14 @@ public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
             try
             {
                 
+                Console.WriteLine("PUTTING STUFF INTO A FILE");
+                
+                string newAlertsJson = JsonConvert.SerializeObject(ListOfAlerts, Formatting.Indented);
+                Console.WriteLine(newAlertsJson);
+                Console.WriteLine(AlertsPath);
+                await File.WriteAllTextAsync(AlertsPath, newAlertsJson, cancellationToken);
+                Console.WriteLine("PUTTING STUFF INTO A FILE");
+                
                 Console.WriteLine($"WAITING FOR {_delay} seconds");
                 await Task.Delay(_delay * 1000, cancellationToken);
             }
@@ -74,7 +87,7 @@ public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
                 return;
             }
         }
-        Console.WriteLine("STOPPED ALERTCHECKER");
+        Console.WriteLine("STOPPED ALERTCHECKER FOR SOME REASON");
     }
 
     public void StopAlertChecker()
@@ -92,6 +105,7 @@ public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
     {
         Console.WriteLine("RESTARTING ALERTCHECKER");
         StopAlertChecker();
+        _cancellationTokenSource = new CancellationTokenSource();
         StartAlertChecker();
         Console.WriteLine("RESTARTED ALERTCHECKER");
     }
