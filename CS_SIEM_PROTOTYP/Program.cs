@@ -28,7 +28,6 @@ public static class Program
         ILogger logger = loggerFactory.CreateLogger<CustomApiFetcher>();
         List<CustomApiElement> apiElements = new()
         {
-            new CustomApiElement("http://10.0.1.200:8000/database/syslog?sd=2025-01-19&st=13:00:00&et=23:59:59&ip=10.0.1.254&severity=6"),
             new CustomApiElement("https://10.0.1.254/api/v2/monitor/wifi/managed_ap", "HNrmjsgr9z9Q44rf3N1pzh8zr9kgrr"),
         };
         DbHostProvider dbHost = new DbHostProvider();

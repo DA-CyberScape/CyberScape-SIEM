@@ -22,6 +22,7 @@ public class ModuleStarter
     private NetflowScheduler _netflowScheduler;
     private SyslogScheduler _syslogScheduler;
     private SnmpTrapScheduler _snmpTrapScheduler;
+    private CustomApiFetcher _customApiFetcher;
     private ApiStarter _apiStarter;
     private readonly IDatabaseManager _db;
     private readonly int _delay;
@@ -30,11 +31,14 @@ public class ModuleStarter
 
     private CancellationTokenSource _cancellationTokenSource;
 
-    List<Dictionary<string, object>> snmpPollsDict = new List<Dictionary<string, object>>();
-    List<Dictionary<string, object>> netflowReceiverDict = new List<Dictionary<string, object>>();
-    List<Dictionary<string, object>> prtgReceiverDict = new List<Dictionary<string, object>>();
-    List<Dictionary<string, object>> snmpTrapReceiverDict = new List<Dictionary<string, object>>();
-    List<Dictionary<string, object>> syslogDict = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> _snmpPollsDict = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> _netflowReceiverDict = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> _prtgReceiverDict = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> _snmpTrapReceiverDict = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> _syslogDict = new List<Dictionary<string, object>>();
+    List<CustomApiElement> _apiElements = new() {
+        new CustomApiElement("https://10.0.1.254/api/v2/monitor/wifi/managed_ap", "HNrmjsgr9z9Q44rf3N1pzh8zr9kgrr"),
+    };
 
     public ModuleStarter(IDatabaseManager db, int delay = 10)
     {
@@ -66,11 +70,11 @@ public class ModuleStarter
             _logger.LogInformation("Processing data");
             ProcessData(PathToJsonConfiguration);
             _logger.LogInformation("Finished processing data");
-            snmpPollList = Converter.ConvertJsontoSnmpPollRequest(snmpPollsDict);
-            netflowList = Converter.convertJsontoNetflowDict(netflowReceiverDict);
-            prtgList = Converter.convertJsontoPRTG(prtgReceiverDict);
-            snmpTrapList = Converter.convertJsontoSNMPTrap(snmpTrapReceiverDict);
-            syslogList = Converter.ConvertJsontoSyslogConfigs(syslogDict);
+            snmpPollList = Converter.ConvertJsontoSnmpPollRequest(_snmpPollsDict);
+            netflowList = Converter.convertJsontoNetflowDict(_netflowReceiverDict);
+            prtgList = Converter.convertJsontoPRTG(_prtgReceiverDict);
+            snmpTrapList = Converter.convertJsontoSNMPTrap(_snmpTrapReceiverDict);
+            syslogList = Converter.ConvertJsontoSyslogConfigs(_syslogDict);
         }
         catch (Exception ex)
         {
@@ -116,6 +120,11 @@ public class ModuleStarter
             _snmpPollScheduler = new SnmpPollScheduler(snmpPollList, _db, _loggerFactory.CreateLogger("Snmp Poll"),oidDetailsDictionary, _delay);
             _snmpPollScheduler.StartPollingAsync();
         }
+        if (_apiElements.Count > 0)
+        {
+            _customApiFetcher = new CustomApiFetcher(_apiElements, _db, _loggerFactory.CreateLogger("api fetcher"));
+            _customApiFetcher.StartCustomApiFetcher();
+        }
 
         
 
@@ -145,6 +154,7 @@ public class ModuleStarter
         _netflowScheduler?.StopPolling();
         _syslogScheduler?.StopPolling();
         _snmpTrapScheduler.StopPolling();
+        _customApiFetcher.StopCustomApiFetcher();
         
         
         
@@ -204,11 +214,11 @@ public class ModuleStarter
 
         foreach (JObject item in jsonArray)
         {
-            ExtractJsonProperty(item, "snmpPolls", ref snmpPollsDict);
-            ExtractJsonProperty(item, "netflowReceiver", ref netflowReceiverDict);
-            ExtractJsonProperty(item, "PRTGReceiver", ref prtgReceiverDict);
-            ExtractJsonProperty(item, "snmpTrapReceiver", ref snmpTrapReceiverDict);
-            ExtractJsonProperty(item, "Syslog", ref syslogDict);
+            ExtractJsonProperty(item, "snmpPolls", ref _snmpPollsDict);
+            ExtractJsonProperty(item, "netflowReceiver", ref _netflowReceiverDict);
+            ExtractJsonProperty(item, "PRTGReceiver", ref _prtgReceiverDict);
+            ExtractJsonProperty(item, "snmpTrapReceiver", ref _snmpTrapReceiverDict);
+            ExtractJsonProperty(item, "Syslog", ref _syslogDict);
 
             if (item["ScyllaDB"] != null)
             {
