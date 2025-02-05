@@ -138,10 +138,6 @@
                   "name":"CPU Utilization (5s)"
                },
                {
-                  "oid":"1.3.6.1.4.1.9.9.48.1.1.1.6.x",
-                  "name":"Free Memory"
-               },
-               {
                   "oid":"1.3.6.1.2.1.31.1.1.1.10.x",
                   "name":"Interface Out Octets"
                },
@@ -155,9 +151,12 @@
                },
                {
                   "oid":"1.3.6.1.4.1.9.9.48.1.1.1.5.x",
-                  "name" : "Total Memory"
+                  "name" : "Used Memory"
                },
-             
+               {
+                  "oid":"1.3.6.1.4.1.9.2.1.8",
+                  "name" : "Free Memory in Bytes"
+                }
                
             ],
             "user":"MY-USER",
@@ -230,13 +229,13 @@
                   "name":"Switch-Model"
                },
                {
-                  "oid":"1.3.6.1.4.1.9.9.48.1.1.1.5",
-                  "name" : "Total Memory"
+                  "oid":"1.3.6.1.4.1.9.9.48.1.1.1.5.x",
+                  "name" : "Used Memory"
                },
                {
-                  "oid":"1.3.6.1.4.1.9.9.48.1.1.1.6",
-                  "name" : "Used Memory"
-               }
+                  "oid":"1.3.6.1.4.1.9.2.1.8",
+                  "name" : "Free Memory in Bytes"
+                }
             ],
             "user":"MY-USER",
             "authentication":"SHA1",
