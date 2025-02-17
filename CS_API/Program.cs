@@ -84,8 +84,19 @@ alertChecker.StartAlertChecker();
 //----------------------------------------------------------------------
 
 var builder = WebApplication.CreateSlimBuilder(args);
-builder.WebHost.UseUrls("http://0.0.0.0:5073");
-// sagt dem Programm dass ein custom serialization context genutzt wird
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5073);
+
+    
+    options.ListenAnyIP(5072, listenOptions =>
+    {
+        listenOptions.UseHttps("/home/cyberscape_admin/CyberScape-SIEM/CS_API/Certificates/selfsigned.pfx", "junioradmin");
+    });
+});
+
+
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.TypeInfoResolver = AppJsonSerializerContext.Default;
@@ -381,7 +392,7 @@ bool IsJsonArrayValid(string jsonContent, JSchema schema, out string validationE
 //TODO Scylla Configuration hinzufügen
 app.MapGet("/configurations/Database", () =>
 {
-    var lFiles = Directory.GetFiles("../App_Configurations", "Database_IPs.yaml");
+    var lFiles = Directory.GetFiles("../App_Configurations", "Database_IPs.test.yaml");
     
     if (lFiles.Length == 0)
     {
@@ -408,9 +419,9 @@ app.MapPost("/configurations/Database", async (HttpRequest request) =>
 {
     using var reader = new StreamReader(request.Body);
     var jsonContent = await reader.ReadToEndAsync();
-    var newFileName = Path.Combine("../App_Configurations", "Database_IPs.yaml");
+    var newFileName = Path.Combine("../App_Configurations", "Database_IPs.test.yaml");
     Console.WriteLine(newFileName);
-
+    Console.WriteLine(jsonContent);
     await File.WriteAllTextAsync(newFileName, jsonContent);
     ps.StopProcess();
     await Task.Delay(10_000);
