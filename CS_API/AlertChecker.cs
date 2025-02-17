@@ -12,7 +12,7 @@ public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
 {
     public List<Dictionary<string, object>> ListOfAlerts = listOfAlerts;
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-    private readonly int _delay = 10;
+    private readonly int _delay = 180;
     public string AlertsPath = "";
 
     public async void StartAlertChecker()
@@ -22,49 +22,56 @@ public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
         
         while (!cancellationToken.IsCancellationRequested)
         {
-            
-            if (ListOfAlerts.Count > 0)
+            try
             {
-                foreach (var element in ListOfAlerts)
+                if (ListOfAlerts.Count > 0)
                 {
-                    foreach (var entry in element)
+                    foreach (var element in ListOfAlerts)
                     {
-                        Console.WriteLine(entry.Key + ": " + entry.Value);
+                        foreach (var entry in element)
+                        {
+                            Console.WriteLine(entry.Key + ": " + entry.Value);
+                        }
+
+                        string currentStartTime = "";
+                        if (element["timestamp"].Equals(""))
+                        {
+                            Console.WriteLine("ADDING TIMESTAMP");
+                            DateTime currentStartTimeStamp = DateTime.Now;
+                            currentStartTime =
+                                $"&sd={currentStartTimeStamp.Year}-{currentStartTimeStamp.Month}-{currentStartTimeStamp.Day}&st={currentStartTimeStamp.Hour}:{currentStartTimeStamp.Minute}:{currentStartTimeStamp.Second}&et=23:59:59";
+                            element["timestamp"] = currentStartTimeStamp;
+                        }
+                        else
+                        {
+
+                            currentStartTime = element["timestamp"].ToString();
+                        }
+
+                        DateTime newStartTimeStamp = DateTime.Now;
+                        string nextStartTime =
+                            $"&sd={newStartTimeStamp.Year}-{newStartTimeStamp.Month}-{newStartTimeStamp.Day}&st={newStartTimeStamp.Hour}:{newStartTimeStamp.Minute}:{newStartTimeStamp.Second}&et=23:59:59";
+                        ;
+                        string ans = await SendApiRequest("http://10.0.1.200:8000/database/",
+                            "" + element["tabelle"].ToString(), "?" + element["condition"].ToString(),
+                            currentStartTime);
+
+                        if (!(ans.Equals("[]") || ans.Equals("")))
+                        {
+                            SendEmail(element["email_adresse"] + "", "ALERT " + element["name"], ans);
+                        }
+
+                        Console.WriteLine("UPDATING TIMESTAMP");
+                        element["timestamp"] = nextStartTime;
+
+
+
                     }
-
-                    string currentStartTime = "";
-                    if (element["timestamp"].Equals(""))
-                    {
-                        Console.WriteLine("ADDING TIMESTAMP");
-                        DateTime currentStartTimeStamp = DateTime.Now;
-                        currentStartTime =
-                            $"&sd={currentStartTimeStamp.Year}-{currentStartTimeStamp.Month}-{currentStartTimeStamp.Day}&st={currentStartTimeStamp.Hour}:{currentStartTimeStamp.Minute}:{currentStartTimeStamp.Second}&et=23:59:59";
-                        element["timestamp"] = currentStartTimeStamp;
-                    }
-                    else
-                    {
-
-                        currentStartTime = element["timestamp"].ToString();
-                    }
-
-                    DateTime newStartTimeStamp = DateTime.Now;
-                    string nextStartTime =
-                        $"&sd={newStartTimeStamp.Year}-{newStartTimeStamp.Month}-{newStartTimeStamp.Day}&st={newStartTimeStamp.Hour}:{newStartTimeStamp.Minute}:{newStartTimeStamp.Second}&et=23:59:59";
-                    ;
-                    string ans = await SendApiRequest("http://10.0.1.200:8000/database/",
-                        "" + element["tabelle"].ToString(), "?" + element["condition"].ToString(), currentStartTime);
-
-                    if (!(ans.Equals("[]") || ans.Equals("")))
-                    {
-                        SendEmail(element["email_adresse"] + "", "ALERT " + element["name"], ans);
-                    }
-
-                    Console.WriteLine("UPDATING TIMESTAMP");
-                    element["timestamp"] = nextStartTime;
-
-
-
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex}");
             }
 
             try
@@ -172,7 +179,10 @@ public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
 
             mail.To.Add(email);
             smtp.Send(mail);
+            Console.WriteLine("----------------------------");
             Console.WriteLine("Email sent successfully!");
+            Console.WriteLine("----------------------------");
+
         }
         catch(Exception ex)
         {

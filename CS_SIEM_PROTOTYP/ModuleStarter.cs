@@ -16,6 +16,9 @@ using System.Globalization;
 
 namespace CS_SIEM_PROTOTYP;
 
+/// <summary>
+/// The ModuleStarter class initializes and manages various modules for the SIEM (Security Information and Event Management) system.
+/// </summary>
 public class ModuleStarter
 {
     private SnmpPollScheduler _snmpPollScheduler;
@@ -40,6 +43,11 @@ public class ModuleStarter
         new CustomApiElement("https://10.0.1.254/api/v2/monitor/wifi/managed_ap", "HNrmjsgr9z9Q44rf3N1pzh8zr9kgrr"),
     };
 
+    /// <summary>
+    /// Initializes a new instance of the ModuleStarter class.
+    /// </summary>
+    /// <param name="db">The database manager used for storing the collected Data</param>
+    /// <param name="delay">The delay that should be used be the modules</param>
     public ModuleStarter(IDatabaseManager db, int delay = 10)
     {
         _delay = delay;
@@ -49,12 +57,12 @@ public class ModuleStarter
         _loggerFactory = LoggerFactory.Create(builder => 
             builder
                 .AddConsole()
-                .SetMinimumLevel(LogLevel.Information)
-                .AddFilter("Snmp Trap", LogLevel.Information)
-                .AddFilter("Syslog", LogLevel.Information)
-                .AddFilter("Netflow", LogLevel.Information)
-                .AddFilter("Snmp Poll", LogLevel.Information)
-                .AddFilter("ModuleStarter", LogLevel.Information));
+                .SetMinimumLevel(LogLevel.Critical)
+                .AddFilter("Snmp Trap", LogLevel.Critical)
+                .AddFilter("Syslog", LogLevel.Critical)
+                .AddFilter("Netflow", LogLevel.Critical)
+                .AddFilter("Snmp Poll", LogLevel.Critical)
+                .AddFilter("ModuleStarter", LogLevel.Critical));
         _logger = _loggerFactory.CreateLogger("ModuleStarter");
     }
 
@@ -138,9 +146,12 @@ public class ModuleStarter
         catch (TaskCanceledException)
         {
             _logger.LogInformation("The Stop SIEM Method has been called STOPPING SIEM");
+            
         }
     }
-
+    /// <summary>
+    /// Stops the SIEM system by cancelling all ongoing operations.
+    /// </summary>
     public void StopSIEM()
     {
         _cancellationTokenSource.Cancel();
@@ -165,6 +176,11 @@ public class ModuleStarter
         _logger.LogInformation("---------------------------------------------------");
         _loggerFactory.Dispose();
     }
+    /// <summary>
+    /// Prepares a Dictionary with all the OID Details (oid, oid_name, oid_description) by parsing all the CSV files in the specified Folder.
+    /// </summary>
+    /// <param name="PathToFolder">The path to the folder containing the CSV files with the OID Information</param>
+    /// <returns>A dictionary mapping OID identifiers to their names and descrptions</returns>
 
     public Dictionary<String, (string ObjectName, string Description)> PrepareSnmpOidDictionary(string PathToFolder)
     {
@@ -207,7 +223,10 @@ public class ModuleStarter
 
         return oidDetailsDictionary;
     }
-
+    /// <summary>
+    /// Processes the data from the specified JSON configuration file and initializes the necessary lists of modules.
+    /// </summary>
+    /// <param name="PathToJsonConfiguration">The path to the JSON configuration file</param>
     private void ProcessData(string PathToJsonConfiguration)
     {
         var jsonArray = ParseJson(PathToJsonConfiguration);
@@ -228,12 +247,23 @@ public class ModuleStarter
             }
         }
     }
+    /// <summary>
+    /// Parses a JSON file and returns a JArray object
+    /// </summary>
+    /// <param name="jsonPath">The path to the JSON file.</param>
+    /// <returns>A JArray object representing the parsed JSON file</returns>
 
     private static JArray ParseJson(string jsonPath)
     {
         string jsonText = File.ReadAllText(jsonPath);
         return JArray.Parse(jsonText);
     }
+    /// <summary>
+    /// Extracts the specified JSON property and converts it into a list of dictionaries
+    /// </summary>
+    /// <param name="item">The JObject containing the property</param>
+    /// <param name="key">The key of the property to extract</param>
+    /// <param name="targetDict">The target list to populate</param>
 
     private static void ExtractJsonProperty(JObject item, string key, ref List<Dictionary<string, object>> targetDict)
     {
@@ -242,6 +272,11 @@ public class ModuleStarter
             targetDict = item[key].ToObject<List<Dictionary<string, object>>>();
         }
     }
+    /// <summary>
+    /// Prints a dictionary to the console in a formated JSON style
+    /// </summary>
+    /// <param name="dict">The dictionary to print</param>
+    /// <typeparam name="T">The type of the dictionary</typeparam>
 
     public static void PrintDictionary<T>(T dict)
     {
@@ -249,24 +284,5 @@ public class ModuleStarter
         Console.WriteLine("------------------------------------");
     }
 
-    public static async void StartPrtg(IDatabaseManager db, ServiceProvider serviceProvider, string url)
-    {
-        // var prtg = serviceProvider.GetService<PrtgReceiver>()!;
-        // var apiKey = "5462TDSFODTTNUP36QXMQIWIQJUED5RWNC5SSVPUZQ======";
-        //
-        //
-        // // creating and insert data into the database
-        //
-        // var snmpColumns = prtg.GetSensorColumnTypes();
-        // string primaryKey = "UUID";
-        // await db.CreateTable("SNMP", snmpColumns, primaryKey);
-        //
-        // // ------------------------LOOP---------------------------------
-        // List<Device> devices = prtg.FetchDeviceWithSensors(url, apiKey).GetAwaiter().GetResult();
-        // foreach (var device in devices)
-        // {
-        //     await prtg.InsertSensorsAsync(device, "SNMP", snmpColumns);
-        // }
-        // // ------------------------LOOP---------------------------------
-    }
+    
 }
