@@ -43,7 +43,7 @@ namespace CS_SIEM_PROTOTYP
             cancellationToken = new CancellationToken();
             _udpClient = new UdpClient(_port);
             _logger.LogInformation($"[INFO] Syslog Receiver is listening on port {_port}...");
-
+            
             Task.Run(() => StartPeriodicDatabaseInsert(_delay, cancellationToken), cancellationToken);
 
             try

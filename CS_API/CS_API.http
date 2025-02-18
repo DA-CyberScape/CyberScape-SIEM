@@ -1,7 +1,6 @@
 @CS_API_HostAddress = http://localhost:5073
 
 
-
 ### Get all configurations
 GET {{CS_API_HostAddress}}/configurations/
 Accept: application/json
@@ -378,8 +377,7 @@ Content-Type: application/json
 POST {{CS_API_HostAddress}}/host_assignment/
 Content-Type: application/json
 
-{"assignments":[{"hostname":"localhost","ipAddress":"127.0.0.1"},{"hostname":"WindowsClient1","ipAddress":"10.40.21.155"},{"hostname":"Fortinet Fortigate","ipAddress":"10.0.1.254"},{"hostname":"SIEM","ipAddress":"10.0.1.10"},{"hostname":"LOG GENERATOR","ipAddress":"192.168.30.30"},{"hostname":"WebGui","ipAddress":"10.0.1.150"}]}
-
+{"assignments":[{"hostname":"localhost","ipAddress":"127.0.0.1"},{"hostname":"WindowsClient1","ipAddress":"10.40.21.155"},{"hostname":"Fortinet Fortigate","ipAddress":"10.0.1.254"},{"hostname":"SIEM","ipAddress":"10.0.1.10"},{"hostname":"LOG GENERATOR","ipAddress":"192.168.30.30"},{"hostname":"WebGui","ipAddress":"10.0.1.150"},{"hostname":"test","ipAddress":"10.10.10.10"}]}
 
 ### GET ALERTS
 GET {{CS_API_HostAddress}}/alerts/
@@ -430,7 +428,7 @@ Content-Type: application/json
 DELETE {{CS_API_HostAddress}}/alerts/1
 
 ### QUERY SERVER TEST
-GET http://10.0.1.200:8000/database/syslog?sd=2025-01-19&st=13:00:00&et=23:59:59&ip=10.0.1.254&severity=6
+GET http://10.0.1.200:8000/database/syslog?sd=2025-02-17&st=11:07:00&et=23:59:59&severity=0
 Accept: application/json
 
 

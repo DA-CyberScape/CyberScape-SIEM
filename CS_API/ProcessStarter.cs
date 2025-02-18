@@ -6,13 +6,21 @@ using CS_DatabaseManager;
 namespace CS_API;
 
 using CS_SIEM_PROTOTYP;
-
+/// <summary>
+/// Represents a class responsible for starting and stopping the database manager and the module starter which starts all the configured modules
+/// </summary>
 public class ProcessStarter
 {
     private static CancellationTokenSource? _cts = null;
     private static Task? _currentTask = null;
     private ModuleStarter _moduleStarter;
 
+    /// <summary>
+    /// Starts a the database manager and the module starter process with the given configuration
+    /// </summary>
+    /// <param name="configPath">The file path of the configuration file to use for the module starter process</param>
+    /// <param name="cancellationToken">A token used to cancel async tasks</param>
+    /// <exception cref="FileNotFoundException">Thrown if the specified configuration file is not found</exception>
     public async Task StartProcessAsync(string configPath, CancellationToken cancellationToken)
     {
         if (!File.Exists(configPath))
@@ -39,6 +47,9 @@ public class ProcessStarter
 
         await _currentTask;
     }
+    /// <summary>
+    /// Stops the currently running process, if there is one
+    /// </summary>
 
     public void StopProcess()
     {

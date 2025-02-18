@@ -8,7 +8,7 @@ clusterlists:
     active: true
     production: false
   - listname: "Remote Cluster"
-    list: [ 192.168.0.110, 192.168.0.111, 192.168.0.112 ]
+    list: [ 192.168.0.110, 192.168.0.111, 192.169.0.112 ]
     active: false
     production: true
   - listname: "Docker Cluster 1"

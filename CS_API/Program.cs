@@ -14,20 +14,21 @@ using Microsoft.Extensions.Logging;
 
 
 
+
 string apiConfigurationFile = "apiConfiguration.json";
 string apiConfigurationSchemaFile = "apiConfigurationSchema.json";
 string hostAssignmentFile = "hostAssignment.json";
 string alertsFile = "alerts.json";
 string alertsPostSchemaFile = "alertsPostSchema.json";
 
-var configDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/Configurations_Example");
+var configDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Configurations_Example");
 var defaultConfigurationPath = Path.Combine(configDirectory, apiConfigurationFile);
 var apiConfigurationSchemaPath = Path.Combine(configDirectory, apiConfigurationSchemaFile);
 
-var assignmentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/HostAssignment");
+var assignmentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "HostAssignment");
 var defaultAssignmentPath = Path.Combine(assignmentDirectory, hostAssignmentFile);
 
-var alertsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "/home/cyberscape_admin/CyberScape-SIEM/CS_API/Alerts");
+var alertsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Alerts");
 var defaultAlertsPath = Path.Combine(alertsDirectory, alertsFile);
 var alertsPostSchemaPath = Path.Combine(alertsDirectory, alertsPostSchemaFile);
 HostTableUpdater.CreateTable();
@@ -85,15 +86,25 @@ alertChecker.StartAlertChecker();
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
+var certificateFile = Path.Combine(Directory.GetCurrentDirectory(), "Certificates/certificate_self_signed.pfx");
+
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5073);
 
     
-    options.ListenAnyIP(5072, listenOptions =>
+    if (File.Exists(certificateFile))
     {
-        listenOptions.UseHttps("/home/cyberscape_admin/CyberScape-SIEM/CS_API/Certificates/selfsigned.pfx", "junioradmin");
-    });
+        options.ListenAnyIP(5072, listenOptions =>
+        {
+            listenOptions.UseHttps(certificateFile, "junioradmin");
+        });
+        Console.WriteLine("Certificate file FOUND. HTTPS endpoint will be enabled.");
+    }
+    else
+    {
+        Console.WriteLine("Certificate file not found. HTTPS endpoint will not be enabled.");
+    }
 });
 
 

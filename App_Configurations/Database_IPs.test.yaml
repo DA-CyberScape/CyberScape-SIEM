@@ -1,0 +1,29 @@
+clusterlists:
+  - listname: Remote Cluster
+    list:
+      - 192.168.0.110
+      - 192.168.0.111
+      - 192.169.0.112
+    active: true
+    production: true
+  - listname: Docker Cluster 1
+    list:
+      - 172.17.0.2
+      - 172.17.0.3
+      - 172.17.0.4
+    active: false
+    production: true
+  - listname: Docker Cluster 2
+    list:
+      - 172.18.0.2
+      - 172.18.0.3
+      - 172.18.0.4
+    active: false
+    production: true
+  - listname: Local Cluster
+    active: false
+    production: false
+    list:
+      - 10.10.1.1
+      - 10.10.1.2
+      - 10.10.1.3

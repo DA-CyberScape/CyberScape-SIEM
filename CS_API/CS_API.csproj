@@ -8,6 +8,10 @@
         <PublishAot>true</PublishAot>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\net8.0\CS_API.xml</DocumentationFile>
+    </PropertyGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\CS_SIEM_PROTOTYP\CS_SIEM_PROTOTYP.csproj" />
     </ItemGroup>
