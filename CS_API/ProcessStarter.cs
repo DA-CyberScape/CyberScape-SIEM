@@ -41,7 +41,7 @@ public class ProcessStarter
             _moduleStarter = new ModuleStarter(db, 10);
             var siemTask =
                 _moduleStarter.StartSIEM(
-                    @"/home/cyberscape_admin/CyberScape-SIEM/CS_API/Configurations_Example/apiConfiguration.json");
+                    configPath);
             return siemTask;
         }, cancellationToken);
 
