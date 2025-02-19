@@ -57,7 +57,7 @@ public class NetflowScheduler
                     }
                     
                     //TODO: reenable the code below later when the log generator is fully functional
-                    MoveFilesToOldDirectory(config.FolderLocation, netflowPaths);
+                    DeleteUsedNetflowFiles(netflowPaths);
 
                     if (_allNetFlowData.Count > 0)
                     {
@@ -108,21 +108,15 @@ public class NetflowScheduler
     }
 
 
-    public void MoveFilesToOldDirectory(string nfdump_files, string[] netflowPaths)
+    public void DeleteUsedNetflowFiles(string[] netflowPaths)
     {
-        string nfDirectoryOld = nfdump_files + "/nf_files_old";
-        if (!Directory.Exists(nfDirectoryOld))
-        {
-            Directory.CreateDirectory(nfDirectoryOld);
-        }
+
 
         foreach (var nfPath in netflowPaths)
         {
-            string fileName = Path.GetFileName(nfPath);
-            string destFilePath = Path.Combine(nfDirectoryOld, fileName);
             try
             {
-                File.Move(nfPath, destFilePath);
+                File.Delete(nfPath);
             }
             catch (IOException ioEx)
             {
