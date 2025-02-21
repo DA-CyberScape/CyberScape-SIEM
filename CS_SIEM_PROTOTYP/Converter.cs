@@ -68,18 +68,7 @@ public class Converter
 
         return configList;
     }
-    /// <summary>
-    /// Converts a list of dictionaries representing PRTG configurations to a list of PrtgConfig objects.
-    /// </summary>
-    /// <param name="dictPRTG">A list of dictionaries containing PRTG configuration information.</param>
-    /// <returns>A list of PrtgConfig objects populated with the converted data.</returns>
-    public static List<PrtgConfig> convertJsontoPRTG(List<Dictionary<string, object>> dictPRTG)
-    {
-        var jsonPrtg = JsonConvert.SerializeObject(dictPRTG);
-        List<PrtgConfig> configList = JsonConvert.DeserializeObject<List<PrtgConfig>>(jsonPrtg);
 
-        return configList;
-    }
     /// <summary>
     /// Converts a list of dictionaries representing SNMP trap configurations to a list of SnmpTrapConfig objects.
     /// </summary>

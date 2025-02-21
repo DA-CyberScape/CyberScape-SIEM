@@ -35,7 +35,6 @@ public class ModuleStarter
 
     List<Dictionary<string, object>> _snmpPollsDict = new List<Dictionary<string, object>>();
     List<Dictionary<string, object>> _netflowReceiverDict = new List<Dictionary<string, object>>();
-    List<Dictionary<string, object>> _prtgReceiverDict = new List<Dictionary<string, object>>();
     List<Dictionary<string, object>> _snmpTrapReceiverDict = new List<Dictionary<string, object>>();
     List<Dictionary<string, object>> _syslogDict = new List<Dictionary<string, object>>();
     List<CustomApiElement> _apiElements = new() {
@@ -72,7 +71,6 @@ public class ModuleStarter
     {
         List<SnmpPollRequest> snmpPollList = new List<SnmpPollRequest>();
         List<NfConfig> netflowList = new List<NfConfig>();
-        List<PrtgConfig> prtgList = new List<PrtgConfig>();
         List<SnmpTrapConfig> snmpTrapList = new List<SnmpTrapConfig>();
         List<SyslogConfig> syslogList = new List<SyslogConfig>();
         try
@@ -82,7 +80,6 @@ public class ModuleStarter
             _logger.LogInformation("Finished processing data");
             snmpPollList = Converter.ConvertJsontoSnmpPollRequest(_snmpPollsDict);
             netflowList = Converter.convertJsontoNetflowDict(_netflowReceiverDict);
-            prtgList = Converter.convertJsontoPRTG(_prtgReceiverDict);
             snmpTrapList = Converter.convertJsontoSNMPTrap(_snmpTrapReceiverDict);
             syslogList = Converter.ConvertJsontoSyslogConfigs(_syslogDict);
         }
@@ -237,7 +234,6 @@ public class ModuleStarter
         {
             ExtractJsonProperty(item, "snmpPolls", ref _snmpPollsDict);
             ExtractJsonProperty(item, "netflowReceiver", ref _netflowReceiverDict);
-            ExtractJsonProperty(item, "PRTGReceiver", ref _prtgReceiverDict);
             ExtractJsonProperty(item, "snmpTrapReceiver", ref _snmpTrapReceiverDict);
             ExtractJsonProperty(item, "Syslog", ref _syslogDict);
 

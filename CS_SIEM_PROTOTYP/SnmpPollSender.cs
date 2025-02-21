@@ -6,8 +6,26 @@ using Lextm.SharpSnmpLib.Security;
 
 namespace CS_SIEM_PROTOTYP;
 
-public class SnmpPoller
+/// <summary>
+/// Provides functionality to send SNMP polls using SNMPv3.
+/// </summary>
+public class SnmpPollSender
 {
+    /// <summary>
+    /// Performs an SNMPv3 bulk walk (GETBULK request) to retrieve multiple OID values from a device.
+    /// </summary>
+    /// <param name="baseOid">The base OID to start the walk from.</param>
+    /// <param name="ipAddress">The IP address of the SNMP device.</param>
+    /// <param name="user">The SNMPv3 username.</param>
+    /// <param name="authPass">The SNMPv3 authentication password.</param>
+    /// <param name="privPass">The SNMPv3 privacy password.</param>
+    /// <param name="port">The port number for the SNMP request.</param>
+    /// <param name="hostname">The hostname of the SNMP device.</param>
+    /// <param name="authentication">The authentication type (e.g., MD5, SHA1).</param>
+    /// <param name="encryption">The encryption type (e.g., DES, AES).</param>
+    /// <param name="baseName">The base name for the OID if no specific name is found.</param>
+    /// <param name="oidDictionary">A dictionary mapping OIDs to their corresponding names and descriptions.</param>
+    /// <returns>A list of <see cref="SnmpPoll"/> objects containing the polled data.</returns>
     public static List<SnmpPoll> WalkSnmpV3(string baseOid, string ipAddress, string user,
         string authPass, string privPass, int port, string hostname, string authentication, string encryption,
         string baseName,
@@ -98,6 +116,21 @@ public class SnmpPoller
         return answerSnmpPolls;
     }
 
+    /// <summary>
+    /// Performs an SNMPv3 GET request to retrieve a single OID value from a device.
+    /// </summary>
+    /// <param name="baseOid">The OID to retrieve.</param>
+    /// <param name="ipAddress">The IP address of the SNMP device.</param>
+    /// <param name="user">The SNMPv3 username.</param>
+    /// <param name="authPass">The SNMPv3 authentication password.</param>
+    /// <param name="privPass">The SNMPv3 privacy password.</param>
+    /// <param name="port">The port number for the SNMP request.</param>
+    /// <param name="hostname">The hostname of the SNMP device.</param>
+    /// <param name="authentication">The authentication type (e.g., MD5, SHA1).</param>
+    /// <param name="encryption">The encryption type (e.g., DES, AES).</param>
+    /// <param name="baseName">The base name for the OID if no specific name is found.</param>
+    /// <param name="oidDictionary">A dictionary mapping OIDs to their corresponding names and descriptions.</param>
+    /// <returns>A list of <see cref="SnmpPoll"/> objects containing the polled data.</returns>
     public static List<SnmpPoll> GetSnmpV3(string baseOid, string ipAddress, string user,
         string authPass, string privPass, int port, string hostname, string authentication, string encryption,
         string baseName,
@@ -175,6 +208,13 @@ public class SnmpPoller
     }
 
 
+    /// <summary>
+    /// Gets the appropriate authentication provider based on the specified authentication type.
+    /// </summary>
+    /// <param name="authentication">The authentication type (e.g., MD5, SHA1).</param>
+    /// <param name="authPass">The authentication password.</param>
+    /// <returns>An instance of <see cref="IAuthenticationProvider"/>.</returns>
+    /// <exception cref="ArgumentException">Thrown when the authentication type is unsupported.</exception>
     private static IAuthenticationProvider GetAuthenticationProvider(string authentication, string authPass)
     {
         switch (authentication.ToUpper())
@@ -194,6 +234,14 @@ public class SnmpPoller
         }
     }
 
+    /// <summary>
+    /// Gets the appropriate privacy provider based on the specified encryption type.
+    /// </summary>
+    /// <param name="encryption">The encryption type (e.g., DES, AES).</param>
+    /// <param name="privPass">The privacy password.</param>
+    /// <param name="auth">The authentication provider.</param>
+    /// <returns>An instance of <see cref="IPrivacyProvider"/>.</returns>
+    /// <exception cref="ArgumentException">Thrown when the encryption type is unsupported.</exception>
     private static IPrivacyProvider GetPrivacyProvider(string encryption, string privPass, IAuthenticationProvider auth)
     {
         switch (encryption.ToUpper())
@@ -213,12 +261,25 @@ public class SnmpPoller
         }
     }
 
+    /// <summary>
+    /// Removes the last two characters from a string if it ends with "0".
+    /// Used to retrieve the OID Name for a specific OID during snmp walks or snmp gets
+    /// </summary>
+    /// <param name="input">The input string.</param>
+    /// <returns>The modified string.</returns>
     private static string RemoveLastTwoIfEndsWithZero(string input)
     {
         if (input.EndsWith("0") && input.Length >= 2) return input.Substring(0, input.Length - 2);
         return input;
     }
 
+    /// <summary>
+    /// Gets the difference between two OID strings.
+    /// Used to get append the difference to the OID name if no specific OID name has been found in the OID dictionary
+    /// </summary>
+    /// <param name="longerStr">The longer OID string.</param>
+    /// <param name="shorterStr">The shorter OID string.</param>
+    /// <returns>The substring difference between the two OIDs.</returns>
     private static string GetDifference(string longerStr, string shorterStr)
     {
         return longerStr.Substring(shorterStr.Length);

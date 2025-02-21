@@ -6,7 +6,7 @@
 using System.Diagnostics;
 using System.Net;
 using CS_DatabaseManager;
-using static CS_SIEM_PROTOTYP.SnmpPoller;
+using static CS_SIEM_PROTOTYP.SnmpPollSender;
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Security;

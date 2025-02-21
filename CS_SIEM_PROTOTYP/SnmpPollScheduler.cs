@@ -8,6 +8,10 @@ using Microsoft.Extensions.Logging;
 
 namespace CS_SIEM_PROTOTYP
 {
+    /// <summary>
+    /// This class is responsible for scheduling SNMP polling tasks like walks and gets. It retrieves SNMP data from devices
+    /// based on the provided SNMP requests and inserts the results into a specified database table.
+    /// </summary>
     public class SnmpPollScheduler
     {
         private readonly int _delay;
@@ -17,6 +21,14 @@ namespace CS_SIEM_PROTOTYP
         private readonly ILogger _logger;
         private readonly Dictionary<string, (string ObjectName, string Description)> _oidDictionary;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SnmpPollScheduler"/> class.
+        /// </summary>
+        /// <param name="snmpRequests">List of SNMP poll requests for the devices to be polled.</param>
+        /// <param name="databaseManager">The database manager responsible for inserting data.</param>
+        /// <param name="logger">Logger instance for logging SNMP polling information.</param>
+        /// <param name="oidDictionary">A dictionary of OIDs used to retrieve specific SNMP data. Like the OID name to a specific OID</param>
+        /// <param name="delayInSeconds">The delay (in seconds) between polling cycles.</param>
         public SnmpPollScheduler(List<SnmpPollRequest> snmpRequests, IDatabaseManager databaseManager, ILogger logger,
             Dictionary<string, (string ObjectName, string Description)> oidDictionary,
             int delayInSeconds = 10)
@@ -30,6 +42,17 @@ namespace CS_SIEM_PROTOTYP
             _oidDictionary = oidDictionary;
         }
 
+        /// <summary>
+        /// Starts the SNMP polling process, continuously polling devices and inserting the data into the database.
+        /// This method runs in a loop, polling each device in the provided <see cref="_snmpRequests"/> list.
+        /// It will continue polling until the operation is canceled via the <see cref="StopPolling"/> method.
+        /// </summary>
+        /// <returns>A Task representing the asynchronous operation.</returns>
+        /// <remarks>
+        /// Each polling cycle is separated by a delay defined in the constructor (default: 10 seconds).
+        /// After each polling cycle, the method waits for the specified delay before starting the next cycle.
+        /// If the polling operation is canceled, the method will stop.
+        /// </remarks>
         public async Task StartPollingAsync()
         {
             var cancellationToken = _cancellationTokenSource.Token;
@@ -44,7 +67,7 @@ namespace CS_SIEM_PROTOTYP
                     _logger.LogInformation(
                         $"[INFO] Polling SNMP data for device IP: {snmpRequest.IpAddress} on Port: {snmpRequest.Port}");
 
-                    List<SnmpPoll> snmpPolls = SnmpPollGetReceiver.PollSnmpV3(snmpRequest, _oidDictionary);
+                    List<SnmpPoll> snmpPolls = SnmpPollReceiver.PollSnmpV3(snmpRequest, _oidDictionary);
                     // Console.WriteLine(snmpRequest);
 
                     // foreach (var poll in snmpPolls)
@@ -87,6 +110,11 @@ namespace CS_SIEM_PROTOTYP
             _logger.LogInformation("SNMP Poll Scheduler stopped.");
         }
 
+        /// <summary>
+        /// Stops the ongoing SNMP polling process gracefully.
+        /// This method cancels the polling operation by triggering the <see cref="_cancellationTokenSource"/>.
+        /// The next cycle will exit after the current polling task is completed.
+        /// </summary>
         public void StopPolling()
         {
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
@@ -97,7 +125,12 @@ namespace CS_SIEM_PROTOTYP
             }
         }
 
-        //TODO MEHMET austesten DB
+        /// <summary>
+        /// Inserts SNMP data into the database.
+        /// </summary>
+        /// <param name="snmpDatas">list of SNMP data objects</param>
+        /// <param name="table">Database table name.</param>
+        /// <param name="columns">Column definitions.</param>
         public async Task InsertSnmpPollDataAsync(List<SnmpPoll> snmpDatas, string table,
             Dictionary<string, Type> columns)
         {
@@ -127,6 +160,11 @@ namespace CS_SIEM_PROTOTYP
             }
         }
 
+        /// <summary>
+        /// Maps the SNMP data to a dictionary for database insertion.
+        /// </summary>
+        /// <param name="snmp">SNMP data object</param>
+        /// <returns>A dictionary representation of the SNMP data</returns>
         public Dictionary<string, object> MapSnmpPollDataToData(SnmpPoll snmp)
         {
             return new Dictionary<string, object>
@@ -142,6 +180,10 @@ namespace CS_SIEM_PROTOTYP
             };
         }
 
+        /// <summary>
+        /// Defines the database column types for SNMP data.
+        /// </summary>
+        /// <returns>A dictionary mapping column names to data types.</returns>
         public Dictionary<string, Type> GetSnmpPollColumn()
         {
             return new Dictionary<string, Type>
