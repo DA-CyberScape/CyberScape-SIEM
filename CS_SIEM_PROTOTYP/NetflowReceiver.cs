@@ -9,12 +9,19 @@ namespace CS_SIEM_PROTOTYP;
 
 using CS_DatabaseManager;
 
+/// <summary>
+/// Class responsible for receiving and processing NetFlow data.
+/// </summary>
 public class NetflowReceiver
 {
 
 
     private readonly IDatabaseManager _databaseManager;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NetflowReceiver"/> class.
+    /// </summary>
+    /// <param name="databaseManager">Instance of <see cref="IDatabaseManager"/> for database operations.</param>
     public NetflowReceiver(IDatabaseManager databaseManager)
     {
         _databaseManager = databaseManager;
@@ -22,6 +29,11 @@ public class NetflowReceiver
 
     
 
+    /// <summary>
+    /// Retrieves file paths from the specified folder that match the pattern "nfcapd.2*".
+    /// </summary>
+    /// <param name="folderPath">Path of the folder to search for files.</param>
+    /// <returns>Array of file paths if found, otherwise null.</returns>
     public static string[]? GetFilePaths(string folderPath)
     {
         if (!Directory.Exists(folderPath))
@@ -39,6 +51,12 @@ public class NetflowReceiver
 
 
     // Method to process a captured file using nfdump
+    /// <summary>
+    /// Processes a captured NetFlow file using nfdump.
+    /// </summary>
+    /// <param name="filePath">Path of the captured file.</param>
+    /// <param name="nfdumpPath">Path of the nfdump binary.</param>
+    /// <returns>List of processed NetFlow data lines.</returns>
     public static List<string> ProcessCapturedFile(string filePath, string nfdumpPath)
     {
         Process nfdumpProcess = new Process();
@@ -68,7 +86,11 @@ public class NetflowReceiver
         // ParseNetFlowData(output);
     }
 
-    // Method to parse nfdump output into NetFlowData objects
+    /// <summary>
+    /// Parses nfdump output into a list of <see cref="NetFlowData"/> objects.
+    /// </summary>
+    /// <param name="lines">List of nfdump output lines.</param>
+    /// <returns>List of parsed <see cref="NetFlowData"/> objects.</returns>
     public static List<NetFlowData> ParseNetFlowData(List<string> lines)
     {
         List<NetFlowData> result = new List<NetFlowData>();
@@ -96,7 +118,11 @@ public class NetflowReceiver
         return result;
     }
 
-    // Method to parse a single line of nfdump output
+    /// <summary>
+    /// Parses a single ICMP-related NetFlow line into a <see cref="NetFlowData"/> object.
+    /// </summary>
+    /// <param name="line">A single line from nfdump output.</param>
+    /// <returns>Parsed <see cref="NetFlowData"/> object.</returns>
     public static NetFlowData ParseICMPLineToNetFlowData(string line)
     {
         Regex regex = new Regex(
@@ -152,6 +178,11 @@ public class NetflowReceiver
 
         return null;
     }
+    /// <summary>
+    /// Parses a non-ICMP NetFlow line into a <see cref="NetFlowData"/> object.
+    /// </summary>
+    /// <param name="line">A single line from nfdump output.</param>
+    /// <returns>Parsed <see cref="NetFlowData"/> object.</returns>
 
     public static NetFlowData ParseLineToNetFlowData(string line)
     {
@@ -207,6 +238,11 @@ public class NetflowReceiver
         return null;
     }
 
+    /// <summary>
+    /// Converts duration string to nanoseconds.
+    /// </summary>
+    /// <param name="duration">Duration string in format 00:00:00.000 or 00.000.</param>
+    /// <returns>Duration in nanoseconds.</returns>
     private static long parseDurationtoNano(string duration)
     {
         // read Format 00:00:00.000 or 00.000
@@ -235,9 +271,27 @@ public class NetflowReceiver
     // Method to stop capturing NetFlow data
 }
 
-// Class to store NetFlow data
+/// <summary>
+/// Represents NetFlow data.
+/// </summary>
 public class NetFlowData
 {
+    /// <summary>
+    /// Initializes NetflowData class
+    /// </summary>
+    /// <param name="timestamp">when the flow happend</param>
+    /// <param name="drtn">duraction of the flow</param>
+    /// <param name="prot">protocol used</param>
+    /// <param name="sIp">source ip</param>
+    /// <param name="sPort">source port</param>
+    /// <param name="dIp">destination ip</param>
+    /// <param name="dPort">destination port</param>
+    /// <param name="b">number of bytes</param>
+    /// <param name="pckts">number of packets</param>
+    /// <param name="f">number of flows</param>
+    /// <param name="tos">type of servce</param>
+    /// <param name="icmpT">icmp type</param>
+    /// <param name="flg">flag</param>
     public NetFlowData(DateTime timestamp, Duration drtn, string prot, string sIp, int sPort, string dIp,
         int dPort, long b, int pckts, int f, int tos, double icmpT, string flg)
     {
@@ -257,6 +311,21 @@ public class NetFlowData
         flag = flg;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="timestamp">when the flow happend</param>
+    /// <param name="drtn">duraction of the flow</param>
+    /// <param name="prot">protocol used</param>
+    /// <param name="sIp">source ip</param>
+    /// <param name="sPort">source port</param>
+    /// <param name="dIp">destination ip</param>
+    /// <param name="dPort">destination port</param>
+    /// <param name="b">number of bytes</param>
+    /// <param name="pckts">number of packets</param>
+    /// <param name="f">number of flows</param>
+    /// <param name="tos">type of servce</param>
+    /// <param name="flg">flag</param>
     public NetFlowData(DateTime timestamp, Duration drtn, string prot, string sIp, int sPort, string dIp,
         int dPort, long b, int pckts, int f, int tos, string flg)
     {
@@ -275,22 +344,70 @@ public class NetFlowData
         flag = flg;
     }
 
+    /// <summary>
+    /// Gets or sets the source ip.
+    /// </summary>
     public string srcIP { get; set; }
+    /// <summary>
+    /// Gets or sets the destination ip.
+    /// </summary>
     public string dstIP { get; set; }
+    /// <summary>
+    /// Gets or sets the source port.
+    /// </summary>
+
     public int srcPort { get; set; }
+    /// <summary>
+    /// Gets or sets the destination port.
+    /// </summary>
     public int dstPort { get; set; }
+    /// <summary>
+    /// Gets or sets the bytes.
+    /// </summary>
     public long bytes { get; set; }
+    /// <summary>
+    /// Gets or sets the date.
+    /// </summary>
     public LocalDate date { get; set; }
+    /// <summary>
+    /// Gets or sets the time.
+    /// </summary>
     public LocalTime time { get; set; }
+    /// <summary>
+    /// Gets or sets the duration.
+    /// </summary>
     public Duration duration { get; set; }
+    /// <summary>
+    /// Gets or sets the protocol.
+    /// </summary>
     public string protocol { get; set; }
+    /// <summary>
+    /// Gets or sets the flag.
+    /// </summary>
     public string flag { get; set; }
+    /// <summary>
+    /// Gets or sets the typeOfService.
+    /// </summary>
     public int typeOfService { get; set; }
+    /// <summary>
+    /// Gets or sets the packets.
+    /// </summary>
     public int packets { get; set; }
+    /// <summary>
+    /// Gets or sets the flows.
+    /// </summary>
     public int flows { get; set; }
+    /// <summary>
+    /// Gets or sets the icmpType.
+    /// </summary>
     public double icmpType { get; set; }
 
 
+
+    /// <summary>
+    /// overrides the toString method
+    /// </summary>
+    /// <returns>all the information in a string</returns>
     public override string ToString()
     {
         return $"Source IP: {srcIP}, Destination IP: {dstIP}, Source Port: {srcPort}, Destination Port: {dstPort}, " +
@@ -299,15 +416,42 @@ public class NetFlowData
     }
 }
 
+/// <summary>
+/// Configuration class for NetFlow settings.
+/// </summary>
 public class NfConfig
 {
+    /// <summary>
+    /// Gets or sets the FolderLocation.
+    /// </summary>
     public string FolderLocation { get; set; }
+    /// <summary>
+    /// Gets or sets the NfdumpBinaryLocation.
+    /// </summary>
     public string NfdumpBinaryLocation { get; set; }
+    /// <summary>
+    /// Gets or sets the NfcapdBinaryLocation.
+    /// </summary>
     public string NfcapdBinaryLocation { get; set; }
+    /// <summary>
+    /// Gets or sets the Port.
+    /// </summary>
     public long Port { get; set; }
+    /// <summary>
+    /// Gets or sets the Name.
+    /// </summary>
     public string Name { get; set; }
+    /// <summary>
+    /// Gets or sets the Id.
+    /// </summary>
     public int Id { get; set; }
 
+
+
+    /// <summary>
+    /// overrides the toString method
+    /// </summary>
+    /// <returns>all the information in a string</returns>
     public override string ToString()
     {
         return $"Folder Location: {FolderLocation}, " +

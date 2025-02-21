@@ -153,6 +153,7 @@ public class ModuleStarter
     }
     /// <summary>
     /// Stops the SIEM system by cancelling all ongoing operations.
+    /// Running the stop operation on each Module and disposes the loggerFactory
     /// </summary>
     public void StopSiem()
     {
@@ -160,9 +161,6 @@ public class ModuleStarter
         _logger.LogDebug($"Cancellation Token: {_cancellationTokenSource.IsCancellationRequested}");
         _logger.LogInformation("Stopping the SIEM");
 
-        // _apiStarter.StopApi();
-        // brauchen wir nicht mehr, da es jetzt einen dedizierten Query Server gibt
-        // object?.stop wird nur aufgerufen wenn object nicht null ist
         _snmpPollScheduler?.StopPolling();
         _netflowScheduler?.StopPolling();
         _syslogScheduler?.StopPolling();
@@ -181,8 +179,8 @@ public class ModuleStarter
     /// <summary>
     /// Prepares a Dictionary with all the OID Details (oid, oid_name, oid_description) by parsing all the CSV files in the specified Folder.
     /// Extracts <see cref="OidCsv"/> from a CSV File
+    /// This is used in SNMP to add an approriate name to a received OID
     /// </summary>
-    ///
     /// <param name="PathToFolder">The path to the folder containing the CSV files with the OID Information</param>
     /// <returns>A dictionary mapping OID identifiers to their names and descrptions</returns>
 

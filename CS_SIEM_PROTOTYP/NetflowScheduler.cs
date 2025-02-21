@@ -5,6 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace CS_SIEM_PROTOTYP;
 
+/// <summary>
+/// Schedules and manages the execution of the NetFlow receiver.
+/// Commands the Netflow receiver to extract the data from files in the specified folder depending on the configuration format the data and then discard the file.
+/// </summary>
 public class NetflowScheduler
 {
     private readonly int _delay;
@@ -14,6 +18,13 @@ public class NetflowScheduler
     private static List<NetFlowData> _allNetFlowData = new List<NetFlowData>();
     private ILogger _logger;
 
+    /// <summary>
+    /// Initializes the NetflowScheduler Class
+    /// </summary>
+    /// <param name="nfConfigs">the list of Netflow configurations that should be used</param>
+    /// <param name="databaseManager">Database manager instance to handle database operations.</param>
+    /// <param name="logger">Logger instance for logging operations.</param>
+    /// <param name="delayInSeconds">time between the extraction of data</param>
     public NetflowScheduler(List<NfConfig> nfConfigs, IDatabaseManager databaseManager, ILogger logger,
         int delayInSeconds = 10)
     {
@@ -26,6 +37,9 @@ public class NetflowScheduler
     }
 
 
+    /// <summary>
+    /// Starts the process of data extraction, data formatation and file deletion
+    /// </summary>
     public async Task StartAnalyzingAsync()
     {
         var cancellationToken = _cancellationTokenSource.Token;
@@ -108,6 +122,10 @@ public class NetflowScheduler
     }
 
 
+    /// <summary>
+    /// Deletes used netflow files
+    /// </summary>
+    /// <param name="netflowPaths">list of paths to the files that should be deleted</param>
     public void DeleteUsedNetflowFiles(string[] netflowPaths)
     {
 
@@ -129,16 +147,23 @@ public class NetflowScheduler
         }
     }
 
+    /// <summary>
+    /// Stops the process
+    /// </summary>
     public void StopPolling()
     {
         if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
         {
             _cancellationTokenSource.Cancel();
-            Console.ForegroundColor = ConsoleColor.Green;
             _logger.LogInformation("[INFO] Netflow Scheduler is stopping...");
         }
     }
 
+    /// <summary>
+    /// Maps the Netflow data to a dictionary for database insertion.
+    /// </summary>
+    /// <param name="nfData">Netflow data object</param>
+    /// <returns>A dictionary representation of the Netflow data</returns>
     public Dictionary<string, object> MapnfDataToData(NetFlowData nfData)
     {
         return new Dictionary<string, object>
@@ -161,6 +186,10 @@ public class NetflowScheduler
         };
     }
 
+    /// <summary>
+    /// Defines the database column types for Netflow data.
+    /// </summary>
+    /// <returns>A dictionary mapping column names to data types.</returns>
     public Dictionary<string, Type> GetNetflowColumnTypes()
     {
         return new Dictionary<string, Type>
@@ -182,8 +211,13 @@ public class NetflowScheduler
             { "UUID", typeof(Guid) }
         };
     }
-    //TODO MEHMET austesten DB
 
+    /// <summary>
+    /// Inserts Netflow data into the database.
+    /// </summary>
+    /// <param name="nfDatas">list of netflow data objects</param>
+    /// <param name="table">Database table name.</param>
+    /// <param name="columns">Column definitions.</param>
     public async Task InsertNfDataAsync(List<NetFlowData> nfDatas, string table, Dictionary<string, Type> columns)
     {
         foreach (var nfData in nfDatas)
