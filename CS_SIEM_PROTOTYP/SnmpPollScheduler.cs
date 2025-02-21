@@ -47,10 +47,16 @@ namespace CS_SIEM_PROTOTYP
                     List<SnmpPoll> snmpPolls = SnmpPollGetReceiver.PollSnmpV3(snmpRequest, _oidDictionary);
                     // Console.WriteLine(snmpRequest);
 
+                    // foreach (var poll in snmpPolls)
+                        // Console.WriteLine(poll);
+                    {
+                    }
+
                     if (snmpPolls != null && snmpPolls.Count > 0)
                     {
                         _logger.LogInformation(
                             $"[INFO] Received {snmpPolls.Count} SNMP poll results for device IP: {snmpRequest.IpAddress}");
+
 
                         await InsertSnmpPollDataAsync(snmpPolls, "SNMP", GetSnmpPollColumn());
                     }
@@ -97,23 +103,27 @@ namespace CS_SIEM_PROTOTYP
         {
             foreach (var snmpData in snmpDatas)
             {
+                //Console.WriteLine("INSERTING SNMP POLL:");
+                //Console.WriteLine(snmpData);
+                if (snmpData.Oid.Equals("1.3.6.1.4.1.12356.101.7.2.2.1.1.5"))
+                {
+                    // Console.WriteLine("THIS OID IS GETTING INSERTED FORTIGATE STUFF");
+                    _logger.LogWarning("THE OID IS GETTING INSERTED");
+                }
+
+
                 var data = MapSnmpPollDataToData(snmpData);
 
-                // foreach (var value in data)
-                // {
-                //     Console.WriteLine(value);
-                // }
 
                 try
                 {
-                    // Console.WriteLine("Starting with SNMP Insert");
                     await _databaseManager.InsertData(table, columns, data);
-                    // Console.WriteLine("Ending with SNMP Insert");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError($"Failed to insert data (SNMP POLL SCHEDULER)");
                 }
+                // Console.WriteLine("SUCCESSFULLY INSERTED SNMP POLL");
             }
         }
 

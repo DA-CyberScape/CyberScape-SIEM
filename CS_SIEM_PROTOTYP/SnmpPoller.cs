@@ -40,7 +40,7 @@ public class SnmpPoller
         
         try
         {
-            // Console.WriteLine("Starting SNMPv3 Walk...");
+            //Console.WriteLine("Starting SNMPv3 Walk...");
             var answer = new List<Variable>();
             Messenger.BulkWalk(VersionCode.V3,
                 target,
@@ -87,7 +87,7 @@ public class SnmpPoller
                         timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
                     new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), modifiedName);
                 answerSnmpPolls.Add(snmpPoll);
-                // Console.WriteLine(snmpPoll);
+                //Console.WriteLine(snmpPoll);
             }
         }
         catch (Exception ex)

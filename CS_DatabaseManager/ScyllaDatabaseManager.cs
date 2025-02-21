@@ -96,7 +96,8 @@ public class ScyllaDatabaseManager : IDatabaseManager
                             {
                                 r[ks].Add(view, new List<string>());
                             }
-                            r[ks][view].Add((string) row[3]);
+
+                            r[ks][view].Add((string)row[3]);
                         }
                     }
                 }
@@ -194,7 +195,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
 //        _tableCache[keySpace + "." + tableName] = columnDefinitions;
     }
 
-    public void DeleteTable(string tableName)
+    public async Task DeleteTable(string tableName)
     {
         // TODO: Delete Tables which are not defined in the "config" file? Maybe call this in CreateTable()
         var dropTableCql = $@"DROP TABLE IF EXISTS ""{Session.Keyspace}"".""{tableName}""";
@@ -202,7 +203,7 @@ public class ScyllaDatabaseManager : IDatabaseManager
         Console.WriteLine("Dropping Table: \n" + dropTableCql);
 
         var statement = new SimpleStatement(dropTableCql);
-        Session.ExecuteAsync(statement).ContinueWith(t =>
+        await Session.ExecuteAsync(statement).ContinueWith(t =>
         {
             Console.WriteLine(t.IsFaulted
                 ? $"Error dropping table: {t.Exception?.GetBaseException().Message}"
@@ -269,7 +270,16 @@ public class ScyllaDatabaseManager : IDatabaseManager
         // Console.WriteLine(insertCql);
         // Console.WriteLine(values);
         var statement = new SimpleStatement(insertCql, values);
-        // Console.WriteLine(statement.ToString());
+        if (data.ContainsKey("oid") && data.ContainsValue("1.3.6.1.4.1.12356.101.7.2.2.1.1.5"))
+        {
+            Console.WriteLine(statement);
+            foreach (var val in values)
+            {
+            Console.Write(val + " " + val.GetType() + " ");
+            Console.WriteLine();
+            }
+
+        }
 
         // foreach (var val in values)
         // {

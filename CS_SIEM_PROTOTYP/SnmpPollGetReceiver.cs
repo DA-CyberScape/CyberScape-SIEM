@@ -28,6 +28,8 @@ public class SnmpPollGetReceiver
                         snmpRequest.PrivPass, snmpRequest.Port, snmpRequest.Hostname, snmpRequest.Authentication,
                         snmpRequest.Encryption, baseName, oidDictionary);
                     answerSnmpPolls.AddRange(answerSnmpElement);
+                   
+                    
                 }
                 else
                 {
@@ -35,6 +37,7 @@ public class SnmpPollGetReceiver
                                             snmpRequest.PrivPass, snmpRequest.Port, snmpRequest.Hostname, snmpRequest.Authentication,
                                             snmpRequest.Encryption, baseName, oidDictionary);
                     answerSnmpPolls.AddRange(answerSnmpElement);
+                   
                 }
 
             }
@@ -150,7 +153,7 @@ public class SnmpPollGetReceiver
                                     SnmpPoll snmpPoll = new SnmpPoll(ipAddress, oidValue,
                                         value_string, hostname, new LocalTime(timestamp.Hour, timestamp.Minute,
                                             timestamp.Second,
-                                            timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
+                                        1000),
                                         new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), modifiedName);
                                     answerSnmpPolls.Add(snmpPoll);
                                 }

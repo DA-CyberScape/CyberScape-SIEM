@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace CS_SIEM_PROTOTYP
 {
-    public class SyslogReceiver : IDataReceiver
+    public class SyslogReceiver
     {
         private static ConcurrentQueue<SyslogAnswer> _syslogMessagesQueue = new ConcurrentQueue<SyslogAnswer>();
         private static int _delay = 10;
@@ -22,10 +22,7 @@ namespace CS_SIEM_PROTOTYP
         private int _port;
         private ILogger _logger;
 
-        public void ReceiveData()
-        {
-            throw new NotImplementedException();
-        }
+
 
         public SyslogReceiver(IDatabaseManager db, int port, ILogger logger, int delay = 10)
         {

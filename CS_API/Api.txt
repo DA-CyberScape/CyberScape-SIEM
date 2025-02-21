@@ -1,0 +1,176 @@
+
+public class Api
+    {
+        public static async Task Main(string[] args)
+        {
+            string apiConfigurationFile = "apiConfiguration.json";
+            string apiConfigurationSchemaFile = "apiConfigurationSchema.json";
+            string hostAssignmentFile = "hostAssignment.json";
+            string alertsFile = "alerts.json";
+            string alertsPostSchemaFile = "alertsPostSchema.json";
+
+            var configDirectory = EnsureDirectory("Configurations_Example");
+            var assignmentDirectory = EnsureDirectory("HostAssignment");
+            var alertsDirectory = EnsureDirectory("Alerts");
+
+            var defaultConfigurationPath = Path.Combine(configDirectory, apiConfigurationFile);
+            var apiConfigurationSchemaPath = Path.Combine(configDirectory, apiConfigurationSchemaFile);
+            var defaultAssignmentPath = Path.Combine(assignmentDirectory, hostAssignmentFile);
+            var defaultAlertsPath = Path.Combine(alertsDirectory, alertsFile);
+            var alertsPostSchemaPath = Path.Combine(alertsDirectory, alertsPostSchemaFile);
+
+            HostTableUpdater.CreateTable();
+            EnsureFileExists(defaultConfigurationPath, apiConfigurationFile, configDirectory);
+            EnsureFileExists(defaultAssignmentPath, hostAssignmentFile, assignmentDirectory);
+            EnsureFileExists(defaultAlertsPath, alertsFile, alertsDirectory);
+            EnsureFileExists(alertsPostSchemaPath, alertsPostSchemaFile, alertsDirectory);
+
+            string currentAlertsJson = File.ReadAllText(defaultAlertsPath);
+            var alertsListDictionary = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(currentAlertsJson);
+            var alertChecker = new AlertChecker(alertsListDictionary) { AlertsPath = defaultAlertsPath };
+            alertChecker.StartAlertChecker();
+
+            var builder = WebApplication.CreateSlimBuilder(args);
+            ConfigureWebHost(builder, "Certificates/certificate_self_signed.pfx");
+
+            builder.Services.ConfigureHttpJsonOptions(options =>
+            {
+                options.SerializerOptions.TypeInfoResolver = AppJsonSerializerContext.Default;
+            });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", b =>
+                {
+                    b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
+
+            builder.Services.AddControllers();
+            var app = builder.Build();
+            app.UseCors("AllowAll");
+            app.MapControllers();
+
+            var ps = new ProcessStarter();
+            CancellationTokenSource cts = new CancellationTokenSource();
+            await Task.Run(() => ps.StartProcessAsync(defaultConfigurationPath, cts.Token));
+
+            RegisterEndpoints(app, ps, cts, configDirectory, assignmentDirectory, alertsDirectory, alertChecker, apiConfigurationFile, apiConfigurationSchemaPath, alertsPostSchemaPath);
+            app.Run();
+        }
+
+        private static string EnsureDirectory(string directoryName)
+        {
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), directoryName);
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+            return directoryPath;
+        }
+
+        private static void EnsureFileExists(string filePath, string fileName, string directoryPath)
+        {
+            if (!File.Exists(filePath))
+            {
+                Console.WriteLine($"Please create the file '{fileName}' in the folder '{directoryPath}'");
+                Environment.Exit(0);
+            }
+        }
+
+        private static void ConfigureWebHost(WebApplicationBuilder builder, string certificatePath)
+        {
+            var certificateFile = Path.Combine(Directory.GetCurrentDirectory(), certificatePath);
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ListenAnyIP(5073);
+                if (File.Exists(certificateFile))
+                {
+                    options.ListenAnyIP(5072, listenOptions =>
+                    {
+                        listenOptions.UseHttps(certificateFile, "junioradmin");
+                    });
+                    Console.WriteLine("Certificate file found. HTTPS endpoint will be enabled.");
+                }
+                else
+                {
+                    Console.WriteLine("Certificate file not found. HTTPS endpoint will not be enabled.");
+                }
+            });
+        }
+
+        private static void RegisterEndpoints(WebApplication app, ProcessStarter ps, CancellationTokenSource cts, string configDirectory, string assignmentDirectory, string alertsDirectory, AlertChecker alertChecker, string apiConfigurationFile, string apiConfigurationSchemaPath, string alertsPostSchemaPath)
+        {
+            app.MapGet("/configurations", () =>
+            {
+                var apiConfigurationPath = Path.Combine(configDirectory, apiConfigurationFile);
+                if (!File.Exists(apiConfigurationPath)) return Results.NotFound("Configuration file not found.");
+                var jsonContent = File.ReadAllText(apiConfigurationPath);
+                return Results.Content(jsonContent, "application/json");
+            });
+
+            app.MapPost("/configurations", async (HttpRequest request) =>
+            {
+                var jsonContent = await new StreamReader(request.Body).ReadToEndAsync();
+                var schemaJson = File.ReadAllText(apiConfigurationSchemaPath);
+                var schema = JSchema.Parse(schemaJson);
+
+                if (!JsonValidationHelper.IsJsonArrayValid(jsonContent, schema, out string validationErrors))
+                    return Results.BadRequest($"Invalid JSON: {validationErrors}");
+
+                var newApiConfigurationFile = Path.Combine(configDirectory, apiConfigurationFile);
+                await File.WriteAllTextAsync(newApiConfigurationFile, jsonContent);
+                ps.StopProcess();
+                cts = new CancellationTokenSource();
+                await Task.Run(() => ps.StartProcessAsync(newApiConfigurationFile, cts.Token));
+                return Results.Ok(new SaveResponse("Configuration saved successfully. Restarted SIEM with new Configuration", apiConfigurationFile));
+            });
+
+            // Other endpoint registrations go here
+        }
+    }
+
+    public static class JsonValidationHelper
+    {
+        public static bool IsJsonValid(string jsonContent, JSchema schema, out string validationErrors)
+        {
+            try
+            {
+                var jsonObject = JObject.Parse(jsonContent);
+                var isValid = jsonObject.IsValid(schema, out IList<string> errors);
+                validationErrors = string.Join("; ", errors);
+                return isValid;
+            }
+            catch (JsonReaderException)
+            {
+                validationErrors = "Invalid JSON structure.";
+                return false;
+            }
+        }
+
+        public static bool IsJsonArrayValid(string jsonContent, JSchema schema, out string validationErrors)
+        {
+            try
+            {
+                var jsonArray = JArray.Parse(jsonContent);
+                var isValid = jsonArray.IsValid(schema, out IList<string> errors);
+                validationErrors = string.Join("; ", errors);
+                return isValid;
+            }
+            catch (JsonReaderException)
+            {
+                validationErrors = "Invalid JSON array structure.";
+                return false;
+            }
+        }
+    }
+
+    public record SaveResponse(string Message, string FileName);
+
+    [JsonSerializable(typeof(Configuration))]
+    [JsonSerializable(typeof(SaveResponse))]
+    [JsonSerializable(typeof(List<Configuration>))]
+    internal partial class AppJsonSerializerContext : JsonSerializerContext { }
+
+    public record Configuration(string Name, string Version, bool Enabled, Dictionary<string, string> Settings);
+}

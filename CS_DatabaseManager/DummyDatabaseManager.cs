@@ -54,7 +54,7 @@ public class DummyDatabaseManager : IDatabaseManager
         return Task.CompletedTask;
     }
 
-    public void DeleteTable(string tableName)
+    public async Task DeleteTable(string tableName)
     {
         // TODO: Delete Tables which are not defined in the "config" file? Maybe call this in CreateTable()
         var dropTableCql = $@"DROP TABLE IF EXISTS ""{_keySpace}"".""{tableName}""";

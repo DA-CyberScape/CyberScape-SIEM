@@ -4,7 +4,7 @@ clusterlists:
       - 192.168.0.110
       - 192.168.0.111
       - 192.169.0.112
-    active: true
+    active: false
     production: true
   - listname: Docker Cluster 1
     list:
@@ -21,9 +21,14 @@ clusterlists:
     active: false
     production: true
   - listname: Local Cluster
-    active: false
+    active: true
     production: false
     list:
       - 10.10.1.1
       - 10.10.1.2
       - 10.10.1.3
+  - listname: Test
+    active: false
+    production: true
+    list:
+      - 192.18.0.1

@@ -9,12 +9,9 @@ namespace CS_SIEM_PROTOTYP;
 
 using CS_DatabaseManager;
 
-public class NetflowReceiver : IDataReceiver
+public class NetflowReceiver
 {
-    public void ReceiveData()
-    {
-        throw new NotImplementedException();
-    }
+
 
     private readonly IDatabaseManager _databaseManager;
 

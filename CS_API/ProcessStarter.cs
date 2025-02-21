@@ -40,7 +40,7 @@ public class ProcessStarter
             
             _moduleStarter = new ModuleStarter(db, 10);
             var siemTask =
-                _moduleStarter.StartSIEM(
+                _moduleStarter.StartSiem(
                     configPath);
             return siemTask;
         }, cancellationToken);
@@ -64,7 +64,7 @@ public class ProcessStarter
             Console.WriteLine("Stopping process...");
             // _cts.Cancel();
             Console.WriteLine(_currentTask.Status);
-            _moduleStarter.StopSIEM();
+            _moduleStarter.StopSiem();
             Console.WriteLine(_currentTask.Status);
             Console.WriteLine(
                 "STOPPED J:LSDKFJS:DLKFJSD:LFKJSDLFKJSD:FLKJSD:FLKJSD:FLKSJD:FLKSJDF:LSKDJF:SLDKJFS:DLKJF");

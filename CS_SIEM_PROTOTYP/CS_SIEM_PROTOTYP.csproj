@@ -40,6 +40,12 @@
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="IDataReceiver.cs">
+        <DependentUpon>PcapReceiver.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
     
 
 

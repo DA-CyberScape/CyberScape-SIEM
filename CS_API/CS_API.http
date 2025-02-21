@@ -377,7 +377,7 @@ Content-Type: application/json
 POST {{CS_API_HostAddress}}/host_assignment/
 Content-Type: application/json
 
-{"assignments":[{"hostname":"localhost","ipAddress":"127.0.0.1"},{"hostname":"WindowsClient1","ipAddress":"10.40.21.155"},{"hostname":"Fortinet Fortigate","ipAddress":"10.0.1.254"},{"hostname":"SIEM","ipAddress":"10.0.1.10"},{"hostname":"LOG GENERATOR","ipAddress":"192.168.30.30"},{"hostname":"WebGui","ipAddress":"10.0.1.150"},{"hostname":"test","ipAddress":"10.10.10.10"}]}
+{"assignments":[{"hostname":"Fortinet Fortigate","ipAddress":"10.0.1.254"},{"hostname":"SIEM","ipAddress":"10.0.1.10"},{"hostname":"LOG GENERATOR","ipAddress":"192.168.30.30"},{"hostname":"WebGui","ipAddress":"10.0.1.150"}]}
 
 ### GET ALERTS
 GET {{CS_API_HostAddress}}/alerts/
@@ -462,5 +462,6 @@ Content-Type: application/json
 }
 
 
-
-
+### GET SNMP DATA
+GET http://10.40.21.154:8000/database/snmp?lb=0&ub=1&sd=2025-02-19&st=00:45:51&et=20:50:00&ed=2025-02-19&lb=0&ub=1&oid=1.3.6.1.4.1.12356.101.7.2.2.1.1.%
+Accept: application/json

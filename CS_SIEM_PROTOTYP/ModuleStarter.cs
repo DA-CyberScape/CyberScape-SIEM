@@ -26,7 +26,6 @@ public class ModuleStarter
     private SyslogScheduler _syslogScheduler;
     private SnmpTrapScheduler _snmpTrapScheduler;
     private CustomApiFetcher _customApiFetcher;
-    private ApiStarter _apiStarter;
     private readonly IDatabaseManager _db;
     private readonly int _delay;
     private ILoggerFactory _loggerFactory;
@@ -52,7 +51,6 @@ public class ModuleStarter
     {
         _delay = delay;
         _db = db;
-        _apiStarter = new ApiStarter(db);
         _cancellationTokenSource = new CancellationTokenSource();
         _loggerFactory = LoggerFactory.Create(builder => 
             builder
@@ -66,7 +64,11 @@ public class ModuleStarter
         _logger = _loggerFactory.CreateLogger("ModuleStarter");
     }
 
-    public async Task StartSIEM(string PathToJsonConfiguration)
+    /// <summary>
+    /// Starts the SIEM system by processing configuration data, converting it, and initializing various modules.
+    /// </summary>
+    /// <param name="PathToJsonConfiguration">The path to the JSON configuration file.</param>
+    public async Task StartSiem(string PathToJsonConfiguration)
     {
         List<SnmpPollRequest> snmpPollList = new List<SnmpPollRequest>();
         List<NfConfig> netflowList = new List<NfConfig>();
@@ -152,7 +154,7 @@ public class ModuleStarter
     /// <summary>
     /// Stops the SIEM system by cancelling all ongoing operations.
     /// </summary>
-    public void StopSIEM()
+    public void StopSiem()
     {
         _cancellationTokenSource.Cancel();
         _logger.LogDebug($"Cancellation Token: {_cancellationTokenSource.IsCancellationRequested}");
@@ -178,7 +180,9 @@ public class ModuleStarter
     }
     /// <summary>
     /// Prepares a Dictionary with all the OID Details (oid, oid_name, oid_description) by parsing all the CSV files in the specified Folder.
+    /// Extracts <see cref="OidCsv"/> from a CSV File
     /// </summary>
+    ///
     /// <param name="PathToFolder">The path to the folder containing the CSV files with the OID Information</param>
     /// <returns>A dictionary mapping OID identifiers to their names and descrptions</returns>
 

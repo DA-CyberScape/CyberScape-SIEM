@@ -5,4 +5,5 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/home/cyberscape_admin/.dotnet/packs/Microsoft.AspNetCore.App.Ref/8.0.10/ref/net8.0/Microsoft.Extensions.Logging.Configuration.dll" /&gt;
   &lt;Assembly Path="/home/cyberscape_admin/.nuget/packages/lextm.sharpsnmplib/12.5.5/lib/net6.0/SharpSnmpLib.dll" /&gt;
+  &lt;Assembly Path="/home/cyberscape_admin/CyberScape-SIEM/CS_API/bin/Debug/net8.0/CS_API.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>
