@@ -13,7 +13,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CS_SIEM_PROTOTYP\CS_SIEM_PROTOTYP.csproj" />
+      <ProjectReference Include="..\CS_SIEM\CS_SIEM.csproj" />
+      <ProjectReference Include="..\CS_DatabaseManager\CS_DatabaseManager.csproj" />
     </ItemGroup>
 
     <ItemGroup>

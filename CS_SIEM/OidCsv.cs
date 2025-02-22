@@ -1,4 +1,4 @@
-namespace CS_SIEM_PROTOTYP;
+namespace CS_SIEM;
 
 /// <summary>
 /// Represents an OID (Object Identifier) entry in CSV format, containing various properties

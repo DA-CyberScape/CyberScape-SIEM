@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Cassandra;
 using Microsoft.Extensions.Logging;
 
-namespace CS_SIEM_PROTOTYP
+namespace CS_SIEM
 {
     /// <summary>
     /// This class is responsible for scheduling SNMP polling tasks like walks and gets. It retrieves SNMP data from devices

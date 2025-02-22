@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using CS_DatabaseManager;
 using Cassandra;
-namespace CS_SIEM_PROTOTYP;
+namespace CS_SIEM;
 
 /// <summary>
 /// Class responsible for receiving and processing NetFlow data.

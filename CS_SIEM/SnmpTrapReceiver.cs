@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace CS_SIEM_PROTOTYP;
+namespace CS_SIEM;
 
 using SnmpSharpNet;
 using System;

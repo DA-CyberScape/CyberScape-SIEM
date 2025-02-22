@@ -2,7 +2,7 @@ using CS_DatabaseManager;
 using Microsoft.Extensions.Logging;
 using Cassandra;
 
-namespace CS_SIEM_PROTOTYP;
+namespace CS_SIEM;
 
 /// <summary>
 /// Class responsible for fetching data from APIs and storing the responses in a database.

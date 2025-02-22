@@ -1,7 +1,7 @@
 ﻿using CS_DatabaseManager;
 using Microsoft.Extensions.Logging;
 using Cassandra;
-namespace CS_SIEM_PROTOTYP;
+namespace CS_SIEM;
 
 /// <summary>
 /// Schedules and manages the execution of the NetFlow receiver.

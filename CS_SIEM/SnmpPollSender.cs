@@ -4,7 +4,7 @@ using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Security;
 
-namespace CS_SIEM_PROTOTYP;
+namespace CS_SIEM;
 
 /// <summary>
 /// Provides functionality to send SNMP polls using SNMPv3.

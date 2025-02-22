@@ -1,11 +1,11 @@
 using Cassandra;
 
-namespace CS_SIEM_PROTOTYP;
+namespace CS_SIEM;
 
 using CS_DatabaseManager;
 using System;
 using SnmpSharpNet;
-using static CS_SIEM_PROTOTYP.SnmpPollSender;
+using static CS_SIEM.SnmpPollSender;
 
 /// <summary>
 /// Class that provides functionality to receive SNMP polls using SNMPv3.

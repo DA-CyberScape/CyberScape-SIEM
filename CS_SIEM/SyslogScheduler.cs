@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using CS_DatabaseManager;
 using Microsoft.Extensions.Logging;
 
-namespace CS_SIEM_PROTOTYP
+namespace CS_SIEM
 {
     /// <summary>
     /// Schedules and manages Syslog receivers for listening to Syslog messages on specified ports.

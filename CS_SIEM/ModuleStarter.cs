@@ -7,7 +7,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
 
-namespace CS_SIEM_PROTOTYP
+namespace CS_SIEM
 {
     /// <summary>
     /// Provides classes and methods to create, start and stop each individual module of the SIEM
@@ -58,11 +58,11 @@ namespace CS_SIEM_PROTOTYP
                 builder
                     .AddConsole()
                     .SetMinimumLevel(LogLevel.Critical)
-                    .AddFilter("Snmp Trap", LogLevel.Critical)
-                    .AddFilter("Syslog", LogLevel.Critical)
-                    .AddFilter("Netflow", LogLevel.Critical)
+                    .AddFilter("Snmp Trap", LogLevel.Information)
+                    .AddFilter("Syslog", LogLevel.Information)
+                    .AddFilter("Netflow", LogLevel.Information)
                     .AddFilter("Snmp Poll", LogLevel.Information)
-                    .AddFilter("ModuleStarter", LogLevel.Critical));
+                    .AddFilter("ModuleStarter", LogLevel.Information));
             _logger = _loggerFactory.CreateLogger("ModuleStarter");
         }
 

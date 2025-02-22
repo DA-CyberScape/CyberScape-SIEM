@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CS_API;
-using CS_SIEM_PROTOTYP;
+using CS_SIEM;
 using CS_DatabaseManager;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

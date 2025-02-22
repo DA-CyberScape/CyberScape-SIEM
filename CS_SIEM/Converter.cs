@@ -1,6 +1,6 @@
 ﻿using SnmpSharpNet;
 
-namespace CS_SIEM_PROTOTYP;
+namespace CS_SIEM;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
