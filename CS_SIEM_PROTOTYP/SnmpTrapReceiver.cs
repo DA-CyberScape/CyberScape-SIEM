@@ -9,6 +9,9 @@ using System.Net;
 using System.Net.Sockets;
 using CS_DatabaseManager;
 using System.Collections.Concurrent;
+/// <summary>
+/// Receives and processes SNMP traps from network devices.
+/// </summary>
 public class SnmpTrapReceiver
 {
     // Class variable to store received SNMP traps
@@ -21,7 +24,15 @@ public class SnmpTrapReceiver
     private int _port;
     private ILogger _logger;
     private Dictionary<string, (string ObjectName, string Description)> _oidDictionary;
-    
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SnmpTrapReceiver"/> class.
+    /// </summary>
+    /// <param name="db">The database manager for inserting received SNMP traps.</param>
+    /// <param name="logger">The logger for logging information and errors.</param>
+    /// <param name="oidDictionary">A dictionary mapping OIDs to their corresponding names and descriptions.</param>
+    /// <param name="port">The port to listen for SNMP traps. Default is 162.</param>
+    /// <param name="delay">The delay in seconds between inserting SNMP traps. Default is 10 seconds.</param>
     public SnmpTrapReceiver(IDatabaseManager db, ILogger logger,Dictionary<string, (string ObjectName, string Description)> oidDictionary, int port = 162, int delay = 10)
     {
         
@@ -34,6 +45,10 @@ public class SnmpTrapReceiver
 
 
 
+    /// <summary>
+    /// Starts listening for SNMPv2c traps on the specified port.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task StartListening()
     {
         try
@@ -86,6 +101,11 @@ public class SnmpTrapReceiver
     }
 
 
+    /// <summary>
+    /// Processes a received SNMP trap.
+    /// </summary>
+    /// <param name="trapBytes">The raw bytes of the SNMP trap.</param>
+    /// <param name="source">The source IP endpoint of the trap.</param>
     private void ProcessTrap(byte[] trapBytes, IPEndPoint source)
     {
         try
@@ -135,6 +155,12 @@ public class SnmpTrapReceiver
             _logger.LogError($"Error processing trap: {ex.Message}");
         }
     }
+    /// <summary>
+    /// Removes the last two characters from a string if it ends with "0".
+    /// Used to get a name from the OID Dictionary if the specific name is null
+    /// </summary>
+    /// <param name="input">The input string.</param>
+    /// <returns>The modified string.</returns>
     public static string RemoveLastTwoIfEndsWithZero(string input)
     {
         if (input.EndsWith("0") && input.Length >= 2)
@@ -143,7 +169,13 @@ public class SnmpTrapReceiver
         }
         return input; 
     }
-    
+
+    /// <summary>
+    /// Starts periodic insertion of SNMP traps into the database.
+    /// </summary>
+    /// <param name="delay">The delay in seconds between insertions.</param>
+    /// <param name="token">The cancellation token to stop the task.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     private async Task StartPeriodicDatabaseInsert(int delay, CancellationToken token)
     {
         while (!token.IsCancellationRequested)
@@ -154,7 +186,10 @@ public class SnmpTrapReceiver
             InsertMessagesIntoDatabase();
         }
     }
-    
+
+    /// <summary>
+    /// Inserts SNMP trap messages from the queue into the database.
+    /// </summary>
     private void InsertMessagesIntoDatabase()
     {
         _logger.LogInformation(" INSIDE THE INSERT METHOD IN SNMP TRAP");
@@ -179,6 +214,9 @@ public class SnmpTrapReceiver
             }
         }
     }
+    /// <summary>
+    /// Stops the SNMP trap receiver and cancels the listening task.
+    /// </summary>
     public void StopReceiver()
     {
         cancellationTokenSource.Cancel();
@@ -189,21 +227,53 @@ public class SnmpTrapReceiver
     
 }
 
+/// <summary>
+/// Represents the data of an SNMP trap.
+/// </summary>
 public class SnmpTrapData
 {
+    /// <summary>
+    /// Gets or sets the source IP address of the trap.
+    /// </summary>
     public string Source { get; set; }
+    /// <summary>
+    /// Gets or sets the community string of the trap.
+    /// </summary>
     public string Community { get; set; }
+    /// <summary>
+    /// Gets or sets the trap OID.
+    /// </summary>
     public string TrapOid { get; set; }
+    /// <summary>
+    /// Gets or sets the variables included in the trap.
+    /// </summary>
     public Dictionary<string, (string OidName, string OidValue)> Variables { get; set; }
 }
 
 
+/// <summary>
+/// Represents the configuration for an SNMP trap receiver.
+/// </summary>
 public class SnmpTrapConfig
 {
+    // <summary>
+    /// Gets or sets the port to listen for SNMP traps.
+    /// </summary>
     public int Port { get; set; }
+    /// <summary>
+    /// Gets or sets the name of the SNMP trap receiver.
+    /// </summary>
+
     public string Name { get; set; }
+    /// <summary>
+    /// Gets or sets the ID of the SNMP trap receiver.
+    /// </summary>
     public int Id { get; set; }
 
+    /// <summary>
+    /// Returns a string representation of the SNMP trap configuration.
+    /// </summary>
+    /// <returns>A string containing the port, ID, and name of the configuration.</returns>
     public override string ToString()
     {
         return $"Port: {Port}, Id: {Id}, Name: {Name}";

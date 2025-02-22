@@ -11,6 +11,10 @@ using System.Text.RegularExpressions;
 
 namespace CS_SIEM_PROTOTYP
 {
+
+    /// <summary>
+    /// Receives and processes Syslog messages from network devices.
+    /// </summary>
     public class SyslogReceiver
     {
         private static ConcurrentQueue<SyslogAnswer> _syslogMessagesQueue = new ConcurrentQueue<SyslogAnswer>();
@@ -24,6 +28,14 @@ namespace CS_SIEM_PROTOTYP
 
 
 
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SyslogReceiver"/> class.
+        /// </summary>
+        /// <param name="db">The database manager for inserting received Syslog messages.</param>
+        /// <param name="port">The port to listen for Syslog messages.</param>
+        /// <param name="logger">The logger for logging information and errors.</param>
+        /// <param name="delay">The delay in seconds between inserting Syslog messages. Default is 10 seconds.</param>
         public SyslogReceiver(IDatabaseManager db, int port, ILogger logger, int delay = 10)
         {
             _db = db;
@@ -35,6 +47,10 @@ namespace CS_SIEM_PROTOTYP
         }
 
 
+        /// <summary>
+        /// Starts listening for Syslog messages on the specified port.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task ReceiveSyslogData()
         {
             cancellationToken = new CancellationToken();
@@ -84,6 +100,12 @@ namespace CS_SIEM_PROTOTYP
             }
         }
 
+        /// <summary>
+        /// Starts periodic insertion of Syslog messages into the database.
+        /// </summary>
+        /// <param name="delay">The delay in seconds between insertions.</param>
+        /// <param name="token">The cancellation token to stop the task.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task StartPeriodicDatabaseInsert(int delay, CancellationToken token)
         {
             while (!token.IsCancellationRequested)
@@ -95,6 +117,10 @@ namespace CS_SIEM_PROTOTYP
             }
         }
 
+        /// <summary>
+        /// Inserts Syslog messages from the queue into the database.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task InsertMessagesIntoDatabase()
         {
             // Console.WriteLine(" INSIDE THE INSERT METHOD IN SYSLOG");
@@ -123,7 +149,12 @@ namespace CS_SIEM_PROTOTYP
             }
         }
 
-        //TODO MEHMET austesten DB
+        /// <summary>
+        /// Inserts Syslog data into the appropriate database table.
+        /// </summary>
+        /// <param name="syslogAnswer">The Syslog message data to insert.</param>
+        /// <param name="columns">The column definitions for the database table.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task InsertSyslogDataAsync(SyslogAnswer syslogAnswer,
             Dictionary<string, Type> columns)
         {
@@ -149,6 +180,10 @@ namespace CS_SIEM_PROTOTYP
             }
         }
 
+        /// <summary>
+        /// Gets the column types for the Syslog database table.
+        /// </summary>
+        /// <returns>A dictionary mapping column names to their types.</returns>
         public Dictionary<string, Type> GetSyslogColumnTypes()
         {
             return new Dictionary<string, Type>
@@ -165,6 +200,11 @@ namespace CS_SIEM_PROTOTYP
             };
         }
 
+        /// <summary>
+        /// Maps Syslog message data to a dictionary for database insertion.
+        /// </summary>
+        /// <param name="syslogAnswer">The Syslog message data to map.</param>
+        /// <returns>A dictionary containing the mapped data.</returns>
         public Dictionary<string, object> MapSyslogDataToData(SyslogAnswer syslogAnswer)
         {
             return new Dictionary<string, object>
@@ -181,6 +221,10 @@ namespace CS_SIEM_PROTOTYP
             };
         }
 
+        /// <summary>
+        /// Gets the column types for the Windows Event database table.
+        /// </summary>
+        /// <returns>A dictionary mapping column names to their types.</returns>
         public Dictionary<string, Type> GetWinEventColumnTypes()
         {
             return new Dictionary<string, Type>
@@ -197,6 +241,11 @@ namespace CS_SIEM_PROTOTYP
             };
         }
 
+        /// <summary>
+        /// Maps Windows Event data to a dictionary for database insertion.
+        /// </summary>
+        /// <param name="syslogAnswer">The Syslog message data to map.</param>
+        /// <returns>A dictionary containing the mapped data.</returns>
         public Dictionary<string, object> MapWinEventDataToData(SyslogAnswer syslogAnswer)
         {
             return new Dictionary<string, object>
@@ -213,6 +262,9 @@ namespace CS_SIEM_PROTOTYP
             };
         }
 
+        /// <summary>
+        /// Stops the Syslog receiver and cancels the listening task.
+        /// </summary>
         public void StopReceiver()
         {
             _logger.LogInformation(
@@ -224,6 +276,12 @@ namespace CS_SIEM_PROTOTYP
             _udpClient?.Close();
         }
 
+        /// <summary>
+        /// Processes a received Syslog message and extracts relevant data.
+        /// </summary>
+        /// <param name="syslogMessage">The raw Syslog message.</param>
+        /// <param name="sourceIp">The source IP address of the message.</param>
+        /// <returns>A <see cref="SyslogAnswer"/> object containing the processed data.</returns
         private static SyslogAnswer ProcessSyslogMessage(string syslogMessage, string sourceIp)
         {
             SyslogAnswer syslogAnswer = new SyslogAnswer
@@ -312,8 +370,13 @@ namespace CS_SIEM_PROTOTYP
             return syslogAnswer;
         }
 
-        // returns the value associated with a key for example in a syslog message service=chicken
-        // it will return chicken if the inputed key is service
+        /// <summary>
+        /// Extracts a value associated with a key from a Syslog message.
+        /// </summary>
+        /// <param name="key">The key to search for in the message.</param>
+        /// <param name="syslogMessage">The Syslog message to search.</param>
+        /// <returns>The value associated with the key, or null if not found.</returns>
+        /// <exception cref="ArgumentException">Thrown if the key or message is null or empty.</exception>
         public static string? ExtractValue(string key, string syslogMessage)
         {
             if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(syslogMessage))
@@ -333,6 +396,11 @@ namespace CS_SIEM_PROTOTYP
             return null;
         }
 
+        /// <summary>
+        /// Extracts the event ID from a Windows Event Log message.
+        /// </summary>
+        /// <param name="message">The message to search.</param>
+        /// <returns>The event ID, or null if not found.</returns>
         public static string? ExtractEventId(string message)
         {
             string pattern = @"(?<eventid>\d+)\s[A-Za-z]{3} [A-Za-z]{3} \d{2} \d{2}:\d{2}:\d{2} \d{4}";
@@ -348,6 +416,9 @@ namespace CS_SIEM_PROTOTYP
             return null;
         }
 
+        /// <summary>
+        /// Tests the <see cref="ProcessSyslogMessage"/> method with sample data.
+        /// </summary>
         public static void TestProcessSyslogMessage()
         {
             List<(string Message, string sourceIp)> testData = new List<(string, string)>
@@ -372,32 +443,85 @@ namespace CS_SIEM_PROTOTYP
         }
     }
 
+    /// <summary>
+    /// Represents the configuration for a Syslog receiver.
+    /// </summary>
     public class SyslogConfig
     {
+        /// <summary>
+        /// Gets or sets the port to listen for Syslog messages.
+        /// </summary>
         public int Port { get; set; }
+        /// <summary>
+        /// Gets or sets the name of the Syslog receiver.
+        /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// Gets or sets the ID of the Syslog receiver.
+        /// </summary>
         public int Id { get; set; }
 
+        /// <summary>
+        /// Returns a string representation of the Syslog configuration.
+        /// </summary>
+        /// <returns>A string containing the port, ID, and name of the configuration.</returns>
         public override string ToString()
         {
             return $"Port: {Port}, Id: {Id}, Name: {Name}";
         }
     }
 
+    /// <summary>
+    /// Represents the processed data of a Syslog message.
+    /// </summary>
     public class SyslogAnswer
     {
+        /// <summary>
+        /// Gets or sets the date of the Syslog message.
+        /// </summary>
         public LocalDate? Date { get; set; }
+        /// <summary>
+        /// Gets or sets the time of the Syslog message.
+        /// </summary>
         public LocalTime? Time { get; set; }
+        /// <summary>
+        /// Gets or sets the hostname of the Syslog message.
+        /// </summary>
         public string? Hostname { get; set; }
+        /// <summary>
+        /// Gets or sets the message content of the Syslog message.
+        /// </summary>
         public string? Message { get; set; }
+        /// <summary>
+        /// Gets or sets the facility code of the Syslog message.
+        /// </summary>
         public int Facility { get; set; }
+        /// <summary>
+        /// Gets or sets the severity level of the Syslog message.
+        /// </summary>
         public int Severity { get; set; }
+        /// <summary>
+        /// Gets or sets the source IP address of the Syslog message.
+        /// </summary>
         public string? sourceIp { get; set; }
+        /// <summary>
+        /// Gets or sets the raw Syslog message.
+        /// </summary>
         public string? RawMessage { get; set; }
+        /// <summary>
+        /// Gets or sets the service associated with the Syslog message.
+        /// </summary>
 
         public string? Service { get; set; }
+        /// <summary>
+        /// Gets or sets the event ID for Windows Event Log messages.
+        /// </summary>
         public string? EventId { get; set; }
 
+        /// <summary>
+        /// Returns a string representation of the Syslog message data.
+        /// </summary>
+        /// <returns>A string containing the date, time, hostname, facility, severity, source IP, and message.</returns>
         public override string ToString()
         {
             return

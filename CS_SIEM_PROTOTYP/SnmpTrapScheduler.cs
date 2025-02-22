@@ -7,6 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace CS_SIEM_PROTOTYP
 {
+    /// <summary>
+    /// Schedules and manages SNMP trap receivers for listening to SNMPv2c traps on specified ports.
+    /// </summary>
     public class SnmpTrapScheduler
     {
         private readonly int _delay;
@@ -18,6 +21,14 @@ namespace CS_SIEM_PROTOTYP
         private ILogger _logger;
         private Dictionary<string, (string ObjectName, string Description)> _oidDictionary;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SnmpTrapScheduler"/> class.
+        /// </summary>
+        /// <param name="snmpTrapConfigs">A list of SNMP trap configurations.</param>
+        /// <param name="databaseManager">The database manager for inserting received SNMP traps.</param>
+        /// <param name="logger">The logger for logging information and errors.</param>
+        /// <param name="oidDictionary">A dictionary mapping OIDs to their corresponding names and descriptions.</param>
+        /// <param name="delayInSeconds">The delay in seconds between inserting SNMP traps. Default is 10 seconds.</param>
         public SnmpTrapScheduler(List<SnmpTrapConfig> snmpTrapConfigs, IDatabaseManager databaseManager,
             ILogger logger,Dictionary<string, (string ObjectName, string Description)> oidDictionary,
             int delayInSeconds = 10)
@@ -33,6 +44,10 @@ namespace CS_SIEM_PROTOTYP
         }
 
 
+        /// <summary>
+        /// Starts analyzing SNMP traps by initializing and starting SNMP trap receivers for each configuration.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task StartAnalyzingAsync()
         {
             var cancellationToken = _cancellationTokenSource.Token;
@@ -60,6 +75,9 @@ namespace CS_SIEM_PROTOTYP
             _logger.LogInformation("[INFO] SNMP Trap Scheduler has stopped all receivers.");
         }
 
+        /// <summary>
+        /// Stops all SNMP trap receivers and cancels the listening tasks.
+        /// </summary>
         public void StopPolling()
         {
             _logger.LogDebug($"SNMP Trap Stop Polling Cancellation Token: {_cancellationTokenSource.IsCancellationRequested}");

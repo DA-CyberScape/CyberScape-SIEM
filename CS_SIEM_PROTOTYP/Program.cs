@@ -6,12 +6,8 @@
 using System.Diagnostics;
 using System.Net;
 using CS_DatabaseManager;
-using static CS_SIEM_PROTOTYP.SnmpPollSender;
-using Lextm.SharpSnmpLib;
-using Lextm.SharpSnmpLib.Messaging;
-using Lextm.SharpSnmpLib.Security;
-using Cassandra;
 using Microsoft.Extensions.Logging;
+
 namespace CS_SIEM_PROTOTYP;
 
 public static class Program
@@ -73,7 +69,7 @@ public static class Program
         //IDatabaseManager db = new ScyllaDatabaseManager(dbHost);
 
         //ModuleStarter moduleStarter = new ModuleStarter(db, 10);
-        //var siemTask = moduleStarter.StartSiem(@"/home/cyberscape_admin/CyberScape-SIEM/CS_SIEM_PROTOTYP/test.json");
+        //var siemTask = moduleStarter.StartSiem(@"/home/cyberscape_admin/CyberScape-SIEM/CS_SIEM/test.json");
 
         //Console.WriteLine("[SIMULATION] SIEM Started, waiting 60 seconds before stopping...");
         //await Task.Delay(60_000);
