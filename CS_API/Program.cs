@@ -198,25 +198,25 @@ app.MapPost("/host_assignment", async (HttpRequest request) =>
     var jsonContent = await reader.ReadToEndAsync();
     var schema = JSchema.Parse(@"
     {
-        'type': 'object',
-        'properties': {
-            'assignments': {
-                'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'hostname': { 'type': 'string' },
-                        'ipAddress': { 
-                            'type': 'string',
-                            'pattern': '^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$'
-                        }
+    'type': 'object',
+    'properties': {
+        'assignments': {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'hostname': { 'type': 'string' },
+                    'ipAddress': {
+                        'type': 'string',
+                        'pattern': '^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$'
                     },
-                    'required': ['hostname', 'ipAddress']
-                }
+                    'device_type': { 'type': 'string' }
+                },
+                'required': ['hostname', 'ipAddress', 'device_type']
             }
-        },
-        'required': ['assignments']
-    }");
+        }
+    },
+    'required': ['assignments']}");
     
     if (!IsJsonValid(jsonContent, schema, out string validationErrors))
     {

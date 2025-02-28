@@ -70,7 +70,11 @@ public class HostTableUpdater
         var assignments = root.GetProperty("assignments");
         foreach (JsonElement assignment in assignments.EnumerateArray())
         {
-            Host h = new Host(assignment.GetProperty("hostname").GetString(),assignment.GetProperty("ipAddress").GetString() );
+            Host h = new Host(
+                assignment.GetProperty("hostname").GetString(),
+                assignment.GetProperty("ipAddress").GetString(),
+                assignment.GetProperty("device_type").GetString()
+            );
             hostnameIpList.Add(h);
         }
         
@@ -90,7 +94,7 @@ public class HostTableUpdater
         {
             { "hostname", typeof(string) },
             { "ip", typeof(string) },
-           
+            { "device_type", typeof(string) }
         };
     }
     /// <summary>
@@ -103,26 +107,29 @@ public class HostTableUpdater
         return new Dictionary<string, object>
         {
             { "hostname", host.Hostname },
-            {"ip", host.IpAddress }
+            {"ip", host.IpAddress },
+            { "device_type", host.DeviceType }
         };
     }
     
 }
 
 /// <summary>
-/// Represents a host with a hostname and an IP address.
+/// Represents a host with a hostname, an IP address, and a device type.
 /// </summary>
 public class Host
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Host"/> class with the provided information.
     /// </summary>
-    /// <param name="hostname"></param>
-    /// <param name="ipAddress"></param>
-    public Host(string hostname, string ipAddress)
+    /// <param name="hostname">The hostname of the host.</param>
+    /// <param name="ipAddress">The IP address of the host.</param>
+    /// <param name="deviceType">The device type of the host.</param>
+    public Host(string hostname, string ipAddress, string deviceType)
     {
         Hostname = hostname;
         IpAddress = ipAddress;
+        DeviceType = deviceType;
     }
 
     /// <summary>
@@ -133,4 +140,8 @@ public class Host
     /// Gets or sets the IP address of the host.
     /// </summary>
     public string IpAddress { get; set; }
+    /// <summary>
+    /// Gets or sets the device type of the host.
+    /// </summary>
+    public string DeviceType { get; set; }
 }

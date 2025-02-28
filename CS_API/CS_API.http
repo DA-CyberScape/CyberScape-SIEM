@@ -373,12 +373,38 @@ Content-Type: application/json
    }
 ]
 
+### GET HOST ASSIGNMENT
+GET {{CS_API_HostAddress}}/host_assignment/
+
+
 ### POST A NEW Host Assignment (TEST OF RESTARTING (SYSLOG TRAP ONLY))
 POST {{CS_API_HostAddress}}/host_assignment/
 Content-Type: application/json
 
-{"assignments":[{"hostname":"Fortinet Fortigate","ipAddress":"10.0.1.254"},{"hostname":"SIEM","ipAddress":"10.0.1.10"},{"hostname":"LOG GENERATOR","ipAddress":"192.168.30.30"},{"hostname":"WebGui","ipAddress":"10.0.1.150"}]}
-
+{
+  "assignments": [
+    {
+      "hostname": "Fortinet Fortigate",
+      "ipAddress": "10.0.1.254",
+      "device_type": "Firewall"
+    },
+    {
+      "hostname": "SIEM",
+      "ipAddress": "10.0.1.10",
+      "device_type": "Server"
+    },
+    {
+      "hostname": "LOG-GENERATOR",
+      "ipAddress": "192.168.30.30",
+      "device_type": "FirServer"
+    },
+    {
+      "hostname": "WebGui",
+      "ipAddress": "10.0.1.150",
+      "device_type": "Server"
+    }
+  ]
+}
 ### GET ALERTS
 GET {{CS_API_HostAddress}}/alerts/
 Accept: application/json

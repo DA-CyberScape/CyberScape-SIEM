@@ -1,1 +1,24 @@
-{"assignments":[{"hostname":"Fortinet Fortigate","ipAddress":"10.0.1.254"},{"hostname":"SIEM","ipAddress":"10.0.1.10"},{"hostname":"LOG GENERATOR","ipAddress":"192.168.30.30"},{"hostname":"WebGui","ipAddress":"10.0.1.150"}]}
+{
+  "assignments": [
+    {
+      "hostname": "Fortinet Fortigate",
+      "ipAddress": "10.0.1.254",
+      "device_type": "Firewall"
+    },
+    {
+      "hostname": "SIEM",
+      "ipAddress": "10.0.1.10",
+      "device_type": "Server"
+    },
+    {
+      "hostname": "LOG-GENERATOR",
+      "ipAddress": "192.168.30.30",
+      "device_type": "FirServer"
+    },
+    {
+      "hostname": "WebGui",
+      "ipAddress": "10.0.1.150",
+      "device_type": "Server"
+    }
+  ]
+}
