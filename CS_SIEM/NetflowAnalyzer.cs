@@ -7,17 +7,17 @@ namespace CS_SIEM;
 /// <summary>
 /// Class responsible for receiving and processing NetFlow data.
 /// </summary>
-public class NetflowReceiver
+public class NetflowAnalyzer
 {
 
 
     private readonly IDatabaseManager _databaseManager;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="NetflowReceiver"/> class.
+    /// Initializes a new instance of the <see cref="NetflowAnalyzer"/> class.
     /// </summary>
     /// <param name="databaseManager">Instance of <see cref="IDatabaseManager"/> for database operations.</param>
-    public NetflowReceiver(IDatabaseManager databaseManager)
+    public NetflowAnalyzer(IDatabaseManager databaseManager)
     {
         _databaseManager = databaseManager;
     }

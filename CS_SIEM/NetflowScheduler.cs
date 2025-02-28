@@ -58,14 +58,14 @@ public class NetflowScheduler
 
                 try
                 {
-                    string[] netflowPaths = NetflowReceiver.GetFilePaths(config.FolderLocation);
+                    string[] netflowPaths = NetflowAnalyzer.GetFilePaths(config.FolderLocation);
                     
                     foreach (string nfpath in netflowPaths)
                     {
                         // Console.WriteLine(nfpath);
                         // Console.WriteLine($"Hello {i}");
-                        List<string> lines = NetflowReceiver.ProcessCapturedFile(nfpath, config.NfdumpBinaryLocation);
-                        _allNetFlowData.AddRange(NetflowReceiver.ParseNetFlowData(lines));
+                        List<string> lines = NetflowAnalyzer.ProcessCapturedFile(nfpath, config.NfdumpBinaryLocation);
+                        _allNetFlowData.AddRange(NetflowAnalyzer.ParseNetFlowData(lines));
                     }
                     
                     //TODO: reenable the code below later when the log generator is fully functional
