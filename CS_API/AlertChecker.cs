@@ -13,9 +13,18 @@ namespace CS_API
     /// </summary>
     public class AlertChecker(List<Dictionary<string, object>> listOfAlerts)
     {
+        /// <summary>
+        /// A list of all alerts to check
+        /// </summary>
         public List<Dictionary<string, object>> ListOfAlerts = listOfAlerts;
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private readonly int _delay = 180;
+        /// <summary>
+        /// The delay waited between every alert check in seconds
+        /// </summary>
+        public readonly int Delay = 180;
+        /// <summary>
+        /// The Path to the alerts.json file which stores all the alerts
+        /// </summary>
         public string AlertsPath = "";
         /// <summary>
         /// Starts the alert checker loop, which periodically sends API requests based on conditions and sends email alerts if conditions are met.
@@ -87,8 +96,8 @@ namespace CS_API
                     await File.WriteAllTextAsync(AlertsPath, newAlertsJson, cancellationToken);
                     Console.WriteLine("PUTTING STUFF INTO A FILE");
 
-                    Console.WriteLine($"WAITING FOR {_delay} seconds");
-                    await Task.Delay(_delay * 1000, cancellationToken);
+                    Console.WriteLine($"WAITING FOR {Delay} seconds");
+                    await Task.Delay(Delay * 1000, cancellationToken);
                 }
                 catch (TaskCanceledException)
                 {
