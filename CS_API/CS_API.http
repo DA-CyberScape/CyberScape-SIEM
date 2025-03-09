@@ -419,7 +419,7 @@ Content-Type: application/json
     "tabelle": "syslog",
     "condition": "severity=7",
     "email_adresse": "0148@htl.rennewg.at",
-    "custom_message": "OH WEH OH WEH ES GIBT EINEN SYSLOG MIT LEVEL7"
+    "custom_message": "OH WEH OH WEH ES GIBT EINEN SYSLOG MIT LEVEL7",
     "timestamp": ""
 }
 ### POST A NEW ALERT
