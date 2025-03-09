@@ -1,1 +1,302 @@
-[{"snmpPolls":[{"name":"FG-SNMP","id":123123,"ip":"10.0.1.254","hostname":"FG-SNMP","oids":[{"oid":"1.3.6.1.4.1.12356.101.4.1.3.0","name":"CPU LOAD"},{"oid":"1.3.6.1.2.1.47.1.2.1.1.2.1","name":"Device"},{"oid":"1.3.6.1.4.1.12356.101.4.1.4.0","name":"MEMORY USAGE"},{"oid":"1.3.6.1.2.1.1.3.0","name":"UPTIME"},{"oid":"1.3.6.1.4.1.12356.101.4.1.1.0","name":"VERSION"},{"oid":"1.3.6.1.4.1.12356.101.7.2.2.1.1.x","name":"VLANS"},{"oid":"1.3.6.1.4.1.12356.101.3.2.1.1.7.x","name":"SESSION COUNT"},{"oid":"1.3.6.1.2.1.47.1.1.1.1.14.x","name":"INTERFACES"},{"oid":"1.3.6.1.2.1.4.20.1.3.x","name":"Subnetmask"},{"oid":"1.3.6.1.2.1.4.20.1.1.x","name":"IpAdd"},{"oid":"1.3.6.1.2.1.31.1.1.1.1.x","name":"All Interfaces"},{"oid":"1.3.6.1.2.1.31.1.1.1.10.x","name":"Sent Traffic/Interface"},{"oid":"1.3.6.1.2.1.31.1.1.1.6.x","name":"Received Traffic/Interface"},{"oid":"1.3.6.1.2.1.4.20.1.2.x","name":"All_Interface_IPs"},{"oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.1.x","name":"Polcy-IDs"},{"oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.3.x","name":"Bytes pro Policy"},{"oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.2.x","name":"Matches pro Policy"},{"oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.4.x","name":"Latest Match of Policy"},{"oid":"1.3.6.1.4.1.12356.101.4.1.8.0","name":"Session Count"}],"user":"MY-USER","authentication":"SHA1","encryption":"AES128","authpass":"MyAuthPass","privpass":"MyPrivPass","port":161},{"name":"CS-Catalyst","id":98273045,"ip":"10.0.200.10","hostname":"CS-Catalyst","oids":[{"oid":"1.3.6.1.2.1.1.3.0","name":"SysUpTime"},{"oid":"1.3.6.1.2.1.2.2.1.2.x","name":"Interface Name"},{"oid":"1.3.6.1.2.1.2.2.1.7.x","name":"Interface Admin Status"},{"oid":"1.3.6.1.2.1.2.2.1.8.x","name":"Interface Operational Status"},{"oid":"1.3.6.1.2.1.4.20.1.1.x","name":"IP Address"},{"oid":"1.3.6.1.2.1.4.20.1.2.x","name":"Interface to IP Mapping"},{"oid":"1.3.6.1.2.1.17.4.3.1.2.x","name":"MAC Address to Port Mapping"},{"oid":"1.3.6.1.2.1.17.2.15.1.5.x","name":"Spanning Tree Port State"},{"oid":"1.3.6.1.2.1.31.1.1.1.6.x","name":"Interface In Octets"},{"oid":"1.3.6.1.4.1.9.2.1.58.0","name":"CPU Utilization (5s)"},{"oid":"1.3.6.1.2.1.31.1.1.1.10.x","name":"Interface Out Octets"},{"oid":"1.3.6.1.2.1.47.1.1.1.1.9.1001","name":"IOS-Version"},{"oid":"1.3.6.1.2.1.47.1.1.1.1.13.1001","name":"Switch-Model"},{"oid":"1.3.6.1.4.1.9.9.48.1.1.1.5.x","name":"Used Memory"},{"oid":"1.3.6.1.4.1.9.2.1.8.0","name":"Free Memory in Bytes"},{"oid":"1.3.6.1.4.1.9.9.46.1.6.1.1.13.x","name":"Interface Mode"}],"user":"MY-USER","authentication":"SHA1","encryption":"AES128","authpass":"MyAuthPass","privpass":"MyPrivPass","port":161},{"name":"CS-MirrorCatalyst","id":12394780,"ip":"10.0.1.99","hostname":"CS-MirrorCatalyst","oids":[{"oid":"1.3.6.1.2.1.1.3.0","name":"SysUpTime"},{"oid":"1.3.6.1.4.1.9.2.1.58.0","name":"CPU Utilization (5s)"},{"oid":"1.3.6.1.4.1.9.2.1.8.0","name":"Free Memory"},{"oid":"1.3.6.1.2.1.2.2.1.2.x","name":"Interface Name"},{"oid":"1.3.6.1.2.1.2.2.1.7.x","name":"Interface Admin Status"},{"oid":"1.3.6.1.2.1.2.2.1.8.x","name":"Interface Operational Status"},{"oid":"1.3.6.1.2.1.4.20.1.1.x","name":"IP Address"},{"oid":"1.3.6.1.2.1.4.20.1.2.x","name":"Interface to IP Mapping"},{"oid":"1.3.6.1.2.1.17.4.3.1.2.x","name":"MAC Address to Port Mapping"},{"oid":"1.3.6.1.2.1.17.2.15.1.5.x","name":"Spanning Tree Port State"},{"oid":"1.3.6.1.2.1.31.1.1.1.6.x","name":"Interface In Octets"},{"oid":"1.3.6.1.2.1.31.1.1.1.10.x","name":"Interface Out Octets"},{"oid":"1.3.6.1.2.1.47.1.1.1.1.9.1001","name":"IOS-Version"},{"oid":"1.3.6.1.2.1.47.1.1.1.1.13.1001","name":"Switch-Model"},{"oid":"1.3.6.1.4.1.9.9.48.1.1.1.5.x","name":"Used Memory"},{"oid":"1.3.6.1.4.1.9.2.1.8.0","name":"Free Memory in Bytes"},{"oid":"1.3.6.1.4.1.9.9.46.1.6.1.1.13.x","name":"Interface Mode"}],"user":"MY-USER","authentication":"SHA1","encryption":"AES128","authpass":"MyAuthPass","privpass":"MyPrivPass","port":161}]},{"netflowReceiver":[{"name":"Netflow1","id":12312,"folderLocation":"/home/cyberscape_admin/Netflow_example_files","nfdumpBinaryLocation":"/usr/bin/nfdump","nfcapdBinaryLocation":"/usr/bin/nfcapd","port":2055}]},{"Syslog":[{"name":"Sys1","id":56756,"port":514}]},{"snmpTrapReceiver":[{"name":"SNMP-Trap-Receiver","id":123123,"port":162}]}]
+[
+   {
+      "snmpPolls":[
+         {
+            "name":"FG-SNMP",
+            "id":123123,
+            "ip":"10.0.1.254",
+            "hostname":"FG-SNMP",
+            "oids":[
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.4.1.3.0",
+                  "name":"CPU LOAD"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.47.1.2.1.1.2.1",
+                  "name":"Device"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.4.1.4.0",
+                  "name":"MEMORY USAGE"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.1.3.0",
+                  "name":"UPTIME"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.4.1.1.0",
+                  "name":"VERSION"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.7.2.2.1.1.x",
+                  "name":"VLANS"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.3.2.1.1.7.x",
+                  "name":"SESSION COUNT"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.47.1.1.1.1.14.x",
+                  "name":"INTERFACES"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.4.20.1.3.x",
+                  "name":"Subnetmask"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.4.20.1.1.x",
+                  "name":"IpAdd"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.31.1.1.1.1.x",
+                  "name":"All Interfaces"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.31.1.1.1.10.x",
+                  "name":"Sent Traffic/Interface"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.31.1.1.1.6.x",
+                  "name":"Received Traffic/Interface"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.4.20.1.2.x",
+                  "name":"All_Interface_IPs"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.1.x",
+                  "name":"Polcy-IDs"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.3.x",
+                  "name":"Bytes pro Policy"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.2.x",
+                  "name":"Matches pro Policy"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.5.1.2.1.1.4.x",
+                  "name":"Latest Match of Policy"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.12356.101.4.1.8.0",
+                  "name":"Session Count"
+               }
+            ],
+            "user":"MY-USER",
+            "authentication":"SHA1",
+            "encryption":"AES128",
+            "authpass":"MyAuthPass",
+            "privpass":"MyPrivPass",
+            "port":161
+         },
+         {
+            "name":"CS-Catalyst",
+            "id":98273045,
+            "ip":"10.0.200.10",
+            "hostname":"CS-Catalyst",
+            "oids":[
+               {
+                  "oid":"1.3.6.1.2.1.1.3.0",
+                  "name":"SysUpTime"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.2.2.1.2.x",
+                  "name":"Interface Name"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.2.2.1.7.x",
+                  "name":"Interface Admin Status"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.2.2.1.8.x",
+                  "name":"Interface Operational Status"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.4.20.1.1.x",
+                  "name":"IP Address"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.4.20.1.2.x",
+                  "name":"Interface to IP Mapping"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.17.4.3.1.2.x",
+                  "name":"MAC Address to Port Mapping"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.17.2.15.1.5.x",
+                  "name":"Spanning Tree Port State"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.31.1.1.1.6.x",
+                  "name":"Interface In Octets"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.9.2.1.58.0",
+                  "name":"CPU Utilization (5s)"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.31.1.1.1.10.x",
+                  "name":"Interface Out Octets"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.47.1.1.1.1.9.1001",
+                  "name":"IOS-Version"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.47.1.1.1.1.13.1001",
+                  "name":"Switch-Model"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.9.9.48.1.1.1.5.x",
+                  "name":"Used Memory"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.9.2.1.8.0",
+                  "name":"Free Memory in Bytes"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.9.9.46.1.6.1.1.13.x",
+                  "name":"Interface Mode"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.2.2.1.19.x",
+                  "name":"ifOutDiscards"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.2.2.1.13.x",
+                  "name":"ifInDiscards"
+               }
+            ],
+            "user":"MY-USER",
+            "authentication":"SHA1",
+            "encryption":"AES128",
+            "authpass":"MyAuthPass",
+            "privpass":"MyPrivPass",
+            "port":161
+         },
+         {
+            "name":"CS-MirrorCatalyst",
+            "id":12394780,
+            "ip":"10.0.1.99",
+            "hostname":"CS-MirrorCatalyst",
+            "oids":[
+               {
+                  "oid":"1.3.6.1.2.1.1.3.0",
+                  "name":"SysUpTime"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.9.2.1.58.0",
+                  "name":"CPU Utilization (5s)"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.9.2.1.8.0",
+                  "name":"Free Memory"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.2.2.1.2.x",
+                  "name":"Interface Name"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.2.2.1.7.x",
+                  "name":"Interface Admin Status"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.2.2.1.8.x",
+                  "name":"Interface Operational Status"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.4.20.1.1.x",
+                  "name":"IP Address"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.4.20.1.2.x",
+                  "name":"Interface to IP Mapping"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.17.4.3.1.2.x",
+                  "name":"MAC Address to Port Mapping"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.17.2.15.1.5.x",
+                  "name":"Spanning Tree Port State"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.31.1.1.1.6.x",
+                  "name":"Interface In Octets"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.31.1.1.1.10.x",
+                  "name":"Interface Out Octets"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.47.1.1.1.1.9.1001",
+                  "name":"IOS-Version"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.47.1.1.1.1.13.1001",
+                  "name":"Switch-Model"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.9.9.48.1.1.1.5.x",
+                  "name":"Used Memory"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.9.2.1.8.0",
+                  "name":"Free Memory in Bytes"
+               },
+               {
+                  "oid":"1.3.6.1.4.1.9.9.46.1.6.1.1.13.x",
+                  "name":"Interface Mode"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.2.2.1.19.x",
+                  "name":"ifOutDiscards"
+               },
+               {
+                  "oid":"1.3.6.1.2.1.2.2.1.13.x",
+                  "name":"ifInDiscards"
+               }
+            ],
+            "user":"MY-USER",
+            "authentication":"SHA1",
+            "encryption":"AES128",
+            "authpass":"MyAuthPass",
+            "privpass":"MyPrivPass",
+            "port":161
+         }
+      ]
+   },
+   {
+      "netflowReceiver":[
+         {
+            "name":"Netflow1",
+            "id":12312,
+            "folderLocation":"/home/cyberscape_admin/Netflow_example_files",
+            "nfdumpBinaryLocation":"/usr/bin/nfdump",
+            "nfcapdBinaryLocation":"/usr/bin/nfcapd",
+            "port":2055
+         }
+      ]
+   },
+   {
+      "Syslog":[
+         {
+            "name":"Sys1",
+            "id":56756,
+            "port":514
+         }
+      ]
+   },
+   {
+      "snmpTrapReceiver":[
+         {
+            "name":"SNMP-Trap-Receiver",
+            "id":123123,
+            "port":162
+         }
+      ]
+   }
+]
