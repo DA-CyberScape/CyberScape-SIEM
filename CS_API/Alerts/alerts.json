@@ -1,11 +1,1 @@
-[
-  {
-    "id": 1,
-    "name": "Warning",
-    "tabelle": "syslog",
-    "condition": "severity=0",
-    "email_adresse": "0136@htl.rennweg.at",
-    "custom_message": "Oh nein",
-    "timestamp": "&sd=2025-3-9&st=20:33:29&et=23:59:59"
-  }
-]
+[]

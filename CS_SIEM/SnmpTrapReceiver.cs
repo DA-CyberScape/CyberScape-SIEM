@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using CS_DatabaseManager;
 using System.Collections.Concurrent;
+using Cassandra;
 /// <summary>
 /// Receives and processes SNMP traps from network devices.
 /// </summary>
@@ -41,6 +42,44 @@ public class SnmpTrapReceiver
         _port = port;
         _logger = logger;
         _oidDictionary = oidDictionary;
+        _db.CreateTable("SnmpTrap", GetSnmpTrapColumnTypes(), "date, time, UUID","time DESC, UUID ASC");
+    }
+
+    /// <summary>
+    /// Gets the column types for the Snmp Trap database table.
+    /// </summary>
+    /// <returns>A dictionary mapping column names to their types.</returns>
+    public Dictionary<string, Type> GetSnmpTrapColumnTypes()
+    {
+        return new Dictionary<string, Type>
+        {
+            { "source", typeof(string) },
+            { "time", typeof(LocalTime) },
+            { "date", typeof(LocalDate) },
+            { "community", typeof(string) },
+            { "trapoid", typeof(string) },
+            { "variables", typeof(string) },
+            { "UUID", typeof(Guid) }
+        };
+    }
+
+    /// <summary>
+    /// Maps Snmp Trap data to a dictionary for database insertion.
+    /// </summary>
+    /// <param name="snmpTrapData">The SnmpTrap data to map.</param>
+    /// <returns>A dictionary containing the mapped data.</returns>
+    public Dictionary<string, object> MapSnmpTrapData(SnmpTrapData snmpTrapData)
+    {
+        return new Dictionary<string, object>
+        {
+            { "source", snmpTrapData.Source },
+            { "time", snmpTrapData.Time },
+            { "date", snmpTrapData.Date },
+            { "community", snmpTrapData.Community },
+            { "trapoid", snmpTrapData.TrapOid },
+            { "variables", snmpTrapData.Variables },
+            { "UUID", Guid.NewGuid() }
+        };
     }
 
 
@@ -118,36 +157,47 @@ public class SnmpTrapReceiver
             {
                 SnmpV2Packet v2Trap = (SnmpV2Packet)snmpPacket;
 
+
                 SnmpTrapData trapData = new SnmpTrapData
                 {
                     Source = source.Address.ToString(),
                     Community = v2Trap.Community.ToString(),
                     TrapOid = v2Trap.Pdu.TrapObjectID.ToString(),
-                    Variables = new Dictionary<string, (string OidName, string OidValue)>()
+                    Variables = string.Empty
                 };
 
+                DateTime timestamp = DateTime.Now;
+                trapData.Date = new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day);
+                trapData.Time = new LocalTime(timestamp.Hour, timestamp.Minute, timestamp.Second,
+                    timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000);
+
+                var variablesBuilder = new System.Text.StringBuilder();
                 foreach (Vb variable in v2Trap.Pdu.VbList)
                 {
-                    string oidName = "unknown";
                     string oidId = variable.Oid.ToString();
                     string oidValue = variable.Value.ToString();
-                    if (_oidDictionary.TryGetValue(RemoveLastTwoIfEndsWithZero(oidId), out var wert1))
-                    {
-                        oidName = wert1.ObjectName;
-                        
-                        Console.WriteLine($"OID NAME: {oidName} OID ID: {oidId} OID VALUE: {oidValue}");
-                    }
-                    trapData.Variables[oidId] = (oidName, oidValue);
+                    Console.WriteLine("---------------");
+                    Console.WriteLine(oidId);
+                    Console.WriteLine(oidValue);
+                    Console.WriteLine("---------------");
+                    // Append the OID and its value to the string
+                    variablesBuilder.Append($"{oidId}: {oidValue}; ");
                 }
+
+                // Remove the trailing semicolon and space
+                if (variablesBuilder.Length > 0)
+                {
+                    variablesBuilder.Length -= 2;
+                }
+
+                trapData.Variables = variablesBuilder.ToString();
                 
                 _snmpTraps.Enqueue(trapData);
                 
                 _logger.LogInformation($"Received Trap from {trapData.Source}");
                 _logger.LogInformation($"Community: {trapData.Community}, OID: {trapData.TrapOid}");
-                foreach (var kvp in trapData.Variables)
-                {
-                    _logger.LogInformation($"  {kvp.Key}: {kvp.Value}");
-                }
+                _logger.LogInformation($"Variables: {trapData.Variables}");
+                _logger.LogInformation($"Time: {trapData.Date} {trapData.Time}");
             }
         }
         catch (Exception ex)
@@ -183,14 +233,14 @@ public class SnmpTrapReceiver
             await Task.Delay(1000 * delay, token);
             _logger.LogInformation("INSERTING EVERYTH(ING S:DLFKJSD:LFKJSD:LFKJSD:FLKJSDF");
             _logger.LogInformation(_snmpTraps.Count + " THIS WAS THE COUNT");
-            InsertMessagesIntoDatabase();
+            await InsertMessagesIntoDatabase();
         }
     }
 
     /// <summary>
     /// Inserts SNMP trap messages from the queue into the database.
     /// </summary>
-    private void InsertMessagesIntoDatabase()
+    private async Task  InsertMessagesIntoDatabase()
     {
         _logger.LogInformation(" INSIDE THE INSERT METHOD IN SNMP TRAP");
         while (!_snmpTraps.IsEmpty)
@@ -201,19 +251,49 @@ public class SnmpTrapReceiver
             {
                 if (trapData.Community.Length > 0)
                 {
-                    _logger.LogInformation($"Received Trap from {trapData.Source}");
-                    _logger.LogInformation($"Community: {trapData.Community}, OID: {trapData.TrapOid}");
-                    foreach (var kvp in trapData.Variables)
-                    {
-                        _logger.LogInformation($"  {kvp.Key}: {kvp.Value}");
-                    }
+                    _logger.LogInformation($"INSERTING Received Trap from {trapData.Source}");
+                    _logger.LogInformation($"INSERTING Community: {trapData.Community}, OID: {trapData.TrapOid}");
+                    _logger.LogInformation($"INSERTING Variables: {trapData.Variables}");
+                    _logger.LogInformation($"INSERTING TIME: {trapData.Date} {trapData.Time}");
 
-                    // TODO: MEHMET DB LOGIK
-                    // InsertSyslogDataAsync(syslogMessage, "Syslog", GetSyslogColumnTypes());
+
+                    await InsertSnmpDataAsync(trapData, "SnmpTrap", GetSnmpTrapColumnTypes());
                 }
             }
         }
     }
+
+    /// <summary>
+    /// Inserts Snmp Trap data into the appropriate database table.
+    /// </summary>
+    /// <param name="trapData">The Syslog message data to insert.</param>
+    /// <param name="column">The column definitions for the database table.</param>
+    /// <param name="columns">The columns that can be found in the database table</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task InsertSnmpDataAsync(SnmpTrapData trapData,string column,
+        Dictionary<string, Type> columns)
+    {
+        var data = MapSnmpTrapData(trapData);
+
+
+        try
+        {
+            await _db.InsertData(column, columns, data);
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Failed to insert data {ex}");
+        }
+    }
+
+
+
+
+
+
+
+
     /// <summary>
     /// Stops the SNMP trap receiver and cancels the listening task.
     /// </summary>
@@ -236,18 +316,30 @@ public class SnmpTrapData
     /// Gets or sets the source IP address of the trap.
     /// </summary>
     public string Source { get; set; }
+
     /// <summary>
     /// Gets or sets the community string of the trap.
     /// </summary>
     public string Community { get; set; }
+
     /// <summary>
     /// Gets or sets the trap OID.
     /// </summary>
     public string TrapOid { get; set; }
+
     /// <summary>
-    /// Gets or sets the variables included in the trap.
+    /// Gets or sets the concatenated string of OID variables in the format "oid_id: oid_value; ...".
     /// </summary>
-    public Dictionary<string, (string OidName, string OidValue)> Variables { get; set; }
+    public string Variables { get; set; }
+
+    /// <summary>
+    /// Gets or sets the date of the Syslog message.
+    /// </summary>
+    public LocalDate? Date { get; set; }
+    /// <summary>
+    /// Gets or sets the time of the Syslog message.
+    /// </summary>
+    public LocalTime? Time { get; set; }
 }
 
 
