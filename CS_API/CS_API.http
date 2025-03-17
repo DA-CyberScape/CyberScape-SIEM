@@ -498,3 +498,9 @@ Content-Type: application/json
 
   ]
 }
+
+### GET NEW VLAN ASSIGNMENT
+GET {{CS_API_HostAddress}}/vlan_assignment/
+
+### GET NEW HOST ASSIGNMENT
+GET {{CS_API_HostAddress}}/host_assignment/

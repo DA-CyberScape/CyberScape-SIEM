@@ -219,7 +219,7 @@ app.MapPost("/host_assignment", async (HttpRequest request) =>
 
 app.MapGet("/vlan_assignment", () =>
 {
-    var vlanAssignmentPath = Path.Combine(assignmentDirectory, vlanAssignmentFile);
+    var vlanAssignmentPath = defaultVlanAssignmentPath;
     if (!File.Exists(vlanAssignmentPath))
     {
         return Results.NotFound("VLAN assignment file not found.");
