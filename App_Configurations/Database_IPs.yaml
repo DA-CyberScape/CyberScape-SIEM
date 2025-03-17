@@ -4,7 +4,7 @@
 
 clusterlists:
   - listname: "Local Cluster"
-    list: [ 10.0.1.13, 10.0.1.14 ]
+    list: [ 10.0.1.13, 10.0.1.14, 10.0.1.15]
     active: true
     production: false
   - listname: "Remote Cluster"

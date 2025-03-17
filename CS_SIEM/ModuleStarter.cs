@@ -54,15 +54,18 @@ namespace CS_SIEM
             _delay = delay;
             _db = db;
             _cancellationTokenSource = new CancellationTokenSource();
+            // Critical to filter most LOGS
+            var logLevel = LogLevel.Information;
+
             _loggerFactory = LoggerFactory.Create(builder =>
                 builder
                     .AddConsole()
-                    .SetMinimumLevel(LogLevel.Critical)
-                    .AddFilter("Snmp Trap", LogLevel.Information)
-                    .AddFilter("Syslog", LogLevel.Information)
-                    .AddFilter("Netflow", LogLevel.Information)
-                    .AddFilter("Snmp Poll", LogLevel.Information)
-                    .AddFilter("ModuleStarter", LogLevel.Information));
+                    .SetMinimumLevel(logLevel)
+                    .AddFilter("Snmp Trap", logLevel)
+                    .AddFilter("Syslog", logLevel)
+                    .AddFilter("Netflow", logLevel)
+                    .AddFilter("Snmp Poll", logLevel)
+                    .AddFilter("ModuleStarter", logLevel));
             _logger = _loggerFactory.CreateLogger("ModuleStarter");
         }
 

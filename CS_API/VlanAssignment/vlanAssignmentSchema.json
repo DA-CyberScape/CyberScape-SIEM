@@ -1,0 +1,18 @@
+{
+  'type': 'object',
+  'properties': {
+    'vlans': {
+      'type': 'array',
+      'items': {
+        'type': 'object',
+        'properties': {
+          'network': { 'type': 'string' },
+          'subnetmask': { 'type': 'string' },
+          'name': { 'type': 'string' }
+        },
+        'required': ['network', 'subnetmask', 'name']
+      }
+    }
+  },
+  'required': ['vlans']
+}

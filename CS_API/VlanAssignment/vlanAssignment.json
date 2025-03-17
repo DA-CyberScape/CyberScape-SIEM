@@ -1,0 +1,15 @@
+{
+  "vlans": [
+    {
+      "network": "10.0.1.0",
+      "subnetmask": "255.255.255.0",
+      "name": "VLAN1"
+    },
+    {
+      "network": "192.168.30.0",
+      "subnetmask": "255.255.255.0",
+      "name": "VLAN12330"
+    }
+
+  ]
+}

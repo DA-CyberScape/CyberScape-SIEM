@@ -9,73 +9,72 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using Microsoft.Extensions.Logging;
 
-// https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-9.0#use-the-certificate-apis
-
-//----------------------------------------------------------------------
-
-
 
 
 string apiConfigurationFile = "apiConfiguration.json";
 string apiConfigurationSchemaFile = "apiConfigurationSchema.json";
 string hostAssignmentFile = "hostAssignment.json";
+string hostAssignmentSchemaFile = "hostAssignmentSchema.json";
+string vlanAssignmentFile = "vlanAssignment.json";
+string vlanAssignmentSchemaFile = "vlanAssignmentSchema.json";
 string alertsFile = "alerts.json";
 string alertsPostSchemaFile = "alertsPostSchema.json";
 
-var configDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Configurations_Example");
-var defaultConfigurationPath = Path.Combine(configDirectory, apiConfigurationFile);
-var apiConfigurationSchemaPath = Path.Combine(configDirectory, apiConfigurationSchemaFile);
 
-var assignmentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "HostAssignment");
-var defaultAssignmentPath = Path.Combine(assignmentDirectory, hostAssignmentFile);
+string baseDirectory = Directory.GetCurrentDirectory();
+string configDirectory = Path.Combine(baseDirectory, "Configuration");
+string assignmentDirectory = Path.Combine(baseDirectory, "HostAssignment");
+string alertsDirectory = Path.Combine(baseDirectory, "Alerts");
+string vlanAssignmentDirectory = Path.Combine(baseDirectory, "VlanAssignment");
 
-var alertsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Alerts");
-var defaultAlertsPath = Path.Combine(alertsDirectory, alertsFile);
-var alertsPostSchemaPath = Path.Combine(alertsDirectory, alertsPostSchemaFile);
+string defaultConfigurationPath = Path.Combine(configDirectory, apiConfigurationFile);
+string apiConfigurationSchemaPath = Path.Combine(configDirectory, apiConfigurationSchemaFile);
+string defaultAssignmentPath = Path.Combine(assignmentDirectory, hostAssignmentFile);
+string defaultAssignmentSchemaPath = Path.Combine(assignmentDirectory, hostAssignmentSchemaFile);
+string defaultAlertsPath = Path.Combine(alertsDirectory, alertsFile);
+string alertsPostSchemaPath = Path.Combine(alertsDirectory, alertsPostSchemaFile);
+string defaultVlanAssignmentPath = Path.Combine(vlanAssignmentDirectory, vlanAssignmentFile);
+string defaultVlanAssignmentSchemaPath = Path.Combine(vlanAssignmentDirectory, vlanAssignmentSchemaFile);
+
+
+
 HostTableUpdater.CreateTable();
+VlanTableUpdater.CreateTable();
 
-if (!Directory.Exists(configDirectory))
-{
-    Directory.CreateDirectory(configDirectory);
-    Console.WriteLine("Please create the File: " + apiConfigurationFile + " in the Folder: "+configDirectory);
+if (!CheckFile(defaultConfigurationPath, apiConfigurationFile))
     return;
+if (!CheckFile(defaultConfigurationPath, apiConfigurationSchemaFile))
+    return;
+
+if (!CheckFile(defaultAssignmentPath, hostAssignmentFile))
+    return;
+
+if (!CheckFile(defaultAssignmentSchemaPath, hostAssignmentSchemaFile))
+    return;
+
+if (!CheckFile(defaultAlertsPath, alertsFile))
+    return;
+
+if (!CheckFile(alertsPostSchemaPath, alertsPostSchemaFile))
+    return;
+
+if (!CheckFile(defaultVlanAssignmentPath, vlanAssignmentFile))
+    return;
+if (!CheckFile(defaultVlanAssignmentSchemaPath, vlanAssignmentSchemaFile))
+    return;
+
+bool CheckFile(string filePath, string fileName)
+{
+    if (!File.Exists(filePath))
+    {
+        Console.WriteLine($"Please create the file: {fileName} in the folder: {Path.GetDirectoryName(filePath)}");
+        return false;
+    }
+
+    return true;
 }
 
-if (!File.Exists(defaultConfigurationPath))
-{
-    Console.WriteLine("Please create the File: " + apiConfigurationFile + " in the Folder: "+configDirectory);
-    return;
-}
 
-if (!Directory.Exists(assignmentDirectory))
-{
-    Directory.CreateDirectory(assignmentDirectory);
-    Console.WriteLine("Please create the File: " + hostAssignmentFile + " in the Folder: "+assignmentDirectory);
-    return;
-}
-
-if (!File.Exists(defaultAssignmentPath))
-{
-    Console.WriteLine("Please create the File: " + hostAssignmentFile + " in the Folder: "+assignmentDirectory);
-    return;
-}
-if (!Directory.Exists(alertsDirectory))
-{
-    Directory.CreateDirectory(assignmentDirectory);
-    Console.WriteLine("Please create the File: " + alertsDirectory + " in the Folder: "+alertsDirectory);
-    return;
-}
-
-if (!File.Exists(defaultAlertsPath))
-{
-    Console.WriteLine("Please create the File: " + defaultAlertsPath + " in the Folder: "+alertsDirectory);
-    return;
-}
-if (!File.Exists(alertsPostSchemaPath))
-{
-    Console.WriteLine("Please create the File: " + alertsPostSchemaPath + " in the Folder: "+alertsDirectory);
-    return;
-}
 
 string currentAlertsJson = File.ReadAllText(defaultAlertsPath);
 // alertsDictionary
@@ -179,7 +178,7 @@ app.MapPost("/configurations", async (HttpRequest request) =>
         "apiConfiguration.json");
     return Results.Ok(response);
 });
-
+// ---------------------------------HOST---------------------------------
 app.MapGet("/host_assignment", () =>
 {
     var hostAssignmentPath = Path.Combine(assignmentDirectory, hostAssignmentFile);
@@ -196,27 +195,8 @@ app.MapPost("/host_assignment", async (HttpRequest request) =>
     
     using var reader = new StreamReader(request.Body);
     var jsonContent = await reader.ReadToEndAsync();
-    var schema = JSchema.Parse(@"
-    {
-    'type': 'object',
-    'properties': {
-        'assignments': {
-            'type': 'array',
-            'items': {
-                'type': 'object',
-                'properties': {
-                    'hostname': { 'type': 'string' },
-                    'ipAddress': {
-                        'type': 'string',
-                        'pattern': '^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$'
-                    },
-                    'device_type': { 'type': 'string' }
-                },
-                'required': ['hostname', 'ipAddress', 'device_type']
-            }
-        }
-    },
-    'required': ['assignments']}");
+    string schemaJson = File.ReadAllText(defaultAssignmentSchemaPath);
+    var schema = JSchema.Parse(schemaJson);
     
     if (!IsJsonValid(jsonContent, schema, out string validationErrors))
     {
@@ -232,9 +212,62 @@ app.MapPost("/host_assignment", async (HttpRequest request) =>
     Console.WriteLine("Updating host assignment:");
     Console.WriteLine(jsonContent);
     var response = new SaveResponse("Host assignment updated successfully.",
-        "hostAssignmentDirectory.json");
+        newHostAssignmentFile);
     return Results.Ok(response);
 });
+// ---------------------------------HOST---------------------------------
+
+app.MapGet("/vlan_assignment", () =>
+{
+    var vlanAssignmentPath = Path.Combine(assignmentDirectory, vlanAssignmentFile);
+    if (!File.Exists(vlanAssignmentPath))
+    {
+        return Results.NotFound("VLAN assignment file not found.");
+    }
+    var jsonContent = File.ReadAllText(vlanAssignmentPath);
+    return Results.Content(jsonContent, "application/json");
+});
+
+// POST endpoint to update VLAN assignments
+app.MapPost("/vlan_assignment", async (HttpRequest request) =>
+{
+    using var reader = new StreamReader(request.Body);
+    var jsonContent = await reader.ReadToEndAsync();
+
+    string schemaJson = File.ReadAllText(defaultVlanAssignmentSchemaPath);
+    var schema = JSchema.Parse(schemaJson);
+
+    // Validate the JSON content against the schema
+    if (!IsJsonValid(jsonContent, schema, out string validationErrors))
+    {
+        return Results.BadRequest($"Invalid JSON: {validationErrors}");
+    }
+
+    // Save the updated VLAN assignments to the file
+    var newVlanAssignmentFile = Path.Combine(vlanAssignmentDirectory, vlanAssignmentFile);
+    await File.WriteAllTextAsync(newVlanAssignmentFile, jsonContent);
+
+    // Update the "Vlans" table in the database
+    VlanTableUpdater vtu = new VlanTableUpdater(jsonContent);
+    vtu.UpdateVlanTable();
+
+    Console.WriteLine("Updating VLAN assignment:");
+    Console.WriteLine(jsonContent);
+
+    var response = new SaveResponse("VLAN assignment updated successfully.",
+        newVlanAssignmentFile);
+    return Results.Ok(response);
+});
+
+
+
+
+
+
+
+
+
+
 
 app.MapGet("/alerts", () =>
 {
@@ -249,9 +282,14 @@ app.MapGet("/alerts", () =>
 
 app.MapPost("/alerts", async (HttpRequest request) =>
 {
+
+
     //json vom body bekommen
     using var reader = new StreamReader(request.Body);
     var jsonContent = await reader.ReadToEndAsync();
+    Console.WriteLine("-------------------------------------------");
+    Console.WriteLine(jsonContent);
+    Console.WriteLine("-------------------------------------------");
     // schema vom file bekommen
     string schemaJson = File.ReadAllText(alertsPostSchemaPath);
     JSchema schema = JSchema.Parse(schemaJson);
@@ -296,6 +334,7 @@ app.MapPost("/alerts", async (HttpRequest request) =>
 
 app.MapDelete("/alerts/{id:long}", async (long id) =>
 {
+    Console.WriteLine("-----------------DELETING-EVERYTHING-----------------");
     if (id <= 0)
     {
         return Results.BadRequest("ID must be a positive integer.");

@@ -1,0 +1,11 @@
+[
+  {
+    "snmpTrapReceiver":[
+      {
+        "name":"SNMP-Trap-Receiver",
+        "id":1,
+        "port":162
+      }
+    ]
+  }
+]

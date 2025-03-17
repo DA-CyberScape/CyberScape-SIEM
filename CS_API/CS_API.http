@@ -1,4 +1,4 @@
-@CS_API_HostAddress = http://localhost:5073
+@CS_API_HostAddress = https://localhost:5072
 
 
 ### Get all configurations
@@ -422,33 +422,7 @@ Content-Type: application/json
     "custom_message": "OH WEH OH WEH ES GIBT EINEN SYSLOG MIT LEVEL7",
     "timestamp": ""
 }
-### POST A NEW ALERT
-POST {{CS_API_HostAddress}}/alerts/
-Content-Type: application/json
 
-{
-    "id": 2,
-    "name": "SYSLOG_SEVERITY_1",
-    "tabelle": "syslog",
-    "condition": "severity=1",
-    "email_adresse": "0148@htl.rennewg.at",
-    "custom_message": "OH WEH OH WEH ES GIBT EINEN SYSLOG MIT LEVEL 1",
-    "timestamp": ""
-}
-
-
-### POST A WRONG NEW ALERT
-POST {{CS_API_HostAddress}}/alerts/
-Content-Type: application/json
-
-{
-  "id": 123123,
-  "name": "NAME2",
-  "tabelle": "SNMP",
-  "condition": "1.2.45.56 = 1",
-  "custom_message": "Test Nachricht 2"
-  
-}
 
 ### DELETE AN ALERT
 DELETE {{CS_API_HostAddress}}/alerts/1
@@ -473,21 +447,54 @@ Authorization: Bearer HNrmjsgr9z9Q44rf3N1pzh8zr9kgrr
 GET {{CS_API_HostAddress}}/host_assignment/
 Accept: application/json
 
-### WRONG HOST ASSIGNMENT
+### HOST ASSIGNMENT
 POST {{CS_API_HostAddress}}/host_assignment/
 Content-Type: application/json
 
-{
-  "assignments": [
-    {
-      "hostname": "localhost",
-      "ipAddress": "127.0.0.1"
-    }
-    
-  ]
-}
+{"assignments":[{"hostname":"FortiGate","ipAddress":"10.0.1.254","device_type":"Firewall"},{"hostname":"Log-Generator","ipAddress":"192.168.30.30","device_type":"Server"},{"hostname":"WebGui","ipAddress":"10.0.1.150","device_type":"Server"},{"hostname":"CS-Catalyst","ipAddress":"10.0.200.10","device_type":"Switch"},{"hostname":"CS-MirrorCatalyst","ipAddress":"10.0.1.99","device_type":"Switch"},{"hostname":"Switch-SNMP","ipAddress":"192.168.50.1","device_type":"Switch"}]}
 
 
 ### GET SNMP DATA
 GET http://10.40.21.154:8000/database/snmp?lb=0&ub=1&sd=2025-02-19&st=00:45:51&et=20:50:00&ed=2025-02-19&lb=0&ub=1&oid=1.3.6.1.4.1.12356.101.7.2.2.1.1.%
 Accept: application/json
+
+
+### POST A WRONG NEW ALERT
+POST {{CS_API_HostAddress}}/alerts/
+Content-Type: application/json
+
+{
+  "id": 123123,
+  "name": "NAME2",
+  "tabelle": "SNMP",
+  "condition": "1.2.45.56 = 1",
+  "custom_message": "Test Nachricht 2"
+
+}
+
+
+### POST A NEW ALERT
+POST {{CS_API_HostAddress}}/alerts/
+Content-Type: application/json
+
+{"id":"1","name":"l","tabelle":"syslog","condition":"severity=0","email_adresse":"l@l.l","custom_message":"dfhdfg","timestamp":""}
+
+### POST A NEW VLAN ASSIGNMENT
+POST {{CS_API_HostAddress}}/vlan_assignment/
+Content-Type: application/json
+
+{
+  "vlans": [
+    {
+      "network": "10.0.1.0",
+      "subnetmask": "255.255.255.0",
+      "name": "VLAN1"
+    },
+    {
+      "network": "192.168.30.0",
+      "subnetmask": "255.255.255.0",
+      "name": "VLAN12330"
+    }
+
+  ]
+}
