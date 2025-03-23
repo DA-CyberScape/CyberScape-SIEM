@@ -58,7 +58,6 @@ public class SnmpPollSender
         
         try
         {
-            //Console.WriteLine("Starting SNMPv3 Walk...");
             var answer = new List<Variable>();
             Messenger.BulkWalk(VersionCode.V3,
                 target,
@@ -105,12 +104,18 @@ public class SnmpPollSender
                         timestamp.Millisecond * 1000000 + timestamp.Microsecond * 1000),
                     new LocalDate(timestamp.Year, timestamp.Month, timestamp.Day), modifiedName);
                 answerSnmpPolls.Add(snmpPoll);
-                //Console.WriteLine(snmpPoll);
+                // Console.WriteLine(snmpPoll);
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error during SNMPv3 Walk: {ex.Message}");
+        }finally
+        {
+            discovery = null;
+            auth = null;
+            priv = null;
+            userOctetString = null;
         }
 
         return answerSnmpPolls;
@@ -202,6 +207,12 @@ public class SnmpPollSender
         catch (Exception ex)
         {
             Console.WriteLine($"Error during SNMPv3 Walk: {ex.Message}");
+        }finally
+        {
+            discovery = null;
+            auth = null;
+            priv = null;
+            userOctetString = null;
         }
 
         return answerSnmpPolls;

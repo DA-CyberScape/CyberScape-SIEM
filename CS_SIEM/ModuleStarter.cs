@@ -55,7 +55,7 @@ namespace CS_SIEM
             _db = db;
             _cancellationTokenSource = new CancellationTokenSource();
             // Critical to filter most LOGS
-            var logLevel = LogLevel.Information;
+            var logLevel = LogLevel.Critical;
 
             _loggerFactory = LoggerFactory.Create(builder =>
                 builder
